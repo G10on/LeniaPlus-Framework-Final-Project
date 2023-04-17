@@ -28,16 +28,16 @@ except ModuleNotFoundError :
   import jax.numpy as jnp
   import jax.scipy as jsp
 
-try :   
-  from tqdm import tqdm
-except ModuleNotFoundError :
-  print('installing tqdm')
-  install("tqdm")
-  from tqdm import tqdm
+# try :   
+#   from tqdm import tqdm
+# except ModuleNotFoundError :
+#   print('installing tqdm')
+#   install("tqdm")
+#   from tqdm import tqdm
 
 import numpy as np
 import random
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import gc
 from functools import partial
 import typing as t

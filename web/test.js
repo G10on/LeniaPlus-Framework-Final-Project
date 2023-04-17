@@ -1,7 +1,26 @@
-console.log(1+2+3+4+5+6);
-
 const canvas = document.getElementById("map");
 const ctx = canvas.getContext("2d");
+
+const stream = canvas.captureStream();
+const chunks = [];
+
+const mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+mediaRecorder.ondataavailable = function(e) {
+  chunks.push(e.data);
+};
+mediaRecorder.onstop = function() {
+  const blob = new Blob(chunks, { type: "video/webm" });
+  const url = URL.createObjectURL(blob);
+  downloadFile(url, "myVideo.webm");
+};
+
+function downloadFile(url, filename) {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+}
+
 
 async function updateWorldDisplay() {
     
@@ -108,7 +127,13 @@ restartBtn.addEventListener("click", () => {
 })
 
 saveBtn.addEventListener("click", () => {
-    // eel.saveSimulationState();
+
+    let nSteps = parseInt(document.querySelector(".n-steps").value);
+    // eel.saveNStepsToVideo(nSteps);
+    mediaRecorder.start();
+    setTimeout(function() {
+        mediaRecorder.stop();
+    }, nSteps * 1000);
 })
 
 

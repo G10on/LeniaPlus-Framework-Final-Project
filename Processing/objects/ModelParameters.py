@@ -20,7 +20,7 @@ from numba.experimental import jitclass
 
 # import pygame as pg
 import numpy as np
-import scipy as sp
+# import scipy as sp
 # import matplotlib.pyplot as plt
 import typing as t
 

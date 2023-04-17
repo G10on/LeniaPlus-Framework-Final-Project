@@ -101,8 +101,6 @@ class KernelParameters():
 
         ker_f = lambda x, a, w, b : (b * np.exp( - (x[..., None] - a)**2 / w)).sum(-1)
 
-        print(D.shape, self.kernels["a"].shape, self.kernels["w"].shape, self.kernels["B"].shape)
-
         K = np.dstack([sigmoid(-(D-1)*10) * ker_f(D, self.kernels["a"][k], self.kernels["w"][k], self.kernels["B"][k]) 
                   for k, D in zip(range(self.n_kernels), Ds)])
         

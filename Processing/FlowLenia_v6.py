@@ -4,7 +4,7 @@ import timeit
 from functools import partial
 # import subprocess
 # import sys
-# import cv2
+import cv2
 
 # import cupy
 
@@ -190,7 +190,7 @@ def compile_version(version,
         temp = [0] * (max_B - len(B))
         B.extend(temp)
 
-    print(ker_params)
+    # print(ker_params)
 
     for k in ker_params.keys():
         ker_params[k] = np.array(ker_params[k], dtype=np.float64)
@@ -235,7 +235,20 @@ eel.start("index.html", mode="chrome-app")
 
 
 
+@eel.expose
+def saveNStepsToVideo(nSteps):
 
-
-
+    # global sX, sY, world, system
+    obs = np.zeros((nSteps, *world.A.shape))
+    obs[0] = world.A
+    
+    params = eel.getParameters()()
+    size = params["size"]
+    seed = params["seed"]
+    numChannels = params["numChannels"]
+    ker_params = params["kernel_params"]
+    # SCALE = 800 // sX
+    sX = sY = size
+    rand_gen = np.random.RandomState(seed)
+    init_size = sX >> 2
 
