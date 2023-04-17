@@ -72,8 +72,8 @@ class System():
     def __init__(self,
                 world:World,
                 k_params,
+                # params,
                 version,
-                params,
                 # C = None,
                 # theta_A = 3,
                 # dd = 20,
@@ -83,8 +83,8 @@ class System():
         
         self.set_world_and_kParams(world, 
                                 k_params, 
+                                # params,
                                 version,
-                                params,
                                 # C,
                                 # theta_A,
                                 # dd,
@@ -97,8 +97,8 @@ class System():
     def set_world_and_kParams(self,
                             world:World,
                             k_params,
-                            version,
-                            params
+                            # params,
+                            version = "FlowLeniaModel",
                             # C = None,
                             # fK = None,
                             # theta_A = 3,
@@ -117,7 +117,7 @@ class System():
         self.model = Model(
             world = self.world,
             k_params = self.k_params,
-            params = params,
+            # params = params,
             # m_params = self.m_params
         )
 
@@ -131,6 +131,10 @@ class System():
 
 
 sX, sY, world, system = None, None, None, None
+
+world = World()
+kernel_params = KernelParameters()
+system = System(world, kernel_params, )
 
 eel.init("web")
 
@@ -204,8 +208,8 @@ def compile_version(version,
     system = System(
         world = world,
         k_params = k_params,
-        version = version,
         params = params,
+        version = version,
         # m_params = m_params
     )
 

@@ -43,8 +43,8 @@ class KernelParameters():
     # INITIALIZE CALLING ANOTHER SETTER, LIKE THE OTHERS AND CHOOSE PARAMETER VALUES
     # Initialization of N of kernels, size and parameters
     def __init__(self,
-                 connection_matrix,
-                 ker_params
+                 connection_matrix = None,
+                 ker_params = None,
                 #  r,
                 #  m,
                 #  s,
@@ -52,17 +52,43 @@ class KernelParameters():
                 #  R = 15,
                  ) -> None:
         
+        if connection_matrix is None:
+
+            connection_matrix = np.array([
+                [1, 1, 1],
+                [1, 1, 1],
+                [1, 1, 1]
+            ])
+        
         self.n_kernels = int(connection_matrix.sum())
         
-        self.spaces = {
+        if ker_params is None:
+            
+            self.spaces = {
+            "r" : {'low' : .2, 'high' : 1., 'mut_std' : .2, 'shape' : None},
+            "b" : {'low' : .001, 'high' : 1., 'mut_std' : .2, 'shape' : (3,)},
             "w" : {'low' : .01, 'high' : .5, 'mut_std' : .2, 'shape' : (3,)},
             "a" : {'low' : .0, 'high' : 1., 'mut_std' : .2, 'shape' : (3,)},
+            "m" : {'low' : .05, 'high' : .5, 'mut_std' : .2, 'shape' : None},
+            "s" : {'low' : .001, 'high' : .18, 'mut_std' : .01, 'shape' : None},
+            "h" : {'low' : .01, 'high' : 1., 'mut_std' : .2, 'shape' : None},
             'T' : {'low' : 10., 'high' : 50., 'mut_std' : .1, 'shape' : None},
             'R' : {'low' : 2., 'high' : 25., 'mut_std' : .2, 'shape' : None},
-            # 'init' : {'low' : 0., 'high' : 1., 'mut_std' : .2, 'shape' : k_shape}
-        }
+            }
 
+            ker_params = {}
+            for k in 'rmsh':
+                ker_params[k] = np.random.uniform(
+                    self.spaces[k]['low'], self.spaces[k]['high'], ker_params
+                )
+            ker_params['B'] = np.random.uniform(
+                self.spaces['B']['low'], self.spaces['B']['high'], (self.n_kernels, 3)
+            )
+
+
+        self.ker_params = ker_params
         self.kernels = {}
+
         for k in 'rmsh':
             self.kernels[k] = ker_params[k]
 
@@ -70,7 +96,7 @@ class KernelParameters():
 
         for k in "aw":
             self.kernels[k] = np.random.uniform(
-                self.spaces[k]['low'], self.spaces[k]['high'], (self.kernels['r'].size, self.kernels['B'][0].size)
+                self.spaces[k]['low'], self.spaces[k]['high'], (self.n_kernels, self.kernels['B'][0].size)
             )
         
         self.kernels.update({

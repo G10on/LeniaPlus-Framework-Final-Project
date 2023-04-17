@@ -51,10 +51,25 @@ class World():
 
     # Set/generate new world
     def new_world(self, 
-                  A = np.random.rand(64, 64, 1)
+                  A = None,
+                  seed = 101
                   ) -> None:
         
+        if A is None:
+            rand_gen = np.random.RandomState(seed)
+            self.A = rand_gen.rand(128, 128, 1)
+        
+        
+        self.seed = seed
         self.A = A
+        self.sX = self.A.shape[0]
+        self.sY = self.A.shape[1]
+        self.numChannels = self.A.shape[2]
+        self.theta = 3
+        self.dd = 7
+        self.dt = 0.2
+        self.sigma = 0.65
+
         # self.dA = self.compute_gradient(self.A)
         # self.fA = self.compute_fftA(self.A)
 
