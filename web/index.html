@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script type="text/javascript" src="./eel.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <h1> Lenia+ Framework</h1>
+    <canvas id="map" width="256px" height="256px"></canvas>
+
+    <span></span>
+
+    <div class="player-menu">
+        <button class="play-btn">PLAY</button>
+        <button class="restart-btn">RESTART</button>
+        <button class="save-btn">SAVE</button>
+    </div>
+    <div class="parameters">
+        <div class="version">
+            <label>Select version</label>
+            <select class="version-selector">
+                <option value="FlowLeniaModel">Flow Lenia</option>
+                <option value="LeniaModel">Original Lenia</option>
+            </select>
+            <p class="version-loading-txt"></p>
+        </div>
+        <label class="size-lbl">Size (px)</label>
+        <input type="number" class="size" value="128">
+        <br>
+        <label class="num-channels-lbl">Nº of channels</label>
+        <input type="number" class="num-channels" value="3">
+        <br>
+        <label class="seed-lbl">Seed</label>
+        <input type="number" class="seed" value="101">
+        <br>
+        <label class="theta-lbl">Maximum mass concentration</label>
+        <input type="number" class="theta" value="3">
+        <br>
+        <label class="dd-lbl">Maximum flow distance (px)</label>
+        <input type="number" class="dd" value="10">
+        <br>
+        <label class="dt-lbl">Time unit size</label>
+        <input type="number" class="dt" value="0.3">
+        <br>
+        <label class="sigma-lbl">Maximum flow mass (%)</label>
+        <input type="number" class="sigma" value="0.65">
+
+        
+  
+        <!-- Create a table with an initial row and add and remove buttons -->
+        <table id="myTable">
+            
+        </table>
+        
+        <button type="button" onclick="addRow()">Add Row</button>
+
+        <button type="button" onclick="submitForm()">Submit Form</button>
+  
+
+          
+    </div>
+
+
+    <script type="text/javascript" src="./test.js"></script>
+</body>
+</html>

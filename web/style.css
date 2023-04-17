@@ -1,0 +1,16 @@
+
+
+body {
+    background-color: #0e1414;
+    color: aliceblue;
+}
+
+
+.inputContainer td {
+    display: flex;
+    flex-direction: row;
+  }
+
+  input {
+    width: 60px;
+  }
