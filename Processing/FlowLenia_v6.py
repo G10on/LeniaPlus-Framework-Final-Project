@@ -185,10 +185,16 @@ def compile_version(version,
 
 
     
+    max_B = max(len(sublist) for sublist in ker_params['B'])
+    for B in ker_params['B']:
+        temp = [0] * (max_B - len(B))
+        B.extend(temp)
+
+    print(ker_params)
+
     for k in ker_params.keys():
         ker_params[k] = np.array(ker_params[k], dtype=np.float64)
     
-    # print(ker_params)
 
     k_params = KernelParameters.KernelParameters(connections,
                                                  ker_params)

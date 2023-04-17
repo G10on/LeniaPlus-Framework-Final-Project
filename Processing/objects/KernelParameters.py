@@ -55,13 +55,8 @@ class KernelParameters():
         self.n_kernels = int(connection_matrix.sum())
         
         self.spaces = {
-            "r" : {'low' : .2, 'high' : 1., 'mut_std' : .2, 'shape' : None},
-            "b" : {'low' : .001, 'high' : 1., 'mut_std' : .2, 'shape' : (3,)},
             "w" : {'low' : .01, 'high' : .5, 'mut_std' : .2, 'shape' : (3,)},
             "a" : {'low' : .0, 'high' : 1., 'mut_std' : .2, 'shape' : (3,)},
-            "m" : {'low' : .05, 'high' : .5, 'mut_std' : .2, 'shape' : None},
-            "s" : {'low' : .001, 'high' : .18, 'mut_std' : .01, 'shape' : None},
-            "h" : {'low' : .01, 'high' : 1., 'mut_std' : .2, 'shape' : None},
             'T' : {'low' : 10., 'high' : 50., 'mut_std' : .1, 'shape' : None},
             'R' : {'low' : 2., 'high' : 25., 'mut_std' : .2, 'shape' : None},
             # 'init' : {'low' : 0., 'high' : 1., 'mut_std' : .2, 'shape' : k_shape}
@@ -75,7 +70,7 @@ class KernelParameters():
 
         for k in "aw":
             self.kernels[k] = np.random.uniform(
-                self.spaces[k]['low'], self.spaces[k]['high'], (self.kernels['r'].size, self.kernels['B'].size)
+                self.spaces[k]['low'], self.spaces[k]['high'], (self.kernels['r'].size, self.kernels['B'][0].size)
             )
         
         self.kernels.update({
@@ -105,6 +100,8 @@ class KernelParameters():
             return 0.5 * (np.tanh(x / 2) + 1)
 
         ker_f = lambda x, a, w, b : (b * np.exp( - (x[..., None] - a)**2 / w)).sum(-1)
+
+        print(D.shape, self.kernels["a"].shape, self.kernels["w"].shape, self.kernels["B"].shape)
 
         K = np.dstack([sigmoid(-(D-1)*10) * ker_f(D, self.kernels["a"][k], self.kernels["w"][k], self.kernels["B"][k]) 
                   for k, D in zip(range(self.n_kernels), Ds)])
