@@ -68,17 +68,17 @@ class FlowLeniaModel():
     def __init__(self,
                 world:World.World,
                 k_params,
-                params,
+                # params,
                 ) -> None:
         
-        self.set_world_and_kParams(world, k_params, params)
+        self.set_world_and_kParams(world, k_params)
     
 
     # Set world and/or kernel parameters
     def set_world_and_kParams(self,
                               world:World.World,
                               k_params,
-                              params,
+                            #   params,
                             #   dd = 3,
                             #   dt = 0.1,
                             #   sigma = 0.8,
@@ -93,20 +93,20 @@ class FlowLeniaModel():
         # self.dt = dt
         # self.sigma = sigma
         # self.theta = theta_A
-        self.__dict__.update(params)
-        self.C = self.world.A.shape[-1]
+        # self.__dict__.update(params)
+        # self.C = self.world.A.shape[-1]
         self.g_func = g_func
-        self.fK = self.k_params.compile_kernels(self.world.A.shape[0], self.world.A.shape[1])
+        self.fK = self.k_params.compile_kernels(self.world.sX, self.world.sY)
 
-        self.x, self.y = np.arange(world.A.shape[0]), np.arange(world.A.shape[1])
+        self.x, self.y = np.arange(self.world.sX), np.arange(self.world.sY)
         X, Y = np.meshgrid(self.x, self.y)
         self.pos = np.dstack((Y, X)) + .5 #(SX, SY, 2)
 
         self.rollxs = []
         self.rollys = []
         
-        for dx in range(-self.dd, self.dd + 1):
-            for dy in range(-self.dd, self.dd + 1):
+        for dx in range(-self.world.dd, self.world.dd + 1):
+            for dy in range(-self.world.dd, self.world.dd + 1):
                 self.rollxs.append(dx)
                 self.rollys.append(dy)
         self.rollxs = np.array(self.rollxs)
@@ -150,7 +150,7 @@ class FlowLeniaModel():
         #     mus
         # ).sum(axis = 0)
 
-        self.world.new_world(nA)
+        self.world.A = nA
 
         return nA
 
@@ -190,17 +190,17 @@ class FlowLeniaModel():
             ) * self.k_params.kernels['h']  # (x,y,k)
 
             H = jnp.dstack([ G[:, :, self.k_params.c1[c]].sum(axis=-1)
-                           for c in range(self.C) ])  # (x,y,c)
+                           for c in range(self.world.numChannels) ])  # (x,y,c)
             
             F = self.gradient_func(H)
 
             dA = self.gradient_func(A.sum(axis = -1, keepdims = True))
         
-            alpha = jnp.clip((A[:, :, None, :] / self.theta)**2, .0, 1.)
+            alpha = jnp.clip((A[:, :, None, :] / self.world.theta)**2, .0, 1.)
         
             F = F * (1 - alpha) - dA * alpha
             
-            mus = self.pos[..., None] + self.dt * F #(x, y, 2, c) : target positions (distribution centers)
+            mus = self.pos[..., None] + self.world.dt * F #(x, y, 2, c) : target positions (distribution centers)
             
             nA = self.flow_func(
                 self.rollxs,
@@ -258,9 +258,9 @@ class FlowLeniaModel():
             # dpmu = jnp.absolute(self.pos[..., None] - jnp.roll(mus, (x, y), axis = (0, 1))) # (x, y, 2, c)
             dpmu = jnp.absolute(self.pos[..., None] - jnp.roll(mus, (x, y), axis = (0, 1))) # (x, y, 2, c)
             # sz = .5 - dpmu + self.sigma #(x, y, 2, c)
-            sz = .5 - dpmu + self.sigma #(x, y, 2, c)
+            sz = .5 - dpmu + self.world.sigma #(x, y, 2, c)
             # area = jnp.prod(np.clip(sz, 0, min(1, 2 * self.sigma)) , axis = 2) / (4 * self.sigma**2) # (x, y, c)
-            area = jnp.prod(jnp.clip(sz, 0, min(1, 2 * self.sigma)) , axis = 2) / (4 * self.sigma**2) # (x, y, c)
+            area = jnp.prod(jnp.clip(sz, 0, min(1, 2 * self.world.sigma)) , axis = 2) / (4 * self.world.sigma**2) # (x, y, c)
             nA = rollA * area
             return nA
         

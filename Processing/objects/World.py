@@ -55,23 +55,29 @@ class World():
                   seed = 101
                   ) -> None:
         
-        if A is None:
-            rand_gen = np.random.RandomState(seed)
-            self.A = rand_gen.rand(128, 128, 1)
-        
-        
-        self.seed = seed
         self.A = A
-        self.sX = self.A.shape[0]
-        self.sY = self.A.shape[1]
-        self.numChannels = self.A.shape[2]
+        self.seed = seed
+        # self.rand_gen = np.random.RandomState(self.seed)
+        self.sX = 128
+        self.sY = self.sX
+        self.numChannels = 3
         self.theta = 3
         self.dd = 7
         self.dt = 0.2
         self.sigma = 0.65
 
+        if A is None:
+            self.generateWorld()
+
         # self.dA = self.compute_gradient(self.A)
         # self.fA = self.compute_fftA(self.A)
+
+    def generateWorld(self):
+        # Generate random world
+        rand_gen = np.random.RandomState(self.seed)
+        init_size = self.sX // 2
+        self.A = np.zeros((self.sX, self.sY, self.numChannels))
+        self.A[self.sX//2-init_size//2:self.sX//2+init_size//2, self.sY//2-init_size//2:self.sY//2+init_size//2, :] = rand_gen.rand(init_size, init_size, self.numChannels)
 
     
     # VECTORIZE OR VRAM CUPY?

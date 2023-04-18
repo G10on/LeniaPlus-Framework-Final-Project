@@ -66,7 +66,7 @@ class KernelParameters():
             
             self.spaces = {
             "r" : {'low' : .2, 'high' : 1., 'mut_std' : .2, 'shape' : None},
-            "b" : {'low' : .001, 'high' : 1., 'mut_std' : .2, 'shape' : (3,)},
+            "B" : {'low' : .001, 'high' : 1., 'mut_std' : .2, 'shape' : (3,)},
             "w" : {'low' : .01, 'high' : .5, 'mut_std' : .2, 'shape' : (3,)},
             "a" : {'low' : .0, 'high' : 1., 'mut_std' : .2, 'shape' : (3,)},
             "m" : {'low' : .05, 'high' : .5, 'mut_std' : .2, 'shape' : None},
@@ -79,14 +79,14 @@ class KernelParameters():
             ker_params = {}
             for k in 'rmsh':
                 ker_params[k] = np.random.uniform(
-                    self.spaces[k]['low'], self.spaces[k]['high'], ker_params
+                    self.spaces[k]['low'], self.spaces[k]['high'], self.n_kernels
                 )
             ker_params['B'] = np.random.uniform(
                 self.spaces['B']['low'], self.spaces['B']['high'], (self.n_kernels, 3)
             )
 
 
-        self.ker_params = ker_params
+        # self.ker_params = ker_params
         self.kernels = {}
 
         for k in 'rmsh':
