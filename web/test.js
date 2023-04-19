@@ -343,7 +343,7 @@ restartBtn.addEventListener("click", () => {
 
 saveBtn.addEventListener("click", () => {
 
-    let nSteps = parseInt(document.querySelector(".n-steps").value);
+    let nSteps = parseInt(document.querySelector(".sec-to-save").value);
     // eel.saveNStepsToVideo(nSteps);
     mediaRecorder.start();
     setTimeout(function() {

@@ -105,17 +105,25 @@ class System():
         # self.m_params = m_params
 
         # Model = getattr(Models, m_params["version"])
-        Model = getattr(Models, version)
+        # Model = getattr(Models, self.version)
+        # self.model = Model(
+        #     world = self.world,
+        #     k_params = self.k_params,
+        #     # params = params,
+        #     # m_params = self.m_params
+        # )
+        self.compile()
+
+    def compile(self):
+        
+        self.k_params.compile_kernels(self.world.sX, self.world.sY)
+        Model = getattr(Models, self.version)
         self.model = Model(
             world = self.world,
             k_params = self.k_params,
             # params = params,
             # m_params = self.m_params
         )
-
-    def compile(self):
-        
-        self.k_params.compile_kernels(self.world.sX, self.world.sY)
 
     
     def step(self):
@@ -170,8 +178,9 @@ def setParameters(data):
     world = system.world
     k_params = system.k_params
 
-    # Pass through method for world and kernel params
-    print(data)
+    system.version = data["version"]
+
+    # Pass through method for world and kernel params!!!
     world.seed = data["seed"]
     world.sX = data["size"]
     world.sY = data["size"]
