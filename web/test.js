@@ -226,6 +226,7 @@ var is_playing = false;
 
 
 async function step() {
+    stepNTxt.textContent = parseInt(stepNTxt.textContent) + 1;
     await eel.step()();
     await updateWorldDisplay();
 }
@@ -243,7 +244,10 @@ saveVideoBtn = document.querySelector(".save-video-btn"),
 saveStateBtn = document.querySelector(".save-state-btn"),
 loadStateBtn = document.querySelector(".load-state-btn"),
 versionMenu = document.querySelector(".version-selector"),
-versionLoadingTxt = document.querySelector(".version-loading-txt");
+versionLoadingTxt = document.querySelector(".version-loading-txt"),
+stepNTxt = document.querySelector("#step-n-txt");
+
+stepNTxt.textContent = 0;
 
 var versionSelected;
 
@@ -423,6 +427,7 @@ restartBtn.addEventListener("click", () => {
     is_playing = false;
     playBtn.innerText = "PLAY";
     setParamsInPython();
+    stepNTxt.textContent = 0;
     // getKernelParamsFromWeb();
 })
 
