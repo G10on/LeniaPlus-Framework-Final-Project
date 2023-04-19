@@ -5,65 +5,80 @@ const ctx = canvas.getContext("2d");
 const stream = canvas.captureStream();
 const chunks = [];
 
-
+var rmsh = ['r', 'm', 's', 'h'];
 
 var rowCount = 1;
 
 function addRow() {
-  rowCount++;
-  var table = document.getElementById("myTable");
-  var row = table.insertRow();
-  row.name = rowCount;
-  var cell1 = row.insertCell(0);
-  var cell2 = row.insertCell(1);
-  var cell3 = row.insertCell(2);
+    rowCount++;
+    var table = document.getElementById("myTable");
+    var row = table.insertRow();
+    row.name = rowCount;
+    var rmshParamsCell = row.insertCell(0);
+    // var BParamsCell = row.insertCell(1);
+    var addInputCell = row.insertCell(1);
+    var deleteRowCell = row.insertCell(2);
 
-  rmsh = ['r', 'm', 's', 'h'];
+    for (var i = 0; i < 4; i++) {
+        myAddInputInThisRow(row, 0, rmsh[i]);
+        // let inputContainer = document.createElement("div");
+        // inputContainer.className = "inputContainer";
+        // rmshParamsCell.appendChild(inputContainer);
+        // let newLbl = document.createElement("label");
+        // newLbl.textContent = rmsh[i];
+        // let newInput = document.createElement("input");
+        // newInput.type = "number";
+        // // newInput.name = "input" + rowCount + "_" + i;
+        // newInput.name = rmsh[i];
+        // newInput.value = 0.2;
+        // inputContainer.appendChild(newLbl);
+        // inputContainer.appendChild(newInput);
+    }
 
-  for (var i = 0; i < 4; i++) {
-    let inputContainer = document.createElement("div");
-    inputContainer.className = "inputContainer";
-    cell1.appendChild(inputContainer);
-    let newLbl = document.createElement("label");
-    newLbl.textContent = rmsh[i];
-    let newInput = document.createElement("input");
-    newInput.type = "number";
-    // newInput.name = "input" + rowCount + "_" + i;
-    newInput.name = rmsh[i];
-    newInput.value = 0.2;
-    inputContainer.appendChild(newLbl);
-    inputContainer.appendChild(newInput);
-  }
+    // let inputContainer = document.createElement("div");
+    // inputContainer.className = "inputContainer";
+    // rmshParamsCell.appendChild(inputContainer);
+    // let newLbl = document.createElement("label");
+    // newLbl.textContent = 'B';
+    // let newInput = document.createElement("input");
+    // newInput.type = "number";
+    // // newInput.name = "input" + rowCount + "_" + i;
+    // newInput.name = 'B';
+    // newInput.value = 0.2;
+    // inputContainer.appendChild(newLbl);
+    // inputContainer.appendChild(newInput);
 
-//   var inputContainer = document.createElement("div");
-//   inputContainer.className = "inputContainer";
-//   row.cells[0].appendChild(inputContainer);
-//   var inputCount = row.cells[0].getElementsByClassName("inputContainer").length - 4;
-//   let newLbl = document.createElement("label");
-//   newLbl.textContent = 'B';
-//   var newInput = document.createElement("input");
-//   newInput.type = "text";
-// //   newInput.name = "input" + rowCount + "_" + inputCount;
-//   newInput.name = inputCount;
-//   newInput.value = 0.2;
-//   inputContainer.appendChild(newLbl);
-//   inputContainer.appendChild(newInput);
-//   var removeButton = document.createElement("button");
-//   removeButton.type = "button";
-//   removeButton.innerHTML = "Remove Input";
-//   removeButton.onclick = function() { removeInput(this); };
-//   inputContainer.appendChild(removeButton);
+    addInputCell.innerHTML = "<button type='button' onclick='addInput(this)'>Add Input</button>";
+    deleteRowCell.innerHTML = "<button type='button' onclick='deleteRow(this)'>Delete Row</button>";
 
-  cell2.innerHTML = "<button type='button' onclick='addInput(this)'>Add Input</button>";
-  cell3.innerHTML = "<button type='button' onclick='deleteRow(this)'>Delete Row</button>";
-
-  return row;
+    return row;
 }
 
 function deleteRow(btn) {
   var row = btn.parentNode.parentNode;
   row.parentNode.removeChild(row);
 }
+
+function myAddInputInThisRow(row, cell_n, p) {
+
+    let cell = row.cells[cell_n];
+
+    let inputContainer = document.createElement("div");
+    inputContainer.className = "inputContainer";
+    cell.appendChild(inputContainer);
+    let newLbl = document.createElement("label");
+    newLbl.textContent = p;
+    let newInput = document.createElement("input");
+    newInput.type = "number";
+    // newInput.name = "input" + rowCount + "_" + i;
+    newInput.name = p;
+    newInput.value = 0.2;
+    inputContainer.appendChild(newLbl);
+    inputContainer.appendChild(newInput);
+
+    return newInput;
+}
+  
 
 function addInput(btn) {
   var row = btn.parentNode.parentNode;
@@ -253,7 +268,7 @@ async function getParamsFromPython() {
         for (var j = 0; j < data["B"][i].length; j++) {
             
             // let input = row.cells[0].querySelector("input[name='" + j + "']");
-            input = addInputInThisRow(row);
+            input = myAddInputInThisRow(row, 0, 'B');
             input.value = data['B'][i][j];
             
         }

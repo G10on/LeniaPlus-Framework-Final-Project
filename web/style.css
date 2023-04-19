@@ -9,8 +9,14 @@ body {
 .inputContainer td {
     display: flex;
     flex-direction: row;
-  }
+}
 
-  input {
+input {
     width: 60px;
-  }
+}
+
+canvas {
+    margin-right: auto;
+    margin-left: auto;
+    display: block;
+}
