@@ -224,22 +224,24 @@ async function updateWorldDisplay() {
 
 var is_playing = false;
 
+
+async function step() {
+    await eel.step()();
+    await updateWorldDisplay();
+}
+
 async function play() {
-
     while (is_playing) {
-        
-        await eel.step()()
-        await updateWorldDisplay();
+        await step();
     }
-
-    
 }
 
 const playBtn = document.querySelector(".play-btn"),
+nextStepBtn = document.querySelector(".next-step-btn"),
 restartBtn = document.querySelector(".restart-btn"),
-saveVideoBtn = document.querySelector(".save-video-btn");
-saveStateBtn = document.querySelector(".save-state-btn");
-loadStateBtn = document.querySelector(".load-state-btn");
+saveVideoBtn = document.querySelector(".save-video-btn"),
+saveStateBtn = document.querySelector(".save-state-btn"),
+loadStateBtn = document.querySelector(".load-state-btn"),
 versionMenu = document.querySelector(".version-selector"),
 versionLoadingTxt = document.querySelector(".version-loading-txt");
 
@@ -404,6 +406,14 @@ playBtn.addEventListener("click", () => {
     } else {
         playBtn.innerText = "PLAY";
     }
+    
+})
+
+nextStepBtn.addEventListener("click", async () => {
+
+    is_playing = false;
+    step();
+    playBtn.innerText = "PLAY";
     
 })
 
