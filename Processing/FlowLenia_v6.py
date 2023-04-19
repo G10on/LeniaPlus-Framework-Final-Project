@@ -303,6 +303,27 @@ def getWorld():
 
     return res.flatten().tolist()
 
+
+
+@eel.expose
+def saveParameterState():
+
+    data = getParameters()
+    with open('LeniaParameters.pkl', 'wb') as f:
+        pickle.dump(data, f)
+    
+    print(os.path.abspath('LeniaParameters.pkl'))
+
+@eel.expose
+def loadParameterState():
+
+    # load the dictionary from the file
+    with open('LeniaParameters.pkl', 'rb') as f:
+        data = pickle.load(f)
+        setParameters(data)
+
+
+
 eel.start("index.html", mode="chrome-app")
 
 
