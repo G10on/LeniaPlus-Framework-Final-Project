@@ -43,10 +43,11 @@ class World():
 
     # Initialize world
     def __init__(self,
-                 A = None
+                 A = None,
+                 seed = 101
                  ) -> None:
         
-        self.new_world(A)
+        self.new_world(A, seed)
         
 
     # Set/generate new world

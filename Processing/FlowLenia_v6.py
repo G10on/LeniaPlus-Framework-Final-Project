@@ -90,18 +90,19 @@ class System():
     ) -> None:
         
         
-        if world is None:
-            world = World.World()
-        
-        if k_params is None:
-            k_params = KernelParameters.KernelParameters()
-        
-        if version is None:
-            version = "FlowLeniaModel"
-
         self.world = world
         self.k_params = k_params
         self.version = version
+
+        if self.world is None:
+            self.world = World.World()
+        
+        if self.k_params is None:
+            self.k_params = KernelParameters.KernelParameters()
+        
+        if self.version is None:
+            self.version = "FlowLeniaModel"
+
         # self.m_params = m_params
 
         # Model = getattr(Models, m_params["version"])
@@ -115,7 +116,9 @@ class System():
         self.compile()
 
     def compile(self):
-        
+
+        self.k_params.generateRandomParameters(seed = self.world.seed)
+
         self.k_params.compile_kernels(self.world.sX, self.world.sY)
         Model = getattr(Models, self.version)
         self.model = Model(
@@ -163,7 +166,7 @@ def getParameters():
 
     # print(k_params.ker_params)
 
-    for k in 'rmshawB':
+    for k in 'rmshBaw':
         data[k] = k_params.kernels[k].tolist()
 
     # data.update(k_params.kernels)
@@ -192,14 +195,20 @@ def setParameters(data):
 
     world.generateWorld()
 
-    max_B = max(len(sublist) for sublist in data['B'])
-    for B in data['B']:
-        temp = [0] * (max_B - len(B))
-        B.extend(temp)
+    max_rings = 0
+    for k in 'Baw':
+        temp = max(len(sublist) for sublist in data[k])
+        if temp > max_rings:
+            max_rings = temp
+        
+    for k in 'Baw':
+        for B in data[k]:
+            temp = [0] * (max_rings - len(B))
+            B.extend(temp)
 
     # print(ker_params)
     
-    for k in 'rmshB':
+    for k in 'rmshBaw':
         k_params.kernels[k] = np.array(data[k], dtype=np.float64)
 
     

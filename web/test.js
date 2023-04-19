@@ -378,6 +378,7 @@ async function setParamsInPython() {
     
     await eel.setParameters(data)();
     updateWorldDisplay();
+    getParamsFromPython();
     versionLoadingTxt.innerText = "";
 }
 
@@ -422,6 +423,7 @@ restartBtn.addEventListener("click", () => {
     is_playing = false;
     playBtn.innerText = "PLAY";
     setParamsInPython();
+    // getKernelParamsFromWeb();
 })
 
 saveVideoBtn.addEventListener("click", () => {

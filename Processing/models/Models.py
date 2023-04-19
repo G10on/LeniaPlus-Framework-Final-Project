@@ -178,8 +178,12 @@ class FlowLeniaModel():
                                 ):
 
             fA = jnp.fft.fft2(A, axes=(0,1))  # (x,y,c)
+
+            print(fA.shape)
         
             fAk = fA[:, :, self.k_params.c0]  # (x,y,k)
+
+            print(fAk.shape)
 
             U = jnp.real(jnp.fft.ifft2(self.fK * fAk, axes=(0,1)))  # (x,y,k)
 

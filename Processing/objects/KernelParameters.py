@@ -37,11 +37,9 @@ import os
 
 class KernelParameters():
 
-    c0 = []
-    c1 = []
-
     # INITIALIZE CALLING ANOTHER SETTER, LIKE THE OTHERS AND CHOOSE PARAMETER VALUES
     # Initialization of N of kernels, size and parameters
+    
     def __init__(self,
                  connection_matrix = None,
                  ker_params = None,
@@ -51,6 +49,22 @@ class KernelParameters():
                 #  h
                 #  R = 15,
                  ) -> None:
+        
+        self.generateRandomParameters(connection_matrix, ker_params)
+
+
+    def generateRandomParameters(self,
+                 connection_matrix = None,
+                 ker_params = None,
+                 seed = 101
+                #  r,
+                #  m,
+                #  s,
+                #  h
+                #  R = 15,
+                 ) -> None:
+        
+        rand_gen = np.random.RandomState(seed)
         
         if connection_matrix is None:
 
@@ -78,30 +92,23 @@ class KernelParameters():
 
             ker_params = {}
             for k in 'rmsh':
-                ker_params[k] = np.random.uniform(
+                ker_params[k] = rand_gen.uniform(
                     self.spaces[k]['low'], self.spaces[k]['high'], self.n_kernels
                 )
-            ker_params['B'] = np.random.uniform(
-                self.spaces['B']['low'], self.spaces['B']['high'], (self.n_kernels, 3)
-            )
+            for k in 'Baw':
+                ker_params[k] = rand_gen.uniform(
+                    self.spaces[k]['low'], self.spaces[k]['high'], (self.n_kernels, 3)
+                )
 
 
         # self.ker_params = ker_params
         self.kernels = {}
 
-        for k in 'rmsh':
+        for k in 'rmshBaw':
             self.kernels[k] = ker_params[k]
-
-        self.kernels['B'] = ker_params['B']
-
-        for k in "aw":
-            self.kernels[k] = np.random.uniform(
-                self.spaces[k]['low'], self.spaces[k]['high'], (self.n_kernels, self.kernels['B'][0].size)
-            )
         
         self.kernels.update({
-            'T' : np.random.uniform(self.spaces['T']['low'], self.spaces['T']['high']),
-            'R' : np.random.uniform(self.spaces['R']['low'], self.spaces['R']['high'])
+            'R' : rand_gen.uniform(self.spaces['R']['low'], self.spaces['R']['high'])
             # 'init' : np.random.rand(*k_shape)
         })
 
@@ -139,6 +146,7 @@ class KernelParameters():
     # Connection matrix where M[i, j] = number of kernels from channel i to channel j
     def conn_from_matrix(self, connection_matrix):
         C = connection_matrix.shape[0]
+        self.c0 = []
         self.c1 = [[] for _ in range(C)]
         # self.c1 = List([List([]) for _ in range(C)])
         i = 0
