@@ -179,42 +179,21 @@ def setParameters(data):
 
     global system
 
-    world = system.world
-    k_params = system.k_params
-
-    system.version = data["version"]
-
-    # Pass through method for world and kernel params!!!
-    world.seed = data["seed"]
-    world.sX = data["size"]
-    world.sY = data["size"]
-    world.numChannels = data["numChannels"]
-    world.theta = data["theta"]
-    world.dd = data["dd"]
-    world.dt = data["dt"]
-    world.sigma = data["sigma"]
-
-    world.generateWorld()
-
-    max_rings = 0
-    for k in 'Baw':
-        temp = max(len(sublist) for sublist in data[k])
-        if temp > max_rings:
-            max_rings = temp
-        
-    for k in 'Baw':
-        for B in data[k]:
-            temp = [0] * (max_rings - len(B))
-            B.extend(temp)
-    
-    for k in 'rmshBaw':
-        k_params.kernels[k] = np.array(data[k], dtype=np.float64)
-
-    
+    setNewParameters(data)
     system.compile()
 
+# REDUCE DUPLICATE CODE FROM SETPARAMETERS FUNCTION!!!
 @eel.expose
 def generateKernel(data):
+    
+    global system
+    
+    setNewParameters(data)
+    system.generateRandomParams()
+    system.compile()
+
+def setNewParameters(data):
+    
     global system
 
     world = system.world
@@ -242,15 +221,12 @@ def generateKernel(data):
         
     for k in 'Baw':
         for B in data[k]:
-            temp = [0] * (max_rings - len(B))
+            temp = [0.2] * (max_rings - len(B))
             B.extend(temp)
     
     for k in 'rmshBaw':
         k_params.kernels[k] = np.array(data[k], dtype=np.float64)
-
     
-    system.generateRandomParams()
-    system.compile()
 
 
 @eel.expose
