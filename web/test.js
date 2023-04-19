@@ -15,12 +15,12 @@ function addRow() {
     var row = table.insertRow();
     row.name = rowCount;
     var rmshParamsCell = row.insertCell(0);
-    // var BParamsCell = row.insertCell(1);
-    var addInputCell = row.insertCell(1);
-    var deleteRowCell = row.insertCell(2);
+    var BParamsCell = row.insertCell(1);
+    var addBInputCell = row.insertCell(2);
+    var deleteRowCell = row.insertCell(3);
 
     for (var i = 0; i < 4; i++) {
-        myAddInputInThisRow(row, 0, rmsh[i]);
+        myAddInputInThisRow(row, 0, rmsh[i], false);
         // let inputContainer = document.createElement("div");
         // inputContainer.className = "inputContainer";
         // rmshParamsCell.appendChild(inputContainer);
@@ -48,7 +48,7 @@ function addRow() {
     // inputContainer.appendChild(newLbl);
     // inputContainer.appendChild(newInput);
 
-    addInputCell.innerHTML = "<button type='button' onclick='addInput(this)'>Add Input</button>";
+    addBInputCell.innerHTML = "<button type='button' onclick='addInput(this, \"B\")'>Add Input</button>";
     deleteRowCell.innerHTML = "<button type='button' onclick='deleteRow(this)'>Delete Row</button>";
 
     return row;
@@ -59,7 +59,7 @@ function deleteRow(btn) {
   row.parentNode.removeChild(row);
 }
 
-function myAddInputInThisRow(row, cell_n, p) {
+function myAddInputInThisRow(row, cell_n, p, removable = true) {
 
     let cell = row.cells[cell_n];
 
@@ -76,13 +76,21 @@ function myAddInputInThisRow(row, cell_n, p) {
     inputContainer.appendChild(newLbl);
     inputContainer.appendChild(newInput);
 
+    if (removable) {
+        let removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.innerHTML = "Remove Input";
+        removeButton.onclick = function() { removeInput(this); };
+        inputContainer.appendChild(removeButton);
+    }
+
     return newInput;
 }
   
 
-function addInput(btn) {
+function addInput(btn, p) {
   var row = btn.parentNode.parentNode;
-  addInputInThisRow(row);
+  myAddInputInThisRow(row, 1, p);
 }
 
 function addInputInThisRow(row) {
@@ -268,7 +276,7 @@ async function getParamsFromPython() {
         for (var j = 0; j < data["B"][i].length; j++) {
             
             // let input = row.cells[0].querySelector("input[name='" + j + "']");
-            input = myAddInputInThisRow(row, 0, 'B');
+            input = myAddInputInThisRow(row, 1, 'B');
             input.value = data['B'][i][j];
             
         }
