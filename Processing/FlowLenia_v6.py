@@ -117,8 +117,6 @@ class System():
 
     def compile(self):
 
-        self.k_params.generateRandomParameters(seed = self.world.seed)
-
         self.k_params.compile_kernels(self.world.sX, self.world.sY)
         Model = getattr(Models, self.version)
         self.model = Model(
@@ -127,6 +125,9 @@ class System():
             # params = params,
             # m_params = self.m_params
         )
+    
+    def generateRandomParams(self):
+        self.k_params.generateRandomParameters(seed = self.world.seed)
 
     
     def step(self):
@@ -205,13 +206,50 @@ def setParameters(data):
         for B in data[k]:
             temp = [0] * (max_rings - len(B))
             B.extend(temp)
-
-    # print(ker_params)
     
     for k in 'rmshBaw':
         k_params.kernels[k] = np.array(data[k], dtype=np.float64)
 
     
+    system.compile()
+
+@eel.expose
+def generateKernel(data):
+    global system
+
+    world = system.world
+    k_params = system.k_params
+
+    system.version = data["version"]
+
+    # Pass through method for world and kernel params!!!
+    world.seed = data["seed"]
+    world.sX = data["size"]
+    world.sY = data["size"]
+    world.numChannels = data["numChannels"]
+    world.theta = data["theta"]
+    world.dd = data["dd"]
+    world.dt = data["dt"]
+    world.sigma = data["sigma"]
+
+    world.generateWorld()
+
+    max_rings = 0
+    for k in 'Baw':
+        temp = max(len(sublist) for sublist in data[k])
+        if temp > max_rings:
+            max_rings = temp
+        
+    for k in 'Baw':
+        for B in data[k]:
+            temp = [0] * (max_rings - len(B))
+            B.extend(temp)
+    
+    for k in 'rmshBaw':
+        k_params.kernels[k] = np.array(data[k], dtype=np.float64)
+
+    
+    system.generateRandomParams()
     system.compile()
 
 

@@ -51,7 +51,7 @@ function addRow() {
     // inputContainer.appendChild(newLbl);
     // inputContainer.appendChild(newInput);
 
-    for (var k = 0; k < Baw.length; k++) {
+    for (let k = 0; k < Baw.length; k++) {
 
         let addInputButton = document.createElement("button");
         addInputButton.type = "button";
@@ -134,12 +134,12 @@ function addInputInThisRow(row) {
 function removeInput(btn) {
   var inputContainer = btn.parentNode;
   inputContainer.parentNode.removeChild(inputContainer);
-  var row = btn.parentNode.parentNode.parentNode;
-  var inputCount = row.cells[0].getElementsByClassName("inputContainer").length;
-  var inputs = row.cells[0].getElementsByTagName("input");
-  for (var i = 4; i < inputs.length; i++) {
-    inputs[i].name = "input" + rowCount + "_" + (i+1);
-  }
+//   var row = btn.parentNode.parentNode.parentNode;
+//   var inputCount = row.cells[0].getElementsByClassName("inputContainer").length;
+//   var inputs = row.cells[0].getElementsByTagName("input");
+//   for (var i = 4; i < inputs.length; i++) {
+//     inputs[i].name = "input" + rowCount + "_" + (i+1);
+//   }
 }
 
 
@@ -240,6 +240,7 @@ async function play() {
 const playBtn = document.querySelector(".play-btn"),
 nextStepBtn = document.querySelector(".next-step-btn"),
 restartBtn = document.querySelector(".restart-btn"),
+generateFromSeedBtn = document.querySelector(".generate-btn"),
 saveVideoBtn = document.querySelector(".save-video-btn"),
 saveStateBtn = document.querySelector(".save-state-btn"),
 loadStateBtn = document.querySelector(".load-state-btn"),
@@ -386,6 +387,70 @@ async function setParamsInPython() {
     versionLoadingTxt.innerText = "";
 }
 
+// TODO: REDUCE DUPLICATE CODE FROM SETPARAMSINPYTHON FUNCTION
+async function generateKernelParamsInPython() {
+
+    versionLoadingTxt.innerText = "Compiling...";
+
+    let data = {};
+    
+    data["version"] = document.querySelector(".version-selector").value;
+    data["size"] = parseInt(document.querySelector(".size").value);
+    data["numChannels"] = parseInt(document.querySelector(".num-channels").value);
+    data["seed"] = parseInt(document.querySelector(".seed").value);
+    data["theta"] = parseFloat(document.querySelector(".theta").value);
+    data["dd"] = parseInt(document.querySelector(".dd").value);
+    data["dt"] = parseFloat(document.querySelector(".dt").value);
+    data["sigma"] = parseFloat(document.querySelector(".sigma").value);
+
+    // let kernelParmas = submitForm();
+
+    for (var k = 0; k < rmsh.length; k++) {
+        data[rmsh[k]] = [];
+    }
+    
+    for (var k = 0; k < Baw.length; k++) {
+        data[Baw[k]] = [];
+    }
+
+    var rows = document.getElementsByTagName("tr");
+
+    for (var i = 0; i < rows.length; i++) {
+        
+        let row = rows[i];
+
+
+        rmsh.forEach(k =>{
+            
+            // let inputs = row.cells[0].getElementsByTagName("input");
+            let input = row.cells[0].querySelector("input[name='" + k + "']");
+            data[k].push(parseFloat(input.value));
+        })
+
+        for (var k = 0; k < Baw.length; k++) {
+
+            // data[Baw[k]].push([]);
+            // console.log(data);
+            inputs = row.cells[k + 1].getElementsByTagName("input");
+
+            let B = [];
+
+            for (var j = 0; j < inputs.length; j++) {
+                
+                // let input = row.cells[0].querySelector("input[name='" + j + "']");
+                B.push(parseFloat(inputs[j].value));
+                
+            }
+            data[Baw[k]].push(B);
+
+        }
+    }
+    
+    await eel.generateKernel(data)();
+    updateWorldDisplay();
+    getParamsFromPython();
+    versionLoadingTxt.innerText = "";
+}
 
 function compile() {
     versionSelected = versionMenu.value;
@@ -427,6 +492,15 @@ restartBtn.addEventListener("click", () => {
     is_playing = false;
     playBtn.innerText = "PLAY";
     setParamsInPython();
+    stepNTxt.textContent = 0;
+    // getKernelParamsFromWeb();
+})
+
+
+generateFromSeedBtn.addEventListener("click", () => {
+    is_playing = false;
+    playBtn.innerText = "PLAY";
+    generateKernelParamsInPython();
     stepNTxt.textContent = 0;
     // getKernelParamsFromWeb();
 })
