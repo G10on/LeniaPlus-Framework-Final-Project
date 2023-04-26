@@ -146,17 +146,20 @@ class KernelParameters():
     # Connection matrix where M[i, j] = number of kernels from channel i to channel j
     def conn_from_matrix(self, connection_matrix):
         C = connection_matrix.shape[0]
-        self.c0 = []
-        self.c1 = [[] for _ in range(C)]
+        c0 = []
+        c1 = [[] for _ in range(C)]
         # self.c1 = List([List([]) for _ in range(C)])
         i = 0
         for s in range(C):
             for t in range(C):
                 n = connection_matrix[s, t]
                 if n:
-                    self.c0 = self.c0 + [s]*n
-                    self.c1[t] = self.c1[t] + list(range(i, i + n))
+                    c0 = c0 + [s]*n
+                    c1[t] = c1[t] + list(range(i, i + n))
                 i += n
+        
+        self.kernels['C'] = c0
+        self.kernels['T'] = c1
         
         # self.c1 = np.asarray(self.c1, dtype=object)
         # self.c1 = numba.typed.List(self.c1)

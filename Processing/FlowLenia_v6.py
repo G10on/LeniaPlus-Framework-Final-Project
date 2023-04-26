@@ -167,8 +167,11 @@ def getParameters():
 
     # print(k_params.ker_params)
 
-    for k in 'rmshBaw':
-        data[k] = k_params.kernels[k].tolist()
+    for k in 'CrmshBawT':
+        temp = k_params.kernels[k]
+        if type(temp) is np.ndarray:
+            temp = temp.tolist()
+        data[k] = temp
 
     # data.update(k_params.kernels)
 
@@ -226,6 +229,11 @@ def setNewParameters(data):
     
     for k in 'rmshBaw':
         k_params.kernels[k] = np.array(data[k], dtype=np.float64)
+    
+    for k in 'CT':
+        k_params.kernels[k] = np.array(data[k], dtype=np.int64)
+    
+    k_params.n_kernels = len(k_params.kernels['r'])
     
 
 
@@ -317,7 +325,7 @@ def step():
 @eel.expose
 def getWorld():
 
-    scl = 256 // system.world.sX
+    scl = 512 // system.world.sX
     
     a = np.uint8(system.world.A.clip(0, 1) * 255.0)
     b = np.ones((scl, scl, 1))

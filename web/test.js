@@ -5,8 +5,8 @@ const ctx = canvas.getContext("2d");
 const stream = canvas.captureStream();
 const chunks = [];
 
-var rmsh = ['r', 'm', 's', 'h'];
-var Baw = ['B', 'a', 'w'];
+var rmsh = ['C', 'r', 'm', 's', 'h'];
+var Baw = ['B', 'a', 'w', 'T'];
 
 var rowCount = 1;
 
@@ -19,11 +19,14 @@ function addRow() {
     var BParamsCell = row.insertCell(1);
     var aParamsCell = row.insertCell(2);
     var wParamsCell = row.insertCell(3);
+    var TParamsCell = row.insertCell(4);
     // var addBInputCell = row.insertCell(4);
-    var deleteRowCell = row.insertCell(4);
+    var deleteRowCell = row.insertCell(5);
 
-    for (var i = 0; i < rmsh.length; i++) {
-        myAddInputInThisRow(row, 0, rmsh[i], false);
+    myAddInputInThisRow(row, 0, rmsh[0], 0.2, false);
+    
+    for (var i = 1; i < rmsh.length; i++) {
+        myAddInputInThisRow(row, 0, rmsh[i], 0.2, false);
         // let inputContainer = document.createElement("div");
         // inputContainer.className = "inputContainer";
         // rmshParamsCell.appendChild(inputContainer);
@@ -57,7 +60,7 @@ function addRow() {
         addInputButton.type = "button";
         addInputButton.textContent = "Add " + Baw[k];
         addInputButton.onclick = function() { 
-            addInput(this, k + 1, Baw[k]); 
+            addInput(this, k + 1, Baw[k], 0);
         }
         
         row.cells[k + 1].appendChild(addInputButton);
@@ -79,7 +82,7 @@ function deleteRow(btn) {
   row.parentNode.removeChild(row);
 }
 
-function myAddInputInThisRow(row, cell_n, p, removable = true) {
+function myAddInputInThisRow(row, cell_n, p, value, removable = true) {
 
     let cell = row.cells[cell_n];
 
@@ -92,7 +95,7 @@ function myAddInputInThisRow(row, cell_n, p, removable = true) {
     newInput.type = "number";
     // newInput.name = "input" + rowCount + "_" + i;
     newInput.name = p;
-    newInput.value = 0.2;
+    newInput.value = value;
     inputContainer.appendChild(newLbl);
     inputContainer.appendChild(newInput);
 
@@ -108,9 +111,9 @@ function myAddInputInThisRow(row, cell_n, p, removable = true) {
 }
   
 
-function addInput(btn, cell_n, p) {
+function addInput(btn, cell_n, p, value) {
   var row = btn.parentNode.parentNode;
-  myAddInputInThisRow(row, cell_n, p);
+  myAddInputInThisRow(row, cell_n, p, value);
 }
 
 function addInputInThisRow(row) {
@@ -209,7 +212,7 @@ async function updateWorldDisplay() {
     // let svg = d3.select("span").append("svg")
     //   .attr("width", sz)
     //   .attr("height", sz);
-    ctx.createImageData(400, 400);
+    ctx.createImageData(800, 800);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.putImageData(img_A, 0, 0);
 
@@ -307,15 +310,28 @@ async function getParamsFromPython() {
             input.value = data[k][i];
         })
 
-        for (var k = 0; k < Baw.length; k++) {
+        for (var k = 0; k < Baw.length - 1; k++) {
 
             for (var j = 0; j < data[Baw[k]][i].length; j++) {
                 
                 // let input = row.cells[0].querySelector("input[name='" + j + "']");
-                input = myAddInputInThisRow(row, k + 1, Baw[k]);
-                input.value = data[Baw[k]][i][j];
+                let input = myAddInputInThisRow(row, k + 1, Baw[k], data[Baw[k]][i][j]);
+                // input.value = data[Baw[k]][i][j];
                 
             }
+        }
+
+                
+    }
+
+    var rows = document.getElementsByTagName("tr");
+
+    for (var c = 0; c < data['numChannels']; c++) {
+
+        for (var j = 0; j < data['T'][c].length; j++) {
+
+            input = myAddInputInThisRow(rows[data['T'][c][j]], Baw.length, 'T', c);
+            // input.value = c;
         }
     }
     
@@ -348,25 +364,32 @@ async function setParamsInPython() {
         data[Baw[k]] = [];
     }
 
+    for (var c = 0; c < data["numChannels"]; c++) {
+        data['T'].push([]);
+    }
+
     var rows = document.getElementsByTagName("tr");
 
     for (var i = 0; i < rows.length; i++) {
         
-        let row = rows[i];
+        let row = rows[i];  
 
 
-        rmsh.forEach(k =>{
+        for (var k = 1; k < rmsh.length; k++) {
             
             // let inputs = row.cells[0].getElementsByTagName("input");
-            let input = row.cells[0].querySelector("input[name='" + k + "']");
-            data[k].push(parseFloat(input.value));
-        })
+            let input = row.cells[0].querySelector("input[name='" + rmsh[k] + "']");
+            data[rmsh[k]].push(parseFloat(input.value));
+        }
 
-        for (var k = 0; k < Baw.length; k++) {
+        let input = row.cells[0].querySelector("input[name='C']");
+        data['C'].push(parseInt(input.value));
+
+        for (var k = 0; k < Baw.length - 1; k++) {
 
             // data[Baw[k]].push([]);
             // console.log(data);
-            inputs = row.cells[k + 1].getElementsByTagName("input");
+            var inputs = row.cells[k + 1].getElementsByTagName("input");
 
             let B = [];
 
@@ -379,7 +402,16 @@ async function setParamsInPython() {
             data[Baw[k]].push(B);
 
         }
+        
+        var inputs = row.cells[Baw.length].getElementsByTagName("input");
+
+        for (var j = 0; j < inputs.length; j++) {
+            data['T'][inputs[j].value].push(parseInt(i));
+        }
     }
+
+
+    console.log(data);
     
     await eel.setParameters(data)();
     updateWorldDisplay();
@@ -472,9 +504,11 @@ playBtn.addEventListener("click", () => {
 
     if (is_playing) {
         play();
-        playBtn.innerText = "STOP";
+        playBtn.innerHTML = "&#10074;&#10074";
+        playBtn.style.background = "tomato";
     } else {
-        playBtn.innerText = "PLAY";
+        playBtn.innerHTML = "&#9658";
+        playBtn.style.background = "#4CAF50";
     }
     
 })
@@ -483,14 +517,16 @@ nextStepBtn.addEventListener("click", async () => {
 
     is_playing = false;
     step();
-    playBtn.innerText = "PLAY";
+    playBtn.innerHTML = "&#9658";
+    playBtn.style.background = "#4CAF50";
     
 })
 
 
 restartBtn.addEventListener("click", () => {
     is_playing = false;
-    playBtn.innerText = "PLAY";
+    playBtn.innerHTML = "&#9658";
+    playBtn.style.background = "#4CAF50";
     setParamsInPython();
     stepNTxt.textContent = 0;
     // getKernelParamsFromWeb();
@@ -499,7 +535,8 @@ restartBtn.addEventListener("click", () => {
 
 generateFromSeedBtn.addEventListener("click", () => {
     is_playing = false;
-    playBtn.innerText = "PLAY";
+    playBtn.innerHTML = "&#9658";
+    playBtn.style.background = "#4CAF50";
     generateKernelParamsInPython();
     stepNTxt.textContent = 0;
     // getKernelParamsFromWeb();

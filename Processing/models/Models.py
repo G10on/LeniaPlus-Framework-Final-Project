@@ -179,7 +179,7 @@ class FlowLeniaModel():
 
             fA = jnp.fft.fft2(A, axes=(0,1))  # (x,y,c)
         
-            fAk = fA[:, :, self.k_params.c0]  # (x,y,k)
+            fAk = fA[:, :, self.k_params.kernels['C']]  # (x,y,k)
 
             U = jnp.real(jnp.fft.ifft2(self.fK * fAk, axes=(0,1)))  # (x,y,k)
 
@@ -189,7 +189,7 @@ class FlowLeniaModel():
                 self.k_params.kernels['s']
             ) * self.k_params.kernels['h']  # (x,y,k)
 
-            H = jnp.dstack([ G[:, :, self.k_params.c1[c]].sum(axis=-1)
+            H = jnp.dstack([ G[:, :, self.k_params.kernels['T'][c]].sum(axis=-1)
                            for c in range(self.world.numChannels) ])  # (x,y,c)
             
             F = self.gradient_func(H)
