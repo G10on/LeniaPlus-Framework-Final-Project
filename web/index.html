@@ -21,7 +21,7 @@
     <title>Document</title>
 </head>
 <body>
-    <h1> Lenia+ Framework</h1>
+    <h1 class="title"> Lenia+ Framework</h1>
     <div class="player-menu">
         <button class="play-btn">
             &#9658;
@@ -57,73 +57,81 @@
         <span id="step-n-txt"></span>
         <p class="version-loading-txt"></p>
     </div>
+    <div class="gui">
+
+        <div class="visualizer">
+            <canvas id="map" width="512px" height="512px"></canvas>
+
+        </div>
     
-    <canvas id="map" width="512px" height="512px"></canvas>
-
-    <span></span>
-
+        <span></span>
     
-    <div class="parameters">
-        <div class="version">
-            <label>Select version</label>
-            <select class="version-selector">
-                <option value="FlowLeniaModel">Flow Lenia</option>
-                <option value="LeniaModel">Original Lenia</option>
-            </select>
+        
+        <div class="parameters">
+            <div class="version">
+                <label>Select version</label>
+                <select class="version-selector">
+                    <option value="FlowLeniaModel">Flow Lenia</option>
+                    <option value="LeniaModel">Original Lenia</option>
+                </select>
+            </div>
+            <div>
+    
+                <label class="size-lbl">Size (px)</label>
+                <input type="number" class="size" value="128">
+                <br>
+            </div>
+            <div>
+                <label class="num-channels-lbl">Nº of channels</label>
+                <input type="number" class="num-channels" value="3">
+                <br>
+                
+            </div>
+            <div>
+                <label class="seed-lbl">Seed</label>
+                <input type="number" class="seed" value="101">
+                <br>
+    
+            </div>
+            <div>
+                <label class="theta-lbl">Maximum mass concentration</label>
+                <input type="number" class="theta" value="3">
+                <br>
+    
+            </div>
+            <div>
+                <label class="dd-lbl">Maximum flow distance (px)</label>
+                <input type="number" class="dd" value="10">
+                <br>
+    
+            </div>
+            <div>
+                <label class="dt-lbl">Time unit size</label>
+                <input type="number" class="dt" value="0.3">
+                <br>
+    
+            </div>
+    
+            <div>
+                <label class="sigma-lbl">Maximum flow mass (%)</label>
+                <input type="number" class="sigma" value="0.65">
+    
+            </div>
+    
         </div>
-        <div>
-
-            <label class="size-lbl">Size (px)</label>
-            <input type="number" class="size" value="128">
-            <br>
-        </div>
-        <div>
-            <label class="num-channels-lbl">Nº of channels</label>
-            <input type="number" class="num-channels" value="3">
-            <br>
-            
-        </div>
-        <div>
-            <label class="seed-lbl">Seed</label>
-            <input type="number" class="seed" value="101">
-            <br>
-
-        </div>
-        <div>
-            <label class="theta-lbl">Maximum mass concentration</label>
-            <input type="number" class="theta" value="3">
-            <br>
-
-        </div>
-        <div>
-            <label class="dd-lbl">Maximum flow distance (px)</label>
-            <input type="number" class="dd" value="10">
-            <br>
-
-        </div>
-        <div>
-            <label class="dt-lbl">Time unit size</label>
-            <input type="number" class="dt" value="0.3">
-            <br>
-
-        </div>
-
-        <div>
-            <label class="sigma-lbl">Maximum flow mass (%)</label>
-            <input type="number" class="sigma" value="0.65">
-
-        </div>
-
     </div>
 
     <!-- Create a table with an initial row and add and remove buttons -->
-    <table id="myTable">
+    <div class="kernel-parameters">
+        <table id="myTable">
+        
+        </table>
+        
+        <button type="button" onclick="addRow()">Add Row</button>
     
-    </table>
-    
-    <button type="button" onclick="addRow()">Add Row</button>
+        <button type="button" onclick="submitForm()">Submit Form</button>
 
-    <button type="button" onclick="submitForm()">Submit Form</button>
+    </div>
 
 
     <script type="text/javascript" src="./test.js"></script>

@@ -1,14 +1,31 @@
 @import url('https://fonts.googleapis.com/css?family=Font+Name');
 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
     /* background-color: #0e1414; */
     background-color: #101616;
     color: aliceblue;
     font-family: 'Poppins', sans-serif;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: stretch;
+    align-content: stretch;
+    flex-wrap: wrap;
 }
 
-h1 {
+.title {
   font-size: 20px;
 }
 
@@ -17,6 +34,7 @@ h1 {
   display: flex;
   /* justify-content: center; */
   align-items: center;
+  width: 100%;
   padding: 20px 5px;
   /* position: fixed; */
   /* right: 0; */
@@ -80,41 +98,76 @@ h1 {
 
 
 
-.inputContainer td {
+.gui {
   display: flex;
-  flex-direction: row;
+  flex-flow: row;
+  width: 100%;
+  height: calc(100% - 100px);
+  flex-grow: 1;
+  position: relative;
+  justify-content: space-evenly;
 }
 
-canvas {
+
+.visualizer {
   /* margin-right: auto;
   margin-left: auto; */
   background-color: #000;
   box-shadow: #2bc3f5 0px 0px 20px -5px;
-  padding: 20px 100px;
-  display: block;
+  /* padding: 20px 100px; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   float: left;
+  width: 70%;
+  height: 100%;
   /* width: 256px;
   height: 256px; */
 }
 
+canvas {
+
+}
+
 
 .parameters {
-  width: 350px;
-  height: 450px;
+  width: 30%;
+  height: 100%;
+  /* top: 0;
+  left: 0; */
   background-color: #374752;
   /* box-shadow: #4CAF50 0px 0px 20px -5px; */
   padding: 20px;
-  margin-right: 40px;
+  /* margin-right: 10px; */
   border-radius: 3px;
 
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   float: right;
+
+  border-left: 2px solid #f58d2b;
 }
+
+
+
+.parameters > div {
+  background-color: #333333;
+  padding: 10px;
+  border-radius: 3px;
+  display: flex;
+  flex-flow: row;
+  justify-content: space-between;
+  align-items: stretch;
+  /* Add margin to create some space between the two divs */
+  /* margin-right: 10px; */
+}
+
+
 
 .parameters label {
   float: left;
+  width: 100%;
 /* Add margin to create some space between the two divs */
 /* margin-right: 10px; */
 }
@@ -124,16 +177,6 @@ canvas {
   width: 60px;
 /* Add margin to create some space between the two divs */
 /* margin-right: 10px; */
-}
-
-.parameters > div {
-  background-color: #333333;
-  padding: 10px;
-  border-radius: 3px;
-  /* display: inline-block; */
-  /* float: left; */
-  /* Add margin to create some space between the two divs */
-  /* margin-right: 10px; */
 }
 
 .parameters input, .parameters select {
@@ -154,6 +197,9 @@ canvas {
 
 
 
+.kernel-parameters {
+  display: none;
+}
 
 
 table {
@@ -174,6 +220,11 @@ table {
     background-color: #f2f2f2;
   }
   
+  .inputContainer td {
+    display: flex;
+    flex-direction: row;
+  }
+
   td {
     padding: 10px;
     text-align: left;

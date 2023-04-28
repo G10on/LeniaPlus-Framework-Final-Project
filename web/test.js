@@ -213,6 +213,8 @@ async function updateWorldDisplay() {
     //   .attr("width", sz)
     //   .attr("height", sz);
     ctx.createImageData(800, 800);
+    // canvas.width = canvas.offsetWidth;
+    // canvas.height = canvas.offsetHeight;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.putImageData(img_A, 0, 0);
 
