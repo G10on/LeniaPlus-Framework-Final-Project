@@ -13,24 +13,24 @@ var tablePreview = document.getElementById("table-preview");
 var tableKernel = document.getElementById("table-kernel");
 
 function addRow() {
-    rowCount++;
-    var row_preview = tablePreview.insertRow();
-    var row_kernel = tableKernel.insertRow();
-    row_preview.id = rowCount;
-    row_kernel.id = rowCount;
-    var rmshParamsCell = row_preview.insertCell(0);
-    var BParamsCell = row_preview.insertCell(1);
-    var aParamsCell = row_preview.insertCell(2);
-    var wParamsCell = row_preview.insertCell(3);
-    var TParamsCell = row_preview.insertCell(4);
+    // rowCount++;
+    row_preview = tablePreview.insertRow();
+    row_kernel = tableKernel.insertRow();
+    // row_preview.id = rowCount;
+    // row_kernel.id = rowCount;
+    var rmshParamsCell = row_kernel.insertCell(0);
+    var BParamsCell = row_kernel.insertCell(1);
+    var aParamsCell = row_kernel.insertCell(2);
+    var wParamsCell = row_kernel.insertCell(3);
+    var TParamsCell = row_kernel.insertCell(4);
     // var addBInputCell = row.insertCell(4);
-    var deleteRowCell = row_preview.insertCell(5);
-    var previewCell = row_preview.insertCell(6);
+    var deleteRowCell = row_preview.insertCell(0);
+    var previewCell = row_preview.insertCell(1);
 
-    myAddInputInThisRow(row_preview, 5, rmsh[0], 0.2, false);
+    myAddInputInThisRow(row_preview, 0, rmsh[0], 0.2, false);
     
     for (var i = 1; i < rmsh.length; i++) {
-        myAddInputInThisRow(row_preview, 0, rmsh[i], 0.2, false);
+        myAddInputInThisRow(row_kernel, 0, rmsh[i], 0.2, false);
         // let inputContainer = document.createElement("div");
         // inputContainer.className = "inputContainer";
         // rmshParamsCell.appendChild(inputContainer);
@@ -67,7 +67,7 @@ function addRow() {
             addInput(this, k + 1, Baw[k], 0);
         }
         
-        row_preview.cells[k + 1].appendChild(addInputButton);
+        row_kernel.cells[k + 1].appendChild(addInputButton);
         
     }
 
@@ -75,15 +75,19 @@ function addRow() {
     let deleteRowButton = document.createElement("button");
     deleteRowButton.type = "button";
     deleteRowButton.textContent = "Delete Row";
-    deleteRowButton.onclick = function() { deleteRow(this); };
+    deleteRowButton.onclick = function() { 
+        deleteRow(this);
+     };
     deleteRowCell.appendChild(deleteRowButton);
 
-    return row_preview;
+    return [row_preview, row_kernel];
 }
 
 function deleteRow(btn) {
-  var row = btn.parentNode.parentNode;
-  row.parentNode.removeChild(row);
+    let row_preview = btn.parentNode.parentNode;
+    let id = row_preview.rowIndex;
+    row_preview.parentNode.removeChild(row_preview);
+    tableKernel.deleteRow(id);
 }
 
 function myAddInputInThisRow(row, cell_n, p, value, removable = true) {
@@ -127,7 +131,7 @@ function addInputInThisRow(row) {
   var inputCount = row.cells[0].getElementsByClassName("inputContainer").length;
   var newInput = document.createElement("input");
   newInput.type = "number";
-  newInput.name = "input" + rowCount + "_" + inputCount;
+//   newInput.name = "input" + rowCount + "_" + inputCount;
   newInput.value = 0.2;
   inputContainer.appendChild(newInput);
   var removeButton = document.createElement("button");
@@ -291,6 +295,7 @@ async function getParamsFromPython() {
 
     versionLoadingTxt.innerText = "Compiling...";
     tablePreview.innerHTML = "";
+    tableKernel.innerHTML = "";
 
     var data = await eel.getParameters()();
     
@@ -305,15 +310,15 @@ async function getParamsFromPython() {
 
     for (var i = 0; i < data["r"].length; i++) {
         
-        let row = addRow();
+        let [row_preview, row_kernel] = addRow();
         rmsh.slice(1).forEach(k =>{
             
             // let inputs = row.cells[0].getElementsByTagName("input");
-            let input = row.cells[0].querySelector("input[name='" + k + "']");
+            let input = row_kernel.cells[0].querySelector("input[name='" + k + "']");
             input.value = data[k][i];
         })
 
-        let input_C = row.cells[5].querySelector("input[name='C']");
+        let input_C = row_preview.cells[0].querySelector("input[name='C']");
         input_C.value = data['C'][i];
 
         for (var k = 0; k < Baw.length - 1; k++) {
@@ -321,7 +326,7 @@ async function getParamsFromPython() {
             for (var j = 0; j < data[Baw[k]][i].length; j++) {
                 
                 // let input = row.cells[0].querySelector("input[name='" + j + "']");
-                let input = myAddInputInThisRow(row, k + 1, Baw[k], data[Baw[k]][i][j]);
+                let input = myAddInputInThisRow(row_kernel, k + 1, Baw[k], data[Baw[k]][i][j]);
                 // input.value = data[Baw[k]][i][j];
                 
             }
@@ -330,7 +335,7 @@ async function getParamsFromPython() {
                 
     }
 
-    var rows = document.getElementsByTagName("tr");
+    var rows = tableKernel.rows;
 
     for (var c = 0; c < data['numChannels']; c++) {
 
@@ -374,28 +379,32 @@ async function setParamsInPython() {
         data['T'].push([]);
     }
 
-    var rows = document.getElementsByTagName("tr");
+    var rows_kernel = tableKernel.rows;
+    var rows_preview = tablePreview.rows;
 
-    for (var i = 0; i < rows.length; i++) {
+    console.log(rows_preview);
+
+    for (var i = 0; i < rows_kernel.length; i++) {
         
-        let row = rows[i];  
+        let row_kernel = rows_kernel[i];  
+        let row_preview = rows_preview[i];  
 
 
         for (var k = 1; k < rmsh.length; k++) {
             
             // let inputs = row.cells[0].getElementsByTagName("input");
-            let input = row.cells[0].querySelector("input[name='" + rmsh[k] + "']");
+            let input = row_kernel.cells[0].querySelector("input[name='" + rmsh[k] + "']");
             data[rmsh[k]].push(parseFloat(input.value));
         }
 
-        let input = row.cells[5].querySelector("input[name='C']");
-        data['C'].push(parseInt(input.value));
+        let input_C = row_preview.cells[0].querySelector("input[name='C']");
+        data['C'].push(parseInt(input_C.value));
 
         for (var k = 0; k < Baw.length - 1; k++) {
 
             // data[Baw[k]].push([]);
             // console.log(data);
-            var inputs = row.cells[k + 1].getElementsByTagName("input");
+            var inputs = row_kernel.cells[k + 1].getElementsByTagName("input");
 
             let B = [];
 
@@ -409,7 +418,7 @@ async function setParamsInPython() {
 
         }
         
-        var inputs = row.cells[Baw.length].getElementsByTagName("input");
+        var inputs = row_kernel.cells[Baw.length].getElementsByTagName("input");
 
         for (var j = 0; j < inputs.length; j++) {
             data['T'][inputs[j].value].push(parseInt(i));
@@ -451,17 +460,19 @@ async function generateKernelParamsInPython() {
         data[Baw[k]] = [];
     }
 
-    var rows = document.getElementsByTagName("tr");
+    var rows_kernel = tableKernel.rows;
+    var rows_preview = tablePreview.rows;
 
-    for (var i = 0; i < rows.length; i++) {
+    for (var i = 0; i < rows_kernel.length; i++) {
         
-        let row = rows[i];
+        let row_kernel = rows_kernel[i];
+        let row_preview = rows_preview[i];
 
 
         rmsh.slice(1).forEach(k =>{
             
             // let inputs = row.cells[0].getElementsByTagName("input");
-            let input = row.cells[0].querySelector("input[name='" + k + "']");
+            let input = row_kernel.cells[0].querySelector("input[name='" + k + "']");
             data[k].push(parseFloat(input.value));
         })
 
@@ -469,7 +480,7 @@ async function generateKernelParamsInPython() {
 
             // data[Baw[k]].push([]);
             // console.log(data);
-            inputs = row.cells[k + 1].getElementsByTagName("input");
+            inputs = row_kernel.cells[k + 1].getElementsByTagName("input");
 
             let B = [];
 
