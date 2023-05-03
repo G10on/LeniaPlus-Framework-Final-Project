@@ -128,7 +128,7 @@ body {
 .visualizer {
   /* margin-right: auto;
   margin-left: auto; */
-  background-color: #aaa;
+  background-color: #000;
   box-shadow: #2bc3f5 0px 0px 20px -5px;
   /* padding: 20px 100px; */
   display: flex;
@@ -279,11 +279,11 @@ canvas {
 
 
 table tr td {
-  display: none;
+  /* display: none; */
 }
 
-table tr td:last-child {
-  display: table-cell;
+tr > td:last-child {
+  /* display: table-cell; */
 }
 
 
