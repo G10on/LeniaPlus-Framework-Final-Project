@@ -24,18 +24,20 @@ body {
     flex-wrap: nowrap;
 }
 
+.window {
+  background-color: #465362;
+  padding: 15px 25px;
+  border: #48E5C2 1px solid;
+  border-radius: 5px;
+  box-shadow: 0 0 30px -5px #48E5C2;
+  border-radius: 5px;
+}
+
 .nav-menu {
   display: flex;
   flex-direction: row;
   align-items: stretch;
   justify-content: space-evenly;
-
-  width: 100%;
-  background-color: #465362;
-  padding: 10px 25px;
-  border: #48E5C2 1px solid;
-  border-radius: 5px;
-  box-shadow: 0 0 30px -5px  #48E5C2;
 }
 
 .title {
@@ -51,7 +53,7 @@ body {
   align-items: center;
   gap: 5px;
 
-  width: 100%;
+  width: min-content;
   /* position: fixed; */
   /* right: 0; */
 }
@@ -118,7 +120,7 @@ body {
   display: flex;
   flex-flow: row;
   width: 100%;
-  height: calc(100% - 100px);
+  height: calc(100% - 120px);
   /* flex-grow: 1; */
   position: relative;
   justify-content: space-between;
@@ -148,11 +150,6 @@ canvas {
 
 
 .parameters {
-  background-color: #465362;
-  padding: 25px 25px;
-  border: #48E5C2 1px solid;
-  border-radius: 5px;
-  box-shadow: 0 0 30px -5px  #48E5C2;
 
   width: 500px;
   height: 100%;
@@ -160,7 +157,6 @@ canvas {
   left: 0; */
   /* box-shadow: #4CAF50 0px 0px 20px -5px; */
   /* margin-right: 10px; */
-  border-radius: 5px;
 
   display: flex;
   flex-direction: column;
@@ -329,24 +325,32 @@ td:hover {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: white;
-  padding: 20px;
-  border: 1px solid black;
+  z-index: 1000;
 }
 
 
-#table-kernel tr {
+#table-kernel tbody tr {
   display: none;
+  flex-direction: row;
+}
+
+#table-kernel tr > td {
+  display: flex;
+  flex-direction: column;
+}
+
+#table-kernel .kernel-parameter-title {
+  
 }
 
 
-/* #overlay {
+#overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
-  display: none;
   z-index: 999;
-} */
+  display: none;
+}

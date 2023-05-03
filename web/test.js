@@ -28,10 +28,30 @@ function addRow() {
     var deleteRowCell = row_preview.insertCell(0);
     var previewCell = row_preview.insertCell(1);
 
+
+    let kernelTitles = [rmsh.slice(1).join('')];
+    kernelTitles = kernelTitles.concat(Baw);
+    
+    for (var i = 0; i < row_kernel.cells.length; i++) {
+
+        let titleContainer = document.createElement("div");
+        let inputList = document.createElement("div");
+        titleContainer.className = "kernel-parameter-title";
+        inputList.className = "input-list";
+        row_kernel.cells[i].appendChild(titleContainer);
+        let newLbl = document.createElement("label");
+        newLbl.textContent = kernelTitles[i];
+        titleContainer.appendChild(newLbl);
+        row_kernel.cells[i].appendChild(inputList);
+    }
+
+
+
+
     myAddInputInThisRow(row_preview, 0, rmsh[0], 0.2, false);
     
     for (var i = 1; i < rmsh.length; i++) {
-        myAddInputInThisRow(row_kernel, 0, rmsh[i], 0.2, false);
+        myAddInputInThisRow(row_kernel, 0, rmsh[i], 0.2, false, innerDiv = true);
         // let inputContainer = document.createElement("div");
         // inputContainer.className = "inputContainer";
         // rmshParamsCell.appendChild(inputContainer);
@@ -58,14 +78,14 @@ function addRow() {
     // newInput.value = 0.2;
     // inputContainer.appendChild(newLbl);
     // inputContainer.appendChild(newInput);
-
     for (let k = 0; k < Baw.length; k++) {
 
         let addInputButton = document.createElement("button");
+        addInputButton.className = "add-parameter-btn";
         addInputButton.type = "button";
         addInputButton.textContent = "Add " + Baw[k];
         addInputButton.onclick = function() { 
-            addInput(this, k + 1, Baw[k], 0);
+            addInput(this, k + 1, Baw[k], 0, true);
         }
         
         row_kernel.cells[k + 1].appendChild(addInputButton);
@@ -99,13 +119,19 @@ function deleteRow(btn) {
     tableKernel.deleteRow(id);
 }
 
-function myAddInputInThisRow(row, cell_n, p, value, removable = true) {
+function myAddInputInThisRow(row, cell_n, p, value, removable = true, innerDiv = false) {
 
-    let cell = row.cells[cell_n];
+    var inputList;
+    console.log(cell_n, p, innerDiv);
+    if (innerDiv) {
+        inputList = row.cells[cell_n].getElementsByClassName("input-list")[0];
+    } else {
+        inputList = row.cells[cell_n];
+    }
 
     let inputContainer = document.createElement("div");
     inputContainer.className = "inputContainer";
-    cell.appendChild(inputContainer);
+    inputList.appendChild(inputContainer);
     let newLbl = document.createElement("label");
     newLbl.textContent = p;
     let newInput = document.createElement("input");
@@ -128,9 +154,10 @@ function myAddInputInThisRow(row, cell_n, p, value, removable = true) {
 }
   
 
-function addInput(btn, cell_n, p, value) {
+function addInput(btn, cell_n, p, value, innerDiv) {
   var row = btn.parentNode.parentNode;
-  myAddInputInThisRow(row, cell_n, p, value);
+  console.log(row);
+  myAddInputInThisRow(row, cell_n, p, value, true, innerDiv);
 }
 
 function addInputInThisRow(row) {
@@ -170,20 +197,19 @@ function displayKernelWindow(btn) {
     let row_preview = btn.parentNode.parentNode;
     let id = row_preview.rowIndex;
     let row_kernel = tableKernel.rows[id];
-    // row_preview.parentNode.removeChild(row_preview);
 
     let kernelWindow = document.querySelector(".kernel-window");
     kernelWindow.style.display = "block";
-    row_kernel.style.display = "block";
-    // overlay.style.display = "block";
+    row_kernel.style.display = "flex";
+    overlay.style.display = "block";
 
+    overlay.addEventListener('click', () => {
+        kernelWindow.style.display = "none";
+        row_kernel.style.display = "none";
+        overlay.style.display = "none";
+    });
 }
 
-// overlay.addEventListener('click', () => {
-//     let kernelWindow = document.querySelector(".kernel-window");
-//     kernelWindow.style.display = "none";
-//     overlay.style.display = "none";
-// });
 
 
 
@@ -349,7 +375,7 @@ async function getParamsFromPython() {
         rmsh.slice(1).forEach(k =>{
             
             // let inputs = row.cells[0].getElementsByTagName("input");
-            let input = row_kernel.cells[0].querySelector("input[name='" + k + "']");
+            let input = row_kernel.cells[0].getElementsByClassName("input-list")[0].querySelector("input[name='" + k + "']");
             input.value = data[k][i];
         })
 
@@ -361,7 +387,7 @@ async function getParamsFromPython() {
             for (var j = 0; j < data[Baw[k]][i].length; j++) {
                 
                 // let input = row.cells[0].querySelector("input[name='" + j + "']");
-                let input = myAddInputInThisRow(row_kernel, k + 1, Baw[k], data[Baw[k]][i][j]);
+                let input = myAddInputInThisRow(row_kernel, k + 1, Baw[k], data[Baw[k]][i][j], true, innerDiv = true);
                 // input.value = data[Baw[k]][i][j];
                 
             }
@@ -376,7 +402,7 @@ async function getParamsFromPython() {
 
         for (var j = 0; j < data['T'][c].length; j++) {
 
-            input = myAddInputInThisRow(rows[data['T'][c][j]], Baw.length, 'T', c);
+            input = myAddInputInThisRow(rows[data['T'][c][j]], Baw.length, 'T', c, true, innerDiv = true);
             // input.value = c;
         }
     }
@@ -428,7 +454,7 @@ async function setParamsInPython() {
         for (var k = 1; k < rmsh.length; k++) {
             
             // let inputs = row.cells[0].getElementsByTagName("input");
-            let input = row_kernel.cells[0].querySelector("input[name='" + rmsh[k] + "']");
+            let input = row_kernel.cells[0].getElementsByClassName("input-list")[0].querySelector("input[name='" + rmsh[k] + "']");
             data[rmsh[k]].push(parseFloat(input.value));
         }
 
@@ -439,7 +465,7 @@ async function setParamsInPython() {
 
             // data[Baw[k]].push([]);
             // console.log(data);
-            var inputs = row_kernel.cells[k + 1].getElementsByTagName("input");
+            var inputs = row_kernel.cells[k + 1].getElementsByClassName("input-list")[0].getElementsByTagName("input");
 
             let B = [];
 
@@ -453,7 +479,7 @@ async function setParamsInPython() {
 
         }
         
-        var inputs = row_kernel.cells[Baw.length].getElementsByTagName("input");
+        var inputs = row_kernel.cells[Baw.length].getElementsByClassName("input-list")[0].getElementsByTagName("input");
 
         for (var j = 0; j < inputs.length; j++) {
             data['T'][inputs[j].value].push(parseInt(i));
