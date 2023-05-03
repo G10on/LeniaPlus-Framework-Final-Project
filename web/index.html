@@ -1,128 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
     <script type="text/javascript" src="./eel.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
 
-
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
+      rel="stylesheet"
+    />
 
     <title>Document</title>
-</head>
-<body>
-    <h1 class="title"> Lenia+ Framework</h1>
-    <div class="player-menu">
-        <button class="play-btn">
-            &#9658;
-        </button>
+  </head>
+  <body>
+    <div class="nav-menu">
+      <h1 class="title">Lenia+ Framework</h1>
+      <div class="player-menu">
+        <button class="play-btn">&#9658;</button>
         <button class="next-step-btn">
-            <i class="material-icons">skip_next</i>
+          <i class="material-icons">skip_next</i>
         </button>
         <button class="restart-btn">
-            <i class="material-icons">restart_alt</i>
+          <span class="material-symbols-outlined"> restart_alt </span>
         </button>
         <button class="generate-btn">
-            <span class="material-symbols-outlined">
-                casino
-            </span>
+          <span class="material-symbols-outlined"> casino </span>
         </button>
         <button class="save-state-btn">
-            <span class="material-symbols-outlined">
-                download
-            </span>
+          <span class="material-symbols-outlined"> download </span>
         </button>
         <button class="load-state-btn">
-            <span class="material-symbols-outlined">
-                upload
-            </span>
+          <span class="material-symbols-outlined"> upload </span>
         </button>
         <!-- <label class="n-save-lbl">Video duration (seconds)</label> -->
         <button class="save-video-btn">
-            <i class="material-icons">movie</i>
+          <i class="material-icons">movie</i>
         </button>
-        <input class="sec-to-save" type="number" value="20">
+        <input class="sec-to-save" type="number" value="20" />
 
         <label id="step-n-label">Step: </label>
         <span id="step-n-txt"></span>
         <p class="version-loading-txt"></p>
+      </div>
     </div>
     <div class="gui">
+      <div class="visualizer">
+        <canvas id="map" width="512px" height="512px"></canvas>
+      </div>
 
-        <div class="visualizer">
-            <canvas id="map" width="512px" height="512px"></canvas>
+      <span></span>
 
+      <div class="parameters">
+        <div class="world-parameters">
+          <div class="parameter-title">
+            <label> WORLD PARAMETERS</label>
+          </div>
+          <div class="version world-param">
+            <label>Select version</label>
+            <select class="version-selector">
+              <option value="FlowLeniaModel">Flow Lenia</option>
+              <option value="LeniaModel">Original Lenia</option>
+            </select>
+          </div>
+          <div class="world-param">
+            <label class="size-lbl">Size (px)</label>
+            <input type="number" class="size" value="128" />
+            <br />
+          </div>
+          <div class="world-param">
+            <label class="num-channels-lbl">Nº of channels</label>
+            <input type="number" class="num-channels" value="3" />
+            <br />
+          </div>
+          <div class="world-param">
+            <label class="seed-lbl">Seed</label>
+            <input type="number" class="seed" value="101" />
+            <br />
+          </div>
+          <div class="world-param">
+            <label class="theta-lbl">Maximum mass concentration</label>
+            <input type="number" class="theta" value="3" />
+            <br />
+          </div>
+          <div class="world-param">
+            <label class="dd-lbl">Maximum flow distance (px)</label>
+            <input type="number" class="dd" value="10" />
+            <br />
+          </div>
+          <div class="world-param">
+            <label class="dt-lbl">Time unit size</label>
+            <input type="number" class="dt" value="0.3" />
+            <br />
+          </div>
+
+          <div class="world-param">
+            <label class="sigma-lbl">Maximum flow mass (%)</label>
+            <input type="number" class="sigma" value="0.65" />
+          </div>
         </div>
-    
-        <span></span>
-    
-        
-        <div class="parameters">
-            <div class="version">
-                <label>Select version</label>
-                <select class="version-selector">
-                    <option value="FlowLeniaModel">Flow Lenia</option>
-                    <option value="LeniaModel">Original Lenia</option>
-                </select>
-            </div>
-            <div>
-    
-                <label class="size-lbl">Size (px)</label>
-                <input type="number" class="size" value="128">
-                <br>
-            </div>
-            <div>
-                <label class="num-channels-lbl">Nº of channels</label>
-                <input type="number" class="num-channels" value="3">
-                <br>
-                
-            </div>
-            <div>
-                <label class="seed-lbl">Seed</label>
-                <input type="number" class="seed" value="101">
-                <br>
-    
-            </div>
-            <div>
-                <label class="theta-lbl">Maximum mass concentration</label>
-                <input type="number" class="theta" value="3">
-                <br>
-    
-            </div>
-            <div>
-                <label class="dd-lbl">Maximum flow distance (px)</label>
-                <input type="number" class="dd" value="10">
-                <br>
-    
-            </div>
-            <div>
-                <label class="dt-lbl">Time unit size</label>
-                <input type="number" class="dt" value="0.3">
-                <br>
-    
-            </div>
-    
-            <div>
-                <label class="sigma-lbl">Maximum flow mass (%)</label>
-                <input type="number" class="sigma" value="0.65">
-    
-            </div>
-    
+
+        <div class="kernel-parameters">
+          <div class="parameter-title">
+            <label>KERNEL PARAMETERS</label>
+          </div>
+
+          <div class="kernel-configuration">
+            <table id="myTable">
+              <tbody>
+                <tr id="2">
+                  <td>
+                    <div class="inputContainer">
+                      <label>r</label><input type="number" name="r" />
+                    </div>
+                    <div class="inputContainer">
+                      <label>m</label><input type="number" name="m" />
+                    </div>
+                    <div class="inputContainer">
+                      <label>s</label><input type="number" name="s" />
+                    </div>
+                    <div class="inputContainer">
+                      <label>h</label><input type="number" name="h" />
+                    </div>
+                  </td>
+                  <td>
+                    <button type="button">Add B</button>
+                    <div class="inputContainer">
+                      <label>B</label><input type="number" name="B" /><button
+                        type="button"
+                      >
+                        Remove Input
+                      </button>
+                    </div>
+                    <div class="inputContainer">
+                      <label>B</label><input type="number" name="B" /><button
+                        type="button"
+                      >
+                        Remove Input
+                      </button>
+                    </div>
+                    <div class="inputContainer">
+                      <label>B</label><input type="number" name="B" /><button
+                        type="button"
+                      >
+                        Remove Input
+                      </button>
+                    </div>
+                  </td>
+                  <td>
+                    <button type="button">Add a</button>
+                    <div class="inputContainer">
+                      <label>a</label><input type="number" name="a" /><button
+                        type="button"
+                      >
+                        Remove Input
+                      </button>
+                    </div>
+                    <div class="inputContainer">
+                      <label>a</label><input type="number" name="a" /><button
+                        type="button"
+                      >
+                        Remove Input
+                      </button>
+                    </div>
+                    <div class="inputContainer">
+                      <label>a</label><input type="number" name="a" /><button
+                        type="button"
+                      >
+                        Remove Input
+                      </button>
+                    </div>
+                  </td>
+                  <td>
+                    <button type="button">Add w</button>
+                    <div class="inputContainer">
+                      <label>w</label><input type="number" name="w" /><button
+                        type="button"
+                      >
+                        Remove Input
+                      </button>
+                    </div>
+                    <div class="inputContainer">
+                      <label>w</label><input type="number" name="w" /><button
+                        type="button"
+                      >
+                        Remove Input
+                      </button>
+                    </div>
+                    <div class="inputContainer">
+                      <label>w</label><input type="number" name="w" /><button
+                        type="button"
+                      >
+                        Remove Input
+                      </button>
+                    </div>
+                  </td>
+                  <td>
+                    <button type="button">Add T</button>
+                    <div class="inputContainer">
+                      <label>T</label><input type="number" name="T" /><button
+                        type="button"
+                      >
+                        Remove Input
+                      </button>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="inputContainer">
+                      <label>C</label><input type="number" name="C" />
+                    </div>
+                    <button type="button">Delete Row</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <button class="add-kernel-btn" type="button" onclick="addRow()">
+              <span class="material-symbols-outlined"> add </span>
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Create a table with an initial row and add and remove buttons -->
-    <div class="kernel-parameters">
+    <!-- <div class="kernel-parameters">
         <table id="myTable">
         
         </table>
@@ -131,9 +247,8 @@
     
         <button type="button" onclick="submitForm()">Submit Form</button>
 
-    </div>
-
+    </div> -->
 
     <script type="text/javascript" src="./test.js"></script>
-</body>
+  </body>
 </html>
