@@ -15,7 +15,9 @@ var tableKernel = document.getElementById("table-kernel");
 function addRow() {
     rowCount++;
     var row_preview = tablePreview.insertRow();
+    var row_kernel = tableKernel.insertRow();
     row_preview.id = rowCount;
+    row_kernel.id = rowCount;
     var rmshParamsCell = row_preview.insertCell(0);
     var BParamsCell = row_preview.insertCell(1);
     var aParamsCell = row_preview.insertCell(2);
