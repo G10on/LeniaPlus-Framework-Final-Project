@@ -201,18 +201,19 @@ function downloadFile(url, filename) {
     link.click();
 }
 
+// var sz = 512;
 
 async function updateWorldDisplay() {
     
     let A = new Uint8ClampedArray(await eel.getWorld()());
-    // console.log(A);
     let sz = Math.sqrt(A.length / 4)
+    // console.log(A);
     let img_A = new ImageData(A, sz, sz);
 
     // let svg = d3.select("span").append("svg")
     //   .attr("width", sz)
     //   .attr("height", sz);
-    ctx.createImageData(800, 800);
+    ctx.createImageData(canvas.height, canvas.width);
     // canvas.width = canvas.offsetWidth;
     // canvas.height = canvas.offsetHeight;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -269,7 +270,6 @@ function getKernelParamsFromWeb() {
     sigma = parseFloat(document.querySelector(".sigma").value);
     kermel_params = submitForm();
     
-    console.log(size);
     return {
         size: size,
         numChannels: numChannels,
@@ -337,7 +337,7 @@ async function getParamsFromPython() {
         }
     }
     
-    updateWorldDisplay();
+    await updateWorldDisplay();
     versionLoadingTxt.innerText = "";
 }
 
@@ -416,7 +416,7 @@ async function setParamsInPython() {
     console.log(data);
     
     await eel.setParameters(data)();
-    updateWorldDisplay();
+    await updateWorldDisplay();
     getParamsFromPython();
     versionLoadingTxt.innerText = "";
 }
@@ -481,7 +481,7 @@ async function generateKernelParamsInPython() {
     }
     
     await eel.generateKernel(data)();
-    updateWorldDisplay();
+    await updateWorldDisplay();
     getParamsFromPython();
     versionLoadingTxt.innerText = "";
 }
@@ -494,7 +494,7 @@ function compile() {
 async function compile_version(version) {
     versionLoadingTxt.innerText = "Compiling...";
     await eel.compile_version(version)();
-    updateWorldDisplay();
+    await updateWorldDisplay();
     versionLoadingTxt.innerText = "";
 }
 
@@ -562,7 +562,7 @@ saveStateBtn.addEventListener("click", () => {
 loadStateBtn.addEventListener("click", async () => {
     await eel.loadParameterState()();
     getParamsFromPython();
-    updateWorldDisplay();
+    await updateWorldDisplay();
 })
 
 

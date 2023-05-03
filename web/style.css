@@ -21,8 +21,7 @@ body {
     flex-direction: column;
     justify-content: space-between;
     align-items: stretch;
-    align-content: stretch;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
 .title {
@@ -198,7 +197,7 @@ canvas {
 
 
 .kernel-parameters {
-  display: none;
+  /* display: none; */
 }
 
 

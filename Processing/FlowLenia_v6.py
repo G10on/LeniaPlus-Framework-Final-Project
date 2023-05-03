@@ -230,8 +230,10 @@ def setNewParameters(data):
     for k in 'rmshBaw':
         k_params.kernels[k] = np.array(data[k], dtype=np.float64)
     
-    for k in 'CT':
+    for k in 'C':
         k_params.kernels[k] = np.array(data[k], dtype=np.int64)
+
+    k_params.kernels['T'] = data['T']
     
     k_params.n_kernels = len(k_params.kernels['r'])
     
@@ -327,7 +329,7 @@ def getWorld():
 
     scl = 512 // system.world.sX
     
-    a = np.uint8(system.world.A.clip(0, 1) * 255.0)
+    a = jnp.uint8(system.world.A.clip(0, 1) * 255.0)
     b = np.ones((scl, scl, 1))
     res = np.kron(a, b)
     res = np.dstack((res, np.ones((system.world.sX * scl, system.world.sY * scl), dtype=np.int8) * 255))

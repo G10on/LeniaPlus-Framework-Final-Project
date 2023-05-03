@@ -86,7 +86,7 @@ class KernelParameters():
             "m" : {'low' : .05, 'high' : .5, 'mut_std' : .2, 'shape' : None},
             "s" : {'low' : .001, 'high' : .18, 'mut_std' : .01, 'shape' : None},
             "h" : {'low' : .01, 'high' : 1., 'mut_std' : .2, 'shape' : None},
-            'T' : {'low' : 10., 'high' : 50., 'mut_std' : .1, 'shape' : None},
+            # 'T' : {'low' : 10., 'high' : 50., 'mut_std' : .1, 'shape' : None},
             'R' : {'low' : 2., 'high' : 25., 'mut_std' : .2, 'shape' : None},
             }
 
