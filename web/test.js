@@ -2,6 +2,7 @@ const canvas = document.getElementById("map");
 const ctx = canvas.getContext("2d");
 
 
+const overlay = document.querySelector('#overlay');
 const stream = canvas.captureStream();
 const chunks = [];
 
@@ -80,6 +81,14 @@ function addRow() {
      };
     deleteRowCell.appendChild(deleteRowButton);
 
+    let EditRowButton = document.createElement("button");
+    EditRowButton.type = "button";
+    EditRowButton.textContent = "Edit Kernel";
+    EditRowButton.onclick = function() { 
+        displayKernelWindow(this);
+     };
+    previewCell.appendChild(EditRowButton);
+
     return [row_preview, row_kernel];
 }
 
@@ -152,6 +161,32 @@ function removeInput(btn) {
 //     inputs[i].name = "input" + rowCount + "_" + (i+1);
 //   }
 }
+
+
+
+
+
+function displayKernelWindow(btn) {
+    let row_preview = btn.parentNode.parentNode;
+    let id = row_preview.rowIndex;
+    let row_kernel = tableKernel.rows[id];
+    // row_preview.parentNode.removeChild(row_preview);
+
+    let kernelWindow = document.querySelector(".kernel-window");
+    kernelWindow.style.display = "block";
+    row_kernel.style.display = "block";
+    // overlay.style.display = "block";
+
+}
+
+// overlay.addEventListener('click', () => {
+//     let kernelWindow = document.querySelector(".kernel-window");
+//     kernelWindow.style.display = "none";
+//     overlay.style.display = "none";
+// });
+
+
+
 
 
 function submitForm() {
