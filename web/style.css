@@ -4,6 +4,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  /* color: white; */
 }
 
 body {
@@ -23,6 +24,15 @@ body {
     align-items: stretch;
     flex-wrap: nowrap;
 }
+
+
+input, button {
+  height: 40px;
+  border-radius: 4px;
+  border-style: none;
+  text-align: center;
+}
+
 
 .window {
   background-color: #465362;
@@ -112,6 +122,9 @@ body {
   color: white;
 }
 
+.player-menu input {
+  width: 70px;
+}
 
 
 
@@ -137,6 +150,7 @@ body {
   align-items: center;
   justify-content: center;
   float: left;
+  border-radius: 4px;
   width: calc(100% - 550px);
   /* width: 800px; */
   height: 100%;
@@ -145,7 +159,7 @@ body {
 }
 
 canvas {
-
+  overflow: hidden;
 }
 
 
@@ -229,6 +243,40 @@ canvas {
 
 
 
+#table-preview {
+  width: 100%;
+}
+
+#table-preview tr {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 5px;
+  margin: 10px 0;
+}
+
+#table-preview tr td {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  width: 50%;
+}
+
+#table-preview tr td:nth-child(1) button {
+  background-color: tomato;
+}
+
+#table-preview tr td:nth-child(2) button {
+  background-color: #48E5C2;
+}
+
+#table-preview tr td button {
+  width: 100%;
+}
+
+
+
+
 
 
 
@@ -238,7 +286,7 @@ canvas {
 
 .add-kernel-btn {
   border: none;
-  background-color: #48E5C2;
+  background-color: #4CAF50;
   /* color: white; */
   /* padding: 8px 20px; */
   text-align: center;
@@ -269,59 +317,14 @@ canvas {
 
 
 
-.kernel-configuration {
-  /* display: none; */
-}
-
-
-table tr td {
-  /* display: none; */
-}
-
-tr > td:last-child {
-  /* display: table-cell; */
-}
-
-
-/* tbody tr:nth-child(even) {
-  background-color: #f2f2f2;
-}
-
-.inputContainer td {
-  display: flex;
-  flex-direction: row;
-}
-
-td {
-  padding: 10px;
-  text-align: left;
-  vertical-align: top;
-}
-
-td img {
-  display: block;
-  margin: 0 auto;
-  width: 32px;
-  height: 32px;
-}
-
-td span {
-  display: block;
-  font-weight: bold;
-  margin-top: 8px;
-}
-
-td:hover {
-  background-color: #f2f2f2;
-  transition: background-color 0.3s ease;
-} */
-
-
 
 
 .kernel-window {
   display: none;
+  /* display: flex; */
+  flex-direction: row;
   position: fixed;
+  padding: 10px 30px 30px 30px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -331,17 +334,57 @@ td:hover {
 
 #table-kernel tbody tr {
   display: none;
+  /* display: flex; */
   flex-direction: row;
+  gap: 30px;
 }
 
 #table-kernel tr > td {
   display: flex;
   flex-direction: column;
+  width: 150px;
 }
 
 #table-kernel .kernel-parameter-title {
-  
+  text-align: center;
+  width: 100%;
 }
+
+.input-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  margin: 20px 0;
+}
+
+.inputContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inputContainer input {
+  width: 70px;
+}
+
+.input-list button {
+  border-style: none;
+  border-radius: 4px;
+  background-color: tomato;
+  width: 100%;
+}
+
+.add-parameter-btn {
+  background-color: #4CAF50;
+}
+
+
+
+
 
 
 #overlay {

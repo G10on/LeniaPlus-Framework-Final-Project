@@ -92,13 +92,13 @@ class KernelParameters():
 
             ker_params = {}
             for k in 'rmsh':
-                ker_params[k] = rand_gen.uniform(
+                ker_params[k] = np.round(rand_gen.uniform(
                     self.spaces[k]['low'], self.spaces[k]['high'], self.n_kernels
-                )
+                ), 4)
             for k in 'Baw':
-                ker_params[k] = rand_gen.uniform(
+                ker_params[k] = np.round(rand_gen.uniform(
                     self.spaces[k]['low'], self.spaces[k]['high'], (self.n_kernels, 3)
-                )
+                ), 4)
 
 
         # self.ker_params = ker_params

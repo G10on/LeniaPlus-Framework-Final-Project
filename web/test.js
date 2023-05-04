@@ -36,7 +36,7 @@ function addRow() {
 
         let titleContainer = document.createElement("div");
         let inputList = document.createElement("div");
-        titleContainer.className = "kernel-parameter-title";
+        titleContainer.className = "kernel-parameter-title parameter-title";
         inputList.className = "input-list";
         row_kernel.cells[i].appendChild(titleContainer);
         let newLbl = document.createElement("label");
@@ -95,7 +95,7 @@ function addRow() {
     
     let deleteRowButton = document.createElement("button");
     deleteRowButton.type = "button";
-    deleteRowButton.textContent = "Delete Row";
+    deleteRowButton.textContent = "Delete Kernel";
     deleteRowButton.onclick = function() { 
         deleteRow(this);
      };
@@ -122,7 +122,6 @@ function deleteRow(btn) {
 function myAddInputInThisRow(row, cell_n, p, value, removable = true, innerDiv = false) {
 
     var inputList;
-    console.log(cell_n, p, innerDiv);
     if (innerDiv) {
         inputList = row.cells[cell_n].getElementsByClassName("input-list")[0];
     } else {
@@ -132,20 +131,23 @@ function myAddInputInThisRow(row, cell_n, p, value, removable = true, innerDiv =
     let inputContainer = document.createElement("div");
     inputContainer.className = "inputContainer";
     inputList.appendChild(inputContainer);
-    let newLbl = document.createElement("label");
-    newLbl.textContent = p;
     let newInput = document.createElement("input");
     newInput.type = "number";
     // newInput.name = "input" + rowCount + "_" + i;
     newInput.name = p;
     newInput.value = value;
-    inputContainer.appendChild(newLbl);
+    if (p != '') {
+        let newLbl = document.createElement("label");
+        newLbl.textContent = p;
+        inputContainer.appendChild(newLbl);
+    }
     inputContainer.appendChild(newInput);
 
     if (removable) {
         let removeButton = document.createElement("button");
+        removeButton.className = "remove-btn";
         removeButton.type = "button";
-        removeButton.innerHTML = "Remove Input";
+        removeButton.innerHTML = "Delete";
         removeButton.onclick = function() { removeInput(this); };
         inputContainer.appendChild(removeButton);
     }
@@ -156,8 +158,7 @@ function myAddInputInThisRow(row, cell_n, p, value, removable = true, innerDiv =
 
 function addInput(btn, cell_n, p, value, innerDiv) {
   var row = btn.parentNode.parentNode;
-  console.log(row);
-  myAddInputInThisRow(row, cell_n, p, value, true, innerDiv);
+  myAddInputInThisRow(row, cell_n, '', value, true, innerDiv);
 }
 
 function addInputInThisRow(row) {
@@ -242,9 +243,6 @@ function submitForm() {
       rowData.push(rowValues);
 
     }
-
-    console.log({ firstInputs: rInputs, secondInputs: mInputs, thirdInputs: sInputs, fourthInputs: hInputs });
-    console.log(rowData);
 
     params = {'r': rInputs, 'm': mInputs, 's': sInputs, 'h': hInputs, "B": rowData};
     return params;
@@ -387,7 +385,7 @@ async function getParamsFromPython() {
             for (var j = 0; j < data[Baw[k]][i].length; j++) {
                 
                 // let input = row.cells[0].querySelector("input[name='" + j + "']");
-                let input = myAddInputInThisRow(row_kernel, k + 1, Baw[k], data[Baw[k]][i][j], true, innerDiv = true);
+                let input = myAddInputInThisRow(row_kernel, k + 1, '', data[Baw[k]][i][j], true, innerDiv = true);
                 // input.value = data[Baw[k]][i][j];
                 
             }
@@ -402,7 +400,7 @@ async function getParamsFromPython() {
 
         for (var j = 0; j < data['T'][c].length; j++) {
 
-            input = myAddInputInThisRow(rows[data['T'][c][j]], Baw.length, 'T', c, true, innerDiv = true);
+            input = myAddInputInThisRow(rows[data['T'][c][j]], Baw.length, '', c, true, innerDiv = true);
             // input.value = c;
         }
     }
@@ -442,8 +440,6 @@ async function setParamsInPython() {
 
     var rows_kernel = tableKernel.rows;
     var rows_preview = tablePreview.rows;
-
-    console.log(rows_preview);
 
     for (var i = 0; i < rows_kernel.length; i++) {
         
@@ -486,8 +482,6 @@ async function setParamsInPython() {
         }
     }
 
-
-    console.log(data);
     
     await eel.setParameters(data)();
     await updateWorldDisplay();
