@@ -4,11 +4,11 @@ import timeit
 from functools import partial
 # import subprocess
 # import sys
-import cv2
+# import cv2
 
 # import cupy
 
-import jax
+# import jax
 import jax.numpy as jnp
 import jax.scipy as jsp
 # import jax.scipy as jsp
@@ -24,7 +24,7 @@ import scipy as sp
 # import matplotlib.pyplot as plt
 import typing as t
 
-import os
+# import os
 
 from models import Models
 from objects import World, KernelParameters, ModelParameters
@@ -35,6 +35,14 @@ import eel
 import pickle
 
 
+# from jax.config import config
+# config.parse_flags_with_absl()
+# config.update("jax_enable_x64", True)
+# config.update("jax_disable_jit", False)
+# config.update("jax_debug_nans", False)
+# config.update("jax_disable_pmap", False)
+# config.update("jax_platform_name", "cpu")
+# config.update("jax_allow_unregistered_dialects", True)
 
 
 
@@ -327,14 +335,18 @@ def step():
 @eel.expose
 def getWorld():
 
-    scl = 512 // system.world.sX
+    # scl = 512 // system.world.sX
     
-    a = jnp.uint8(system.world.A.clip(0, 1) * 255.0)
-    b = np.ones((scl, scl, 1))
-    res = np.kron(a, b)
-    res = np.dstack((res, np.ones((system.world.sX * scl, system.world.sY * scl), dtype=np.int8) * 255))
+    # a = jnp.uint8(system.world.A.clip(0, 1) * 255.0)
+    # b = np.ones((scl, scl, 1))
+    # res = np.kron(a, b)
+    # res = np.dstack((res, np.ones((system.world.sX * scl, system.world.sY * scl), dtype=np.int8) * 255))
 
-    return res.flatten().tolist()
+    res = jnp.dstack((system.world.A, np.ones((system.world.sX, system.world.sY))))
+    res = np.uint8(res * 255.0).tolist()
+
+    # res = res.flatten().tolist()
+    return res
 
 
 

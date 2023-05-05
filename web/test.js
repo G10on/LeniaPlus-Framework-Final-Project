@@ -267,30 +267,36 @@ function downloadFile(url, filename) {
     link.click();
 }
 
-// var sz = 512;
+// var sz = 128;
 
 async function updateWorldDisplay() {
     
-    let A = new Uint8ClampedArray(await eel.getWorld()());
-    let sz = Math.sqrt(A.length / 4)
-    // console.log(A);
-    let img_A = new ImageData(A, sz, sz);
+    // let A = new Uint8ClampedArray(await eel.getWorld()());
+    // let sz = Math.sqrt(A.length / 4);
+    // let img_A = new ImageData(A, sz, sz);
 
-    // let svg = d3.select("span").append("svg")
-    //   .attr("width", sz)
-    //   .attr("height", sz);
-    ctx.createImageData(canvas.height, canvas.width);
-    // canvas.width = canvas.offsetWidth;
-    // canvas.height = canvas.offsetHeight;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.putImageData(img_A, 0, 0);
+    // ctx.createImageData(canvas.height, canvas.width);
+    // ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // ctx.putImageData(img_A, 0, 0);
 
-    // svg.append("g")
-    // .attr("transform", "translate(0," + sz + ") scale(1,-1)")
-    // .append("image")
-    // .attr("xlink:href", "data:image/png;base64," + btoa(String.fromCharCode.apply(null, img_A.data)))
-    // .attr("width", sz)
-    // .attr("height", sz);
+    var matrix = await eel.getWorld()();
+    // console.log(matrix.length);
+    const new_width = 800;
+    const new_height = 800;
+    canvas.width = new_width;
+    canvas.height = new_height;
+    for (var i = 0; i < matrix.length; i++) {
+        for (var j = 0; j < matrix[i].length; j++) {
+            ctx.fillStyle = 'rgba(' + matrix[i][j].join(',') + ')';
+            ctx.fillRect(i * new_width / matrix.length, j * new_height / matrix[i].length, new_width / matrix.length, new_height / matrix[i].length);
+        }
+    }
+    var dataUri = canvas.toDataURL();
+
+    let img = new Image();
+    ctx.drawImage(img, 0, 0);
+    img.src = dataUri;
+
 
 }
 

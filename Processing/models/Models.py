@@ -24,7 +24,7 @@ import scipy as sp
 # import matplotlib.pyplot as plt
 import typing as t
 
-import os
+# import os
 
 from objects import World, KernelParameters, ModelParameters
 

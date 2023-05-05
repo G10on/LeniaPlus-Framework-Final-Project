@@ -31,6 +31,11 @@
     <div class="nav-menu window">
       <h1 class="title">Lenia+ Framework</h1>
       <div class="player-menu">
+        <p class="version-loading-txt"></p>
+        <div class="step-n-container">
+          <label id="step-n-label">Step: </label>
+          <span id="step-n-txt"></span>
+        </div>
         <button class="play-btn">&#9658;</button>
         <button class="next-step-btn">
           <i class="material-icons">skip_next</i>
@@ -52,15 +57,12 @@
           <i class="material-icons">movie</i>
         </button>
         <input class="sec-to-save" type="number" value="20" />
-
-        <label id="step-n-label">Step: </label>
-        <span id="step-n-txt"></span>
-        <p class="version-loading-txt"></p>
       </div>
     </div>
     <div class="gui">
       <div class="visualizer">
         <canvas id="map" width="512px" height="512px"></canvas>
+        <!-- <img id="map-img" width="800px" height="800px"/> -->
       </div>
 
       <span></span>
