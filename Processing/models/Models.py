@@ -327,12 +327,15 @@ class LeniaModel():
                             #   dt = 0.1,
                             #   sigma = 0.8,
                             #   theta_A = 1.5,
-                              g_func = jax.jit(lambda x, m, s: (jnp.exp(-((x - m) / s)**2 / 2)) * 2 - 1)
+                              g_func = jax.jit(lambda x, m, s: jnp.exp(-((x-m)/s)**2 / 2) * 2 - 1)
     ):
         
         
         self.world = world
         self.k_params = k_params
+        # self.k_params.ker_f = lambda x, m, s, b: (b * np.exp(-((x[..., None]-m)/s)**2 / 2)).sum(-1)
+        self.k_params.ker_f = lambda x, m, s, _: np.exp(
+            -((x[..., None]-m)/s)**2 / 2).sum(-1)
         # self.dd = dd
         # self.dt = dt
         # self.sigma = sigma
@@ -341,6 +344,7 @@ class LeniaModel():
         # self.C = self.world.A.shape[-1]
         self.g_func = g_func
         self.fK = self.k_params.compile_kernels(self.world.sX, self.world.sY)
+        self.fK = self.fK.transpose((2, 0, 1))
 
         self.x, self.y = np.arange(self.world.sX), np.arange(self.world.sY)
         X, Y = np.meshgrid(self.x, self.y)
@@ -421,26 +425,43 @@ class LeniaModel():
                                 # C : int
                                 ):
 
-            fA = jnp.fft.fft2(A, axes=(0,1))  # (x,y,c)
+            # fA = jnp.fft.fft2(A, axes=(0,1))  # (x,y,c)
         
-            fAk = fA[:, :, self.k_params.c0]  # (x,y,k)
+            # fAk = fA[:, :, self.k_params.kernels['C']]  # (x,y,k)
 
-            U = jnp.real(jnp.fft.ifft2(self.fK * fAk, axes=(0,1)))  # (x,y,k)
+            # U = jnp.real(jnp.fft.ifft2(self.fK * fAk, axes=(0,1)))  # (x,y,k)
 
-            G = self.g_func(
-                U, 
-                self.k_params.kernels['m'], 
-                self.k_params.kernels['s']
-            ) * self.k_params.kernels['h']  # (x,y,k)
+            # G = self.g_func(
+            #     U, 
+            #     self.k_params.kernels['m'], 
+            #     self.k_params.kernels['s']
+            # ) * self.k_params.kernels['h']  # (x,y,k)
 
-            H = jnp.dstack([ G[:, :, self.k_params.c1[c]].sum(axis=-1)
-                           for c in range(self.world.numChannels) ])  # (x,y,c)
+            # H = jnp.dstack([ G[:, :, self.k_params.kernels['T'][c]].sum(axis=-1)
+            #                for c in range(self.world.numChannels) ])  # (x,y,c)
             
-            nA = jnp.clip(self.world.A + (1 / self.world.dt) * H, 0., 1.)
+            # nA = jnp.clip(A + (1 / self.world.dt) * H, 0., 1.)
 
-            self.world.A = nA
+            # # self.world.A = nA
 
+            # return nA
+
+            # fAs = [ jnp.fft.fft2(cA) for cA in A ]
+            fAs = [ jnp.fft.fft2(A[:,:,c]) for c in range(self.k_params.n_kernels) ]
+            # print(self.fK.shape)
+            Us = [ np.real(jnp.fft.ifft2(fK * fAs[c0])) for fK, c0 in zip(self.fK, self.k_params.kernels["C"]) ]
+            ''' calculate growth values for destination channels c1 '''
+            Gs = [ self.g_func(U, self.k_params.kernels['m'][k], self.k_params.kernels['s'][k]) for U, k in zip(Us, range(len(self.k_params.kernels['m']))) ]
+            Hs = [sum(self.k_params.kernels['h'][k] * G for G, k in zip(Gs, range(len(self.k_params.kernels['m'])))
+                      if k in self.k_params.kernels['T'][c1]) for c1 in range(A.shape[2])]
+            ''' add growth values to channels '''
+            #A = np.clip(A + 1/T * np.mean(np.asarray(Gs),axis=0), 0, 1)
+            As = [ jnp.clip(A[:,:,cA] + 1/self.world.dt * H, 0, 1) for cA,H in zip(range(A.shape[2]),Hs) ]
+            nA = jnp.dstack(As)
             return nA
+
+
+
         
         # return jax.jit(f, static_argnames = ["A"])
         return jax.jit(from_U_compute_H)

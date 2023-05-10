@@ -1,5 +1,9 @@
 const canvas = document.getElementById("map");
 const ctx = canvas.getContext("2d");
+const new_width = 800;
+const new_height = 800;
+canvas.width = new_width;
+canvas.height = new_height;
 
 
 const overlay = document.querySelector('#overlay');
@@ -48,7 +52,7 @@ function addRow() {
 
 
 
-    myAddInputInThisRow(row_preview, 0, rmsh[0], 0.2, false);
+    myAddInputInThisRow(row_preview, 0, rmsh[0], 0, false);
     
     for (var i = 1; i < rmsh.length; i++) {
         myAddInputInThisRow(row_kernel, 0, rmsh[i], 0.2, false, innerDiv = true);
@@ -281,16 +285,14 @@ async function updateWorldDisplay() {
 
     var matrix = await eel.getWorld()();
     // console.log(matrix.length);
-    const new_width = 800;
-    const new_height = 800;
-    canvas.width = new_width;
-    canvas.height = new_height;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < matrix.length; i++) {
         for (var j = 0; j < matrix[i].length; j++) {
             ctx.fillStyle = 'rgba(' + matrix[i][j].join(',') + ')';
             ctx.fillRect(i * new_width / matrix.length, j * new_height / matrix[i].length, new_width / matrix.length, new_height / matrix[i].length);
         }
     }
+
     var dataUri = canvas.toDataURL();
 
     let img = new Image();
