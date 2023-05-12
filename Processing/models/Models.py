@@ -67,17 +67,16 @@ class FlowLeniaModel():
 
     def __init__(self,
                 world:World.World,
-                k_params,
                 # params,
                 ) -> None:
         
-        self.set_world_and_kParams(world, k_params)
+        self.set_world_and_kParams(world)
     
 
     # Set world and/or kernel parameters
     def set_world_and_kParams(self,
                               world:World.World,
-                              k_params,
+                            #   k_params,
                             #   params,
                             #   dd = 3,
                             #   dt = 0.1,
@@ -86,25 +85,18 @@ class FlowLeniaModel():
                               g_func = jax.jit(lambda x, m, s: (jnp.exp(-((x - m) / s)**2 / 2)) * 2 - 1)
     ):
         
-        
         self.world = world
-        self.k_params = k_params
-        # self.dd = dd
-        # self.dt = dt
-        # self.sigma = sigma
-        # self.theta = theta_A
-        # self.__dict__.update(params)
-        # self.C = self.world.A.shape[-1]
+        self.k_params = self.getNewKParams()
         self.g_func = g_func
-        self.fK = self.k_params.compile_kernels(self.world.sX, self.world.sY)
+        # self.fK = self.k_params.compile_kernels(self.world.sX, self.world.sY)
 
         self.x, self.y = np.arange(self.world.sX), np.arange(self.world.sY)
         X, Y = np.meshgrid(self.x, self.y)
-        self.pos = np.dstack((Y, X)) + .5 #(SX, SY, 2)
+        self.pos = np.dstack((Y, X)) + .5  # (SX, SY, 2)
 
         self.rollxs = []
         self.rollys = []
-        
+
         for dx in range(-self.world.dd, self.world.dd + 1):
             for dy in range(-self.world.dd, self.world.dd + 1):
                 self.rollxs.append(dx)
@@ -113,16 +105,21 @@ class FlowLeniaModel():
         self.rollys = np.array(self.rollys)
 
         self.sobel_k = np.array([
-                [1., 0., -1.],
-                [2., 0., -2.],
-                [1., 0., -1.]
+            [1., 0., -1.],
+            [2., 0., -2.],
+            [1., 0., -1.]
         ])
 
+        # self.compile()
+
+    def compile(self):
+
+        self.fK = self.k_params.compile_kernels(self.world.sX, self.world.sY)
 
         self.gradient_func = self.compile_gradient_func()
         self.flow_func = self.compile_flow_function()
         self.next_gen_func = self.compile_next_gen_func()
-    
+
 
 
     def step(self):
@@ -177,6 +174,7 @@ class FlowLeniaModel():
                                 # C : int
                                 ):
 
+            print(A.shape)
             fA = jnp.fft.fft2(A, axes=(0,1))  # (x,y,c)
         
             fAk = fA[:, :, self.k_params.kernels['C']]  # (x,y,k)
@@ -266,6 +264,14 @@ class FlowLeniaModel():
         
         return jax.jit(step_flow)
 
+    def getNewKParams(self):
+
+        return KernelParameters.KernelParameters()
+    
+    def getKParams(self):
+
+        return self.k_params
+
 
 
 
@@ -311,40 +317,30 @@ class LeniaModel():
 
     def __init__(self,
                 world:World.World,
-                k_params,
                 # params,
                 ) -> None:
         
-        self.set_world_and_kParams(world, k_params)
+        self.set_world_and_kParams(world)
     
 
     # Set world and/or kernel parameters
+
     def set_world_and_kParams(self,
-                              world:World.World,
-                              k_params,
-                            #   params,
-                            #   dd = 3,
-                            #   dt = 0.1,
-                            #   sigma = 0.8,
-                            #   theta_A = 1.5,
-                              g_func = jax.jit(lambda x, m, s: jnp.exp(-((x-m)/s)**2 / 2) * 2 - 1)
-    ):
-        
-        
+                              world: World.World,
+                              #   k_params,
+                              #   params,
+                              #   dd = 3,
+                              #   dt = 0.1,
+                              #   sigma = 0.8,
+                              #   theta_A = 1.5,
+                              g_func=jax.jit(lambda x, m, s: (
+                                  jnp.exp(-((x - m) / s)**2 / 2)) * 2 - 1)
+                              ):
+
         self.world = world
-        self.k_params = k_params
-        # self.k_params.ker_f = lambda x, m, s, b: (b * np.exp(-((x[..., None]-m)/s)**2 / 2)).sum(-1)
-        self.k_params.ker_f = lambda x, m, s, _: np.exp(
-            -((x[..., None]-m)/s)**2 / 2).sum(-1)
-        # self.dd = dd
-        # self.dt = dt
-        # self.sigma = sigma
-        # self.theta = theta_A
-        # self.__dict__.update(params)
-        # self.C = self.world.A.shape[-1]
+        self.k_params = self.getNewKParams()
         self.g_func = g_func
-        self.fK = self.k_params.compile_kernels(self.world.sX, self.world.sY)
-        self.fK = self.fK.transpose((2, 0, 1))
+        # self.fK = self.k_params.compile_kernels(self.world.sX, self.world.sY)
 
         self.x, self.y = np.arange(self.world.sX), np.arange(self.world.sY)
         X, Y = np.meshgrid(self.x, self.y)
@@ -366,11 +362,17 @@ class LeniaModel():
                 [1., 0., -1.]
         ])
 
+        # self.compile()
 
+
+    
+    def compile(self):
+        
+        self.fK = self.k_params.compile_kernels(self.world.sX, self.world.sY)
+        
         self.gradient_func = self.compile_gradient_func()
         self.flow_func = self.compile_flow_function()
         self.next_gen_func = self.compile_next_gen_func()
-    
 
 
     def step(self):
@@ -447,7 +449,8 @@ class LeniaModel():
             # return nA
 
             # fAs = [ jnp.fft.fft2(cA) for cA in A ]
-            fAs = [ jnp.fft.fft2(A[:,:,c]) for c in range(self.k_params.n_kernels) ]
+            # print("SHAPE IN LENIA", A.shape)
+            fAs = [ jnp.fft.fft2(A[:,:,c]) for c in range(self.world.numChannels) ]
             # print(self.fK.shape)
             Us = [ np.real(jnp.fft.ifft2(fK * fAs[c0])) for fK, c0 in zip(self.fK, self.k_params.kernels["C"]) ]
             ''' calculate growth values for destination channels c1 '''
@@ -517,6 +520,14 @@ class LeniaModel():
             return nA
         
         return jax.jit(step_flow)
+
+    def getNewKParams(self):
+
+        return KernelParameters.LeniaKernelParameters()
+    
+    def getKParams(self):
+
+        return self.k_params
 
 
 

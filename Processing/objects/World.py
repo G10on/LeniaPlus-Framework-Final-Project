@@ -27,47 +27,58 @@ import typing as t
 import os
 
 
-
-
-
-
-
-
 class World():
 
     k = np.array([
-            [1., 0., -1.],
-            [2., 0., -2.],
-            [1., 0., -1.]
+        [1., 0., -1.],
+        [2., 0., -2.],
+        [1., 0., -1.]
     ])
 
     # Initialize world
     def __init__(self,
-                 A = None,
-                 seed = 101
+                 A=None,
+                 seed=101
                  ) -> None:
-        
-        self.new_world(A, seed)
-        
+
+        data = {"world":None,
+                "seed":seed,
+                "size":128,
+                "numChannels":3,
+                "theta":3,
+                "dd":7,
+                "dt":0.2,
+                "sigma":0.65,
+        }
+        self.new_world(data)
 
     # Set/generate new world
-    def new_world(self, 
-                  A = None,
-                  seed = 101
+    def new_world(self, data
+                #   A=None,
+                #   seed=101,
+                #   size=128,
+                #   numChannels=3,
+                #   theta=3,
+                #   dd=7,
+                #   dt=0.2,
+                #   sigma=0.65
                   ) -> None:
-        
-        self.A = A
-        self.seed = seed
-        # self.rand_gen = np.random.RandomState(self.seed)
-        self.sX = 128
-        self.sY = self.sX
-        self.numChannels = 3
-        self.theta = 3
-        self.dd = 7
-        self.dt = 0.2
-        self.sigma = 0.65
 
-        if A is None:
+        try:
+            self.A = data["world"]
+        except KeyError:
+            self.A = None
+            
+        self.seed = data["seed"]
+        self.sX = data["size"]
+        self.sY = self.sX
+        self.numChannels = data["numChannels"]
+        self.theta = data["theta"]
+        self.dd = data["dd"]
+        self.dt = data["dt"]
+        self.sigma = data["sigma"]
+
+        if self.A is None:
             self.generateWorld()
 
         # self.dA = self.compute_gradient(self.A)
@@ -78,43 +89,9 @@ class World():
         rand_gen = np.random.RandomState(self.seed)
         init_size = self.sX // 2
         self.A = np.zeros((self.sX, self.sY, self.numChannels))
-        self.A[self.sX//2-init_size//2:self.sX//2+init_size//2, self.sY//2-init_size//2:self.sY//2+init_size//2, :] = rand_gen.rand(init_size, init_size, self.numChannels)
+        self.A[self.sX//2-init_size//2:self.sX//2+init_size//2, self.sY//2-init_size //
+               2:self.sY//2+init_size//2, :] = rand_gen.rand(init_size, init_size, self.numChannels)
 
-    
     # VECTORIZE OR VRAM CUPY?
-    @staticmethod
-    @jax.jit
-    def compute_gradient(H):
 
-        # @jax.jit
-        return jnp.concatenate((World.sobel(H, World.k)[:, :, None, :],
-                                World.sobel(H, World.k.transpose())[:, :, None, :]),
-                                axis = 2)
     
-
-    @staticmethod
-    @jax.jit
-    def sobel(A, k):
-        return jnp.dstack([jsp.signal.convolve2d(A[:, :, c], k, mode = 'same') 
-                        for c in range(A.shape[-1])])
-
-
-    # Return world state
-    # def get_world(self):
-    #     #  RETURN REFERENCE INSTEAD OF COPY
-    #     return self.A
-
-
-    # Return FFT of world
-    @staticmethod
-    # @jax.jit(static_argnums = ["A"])
-    def compute_fftA(A):
-        #  RETURN REFERENCE INSTEAD OF COPY
-        return np.fft.fft2(A, axes=(0,1))  # (x,y,c)
-
-
-    # Statistics about the world
-    def get_total_mass(self) -> float64:
-        
-        return self.A.sum()
-

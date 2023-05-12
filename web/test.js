@@ -365,6 +365,8 @@ async function getParamsFromPython() {
     tableKernel.innerHTML = "";
 
     var data = await eel.getParameters()();
+
+    console.log(data)
     
     document.querySelector(".version-selector").value = data["version"];
     document.querySelector(".size").value = data["size"];
