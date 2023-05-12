@@ -208,6 +208,10 @@ def setNewParameters(data):
     
     global system
 
+    print("START of data to set")
+    print(data)
+    print("END  of data to set")
+
     world = system.world
     k_params = system.k_params
 
@@ -243,6 +247,7 @@ def setNewParameters(data):
         k_params.kernels[k] = np.array(data[k], dtype=np.int64)
 
     k_params.kernels['T'] = data['T']
+    k_params.kernels['R'] = 13
     
     k_params.n_kernels = len(k_params.kernels['r'])
     
@@ -385,12 +390,13 @@ def sample(new_data):
     SY = SX
     C = new_data["numChannels"]
 
+    print("SUBARRAY:", [sublst['b'] for sublst in entity["kernels"]])
     lst_B = [sublst['b'] for sublst in entity["kernels"]]
     max_rings = max(len(sublist) for sublist in lst_B)
-    
-    for B in lst_B:
-        temp = [0.0] * (max_rings - len(B))
-        B.extend(temp)
+
+    # for B in lst_B:
+    #     temp = [0.0] * (max_rings - len(B))
+    #     B.extend(temp)
         # B.reverse()
 
     # for k in "ms":

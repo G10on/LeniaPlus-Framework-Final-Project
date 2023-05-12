@@ -117,30 +117,30 @@ class KernelParameters():
         midX = SX >> 1
         midY = SY >> 1
 
+        print(self.kernels)
+
         # self.kernels['B'] = self.kernels['B'].tolist()
         new_B = []
         
         for lst in self.kernels['B']:
-            mask = lst == 0.0
-            index_of_first_zero = mask.argmax()
-            subarray = lst[:index_of_first_zero].tolist()
+            subarray = lst[lst!=0]
             new_B.append(subarray)
         
         self.kernels['B'] = new_B
         
-        print(self.kernels['B'])
+        # print(self.kernels['B'])
         
         def sigmoid(x):
             return 0.5 * (np.tanh(x / 2) + 1)
 
         r = self.kernels['r'] * (self.kernels['R'])
-        D = np.linalg.norm(np.mgrid[-midX: midX, -midY: midY], axis=0)
+        D_norm = np.linalg.norm(np.ogrid[-midX: midX, -midY: midY])
         
         # The correct
         # Ds = [D / r[k] for k in range(self.n_kernels)]
         
         # The test
-        Ds = [D /
+        Ds = [D_norm /
               self.kernels['R'] * len(self.kernels['B'][k]) / self.kernels['r'][k] for k in range(self.n_kernels)]
 
         # ker_f = lambda x, a, w, b : (b * np.exp( - (x[..., None] - a)**2 / w)).sum(-1)
@@ -150,7 +150,7 @@ class KernelParameters():
                     #    for k, D in zip(range(self.n_kernels), Ds)]
 
         # The test
-        Ks = [ (D<len(self.kernels['B'][k])) * np.asarray(self.kernels['B'][k])[np.minimum(D.astype(int),len(self.kernels['B'][k])-1)] * self.ker_f(D%1, self.kernels['m'], self.kernels['s'], 1) for D,k in zip(Ds,range(self.n_kernels)) ]
+        Ks = [ (D<len(self.kernels['B'][k])) * np.asarray(self.kernels['B'][k])[np.minimum(D.astype(int),len(self.kernels['B'][k])-1)] * self.ker_f(D%1, 0.5, 0.15, 1) for D,k in zip(Ds,range(self.n_kernels)) ]
         
 
 
