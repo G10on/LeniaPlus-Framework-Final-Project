@@ -149,7 +149,7 @@ class System():
     def setData(self, data = None):
 
         print("START of data to set")
-        print(data)
+        # print(data)
         print("END  of data to set")
 
         if data == None:

@@ -334,7 +334,7 @@ class LeniaModel():
                               #   sigma = 0.8,
                               #   theta_A = 1.5,
                               g_func=jax.jit(lambda x, m, s: (
-                                  jnp.exp(-((x - m) / s)**2 / 2)) * 2 - 1)
+                                  jnp.exp(-((x - m) / s)**2 / 2)))
                               ):
 
         self.world = world
@@ -450,11 +450,31 @@ class LeniaModel():
 
             # fAs = [ jnp.fft.fft2(cA) for cA in A ]
             # print("SHAPE IN LENIA", A.shape)
+
+            def growth(U, m, s, A=None):
+                return self.g_func(U, m, s)*2-1
+            def target(U, m, s, A=None):
+                return self.g_func(U, m, s) - A
+            
+            funcs = [growth, growth, target]
+
+            def get_index(lst, num):
+                for i in range(len(lst)):
+                    for j in range(len(lst[i])):
+                        if lst[i][j] == num:
+                            return i
+                return -1
+
             fAs = [ jnp.fft.fft2(A[:,:,c]) for c in range(self.world.numChannels) ]
             # print(self.fK.shape)
             Us = [ np.real(jnp.fft.ifft2(fK * fAs[c0])) for fK, c0 in zip(self.fK, self.k_params.kernels["C"]) ]
             ''' calculate growth values for destination channels c1 '''
-            Gs = [ self.g_func(U, self.k_params.kernels['m'][k], self.k_params.kernels['s'][k]) for U, k in zip(Us, range(len(self.k_params.kernels['m']))) ]
+            # Gs = [ growth(U, self.k_params.kernels['m'][k], self.k_params.kernels['s'][k]) for U, k in zip(Us, range(len(self.k_params.kernels['m']))) ]
+
+            # print("--------------", self.k_params.kernels['T'][0])
+            Gs = [funcs[get_index(self.k_params.kernels['T'], k)](U, self.k_params.kernels['m'][k], self.k_params.kernels['s'][k], A[:,:,get_index(
+                self.k_params.kernels['T'], k)]) for U, k in zip(Us, range(self.k_params.n_kernels))]
+
             Hs = [sum(self.k_params.kernels['h'][k] * G for G, k in zip(Gs, range(len(self.k_params.kernels['m'])))
                       if k in self.k_params.kernels['T'][c1]) for c1 in range(A.shape[2])]
             ''' add growth values to channels '''

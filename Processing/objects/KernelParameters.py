@@ -57,8 +57,8 @@ class KernelParameters():
 
         rand_gen = np.random.RandomState(seed)
 
-        self.ker_f = jax.jit(lambda x, a, w, b: (
-            b * jnp.exp(- (x[..., None] - a)**2 / w)).sum(-1))
+        self.ker_f = lambda x, a, w, b: (
+            b * np.exp(- (x[..., None] - a)**2 / w)).sum(-1)
 
         if connection_matrix is None:
 
@@ -230,8 +230,7 @@ class LeniaKernelParameters():
 
         rand_gen = np.random.RandomState(seed)
 
-        self.ker_f = jax.jit(lambda x, a, w, b: (
-            b * jnp.exp(- (x[..., None] - a)**2 / w)).sum(-1))
+        self.ker_f = lambda x, m, s: np.exp(-((x-m)/s)**2 / 2)
 
         if connection_matrix is None:
 
@@ -325,7 +324,7 @@ class LeniaKernelParameters():
 
         # The test
         Ks = [(D < len(self.kernels['B'][k])) * np.asarray(self.kernels['B'][k])[np.minimum(D.astype(int),
-                                                                                            len(self.kernels['B'][k])-1)] * self.ker_f(D % 1, 0.5, 0.15, 1) for D, k in zip(Ds, range(self.n_kernels))]
+                                                                                            len(self.kernels['B'][k])-1)] * self.ker_f(D % 1, 0.5, 0.15) for D, k in zip(Ds, range(self.n_kernels))]
 
         # The correct
         # K = np.dstack(Ks)
@@ -335,7 +334,7 @@ class LeniaKernelParameters():
         # The test
         nKs = [K / np.sum(K) for K in Ks]
         fKs = [np.fft.fft2(np.fft.fftshift(K)) for K in nKs]
-        print(len(fKs), fKs[0].shape)
+        # print(len(fKs), fKs[0].shape)
         # fKs = np.asarray(fKs).transpose((1, 2, 0))
 
         return fKs
