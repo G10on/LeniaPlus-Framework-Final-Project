@@ -469,11 +469,10 @@ class LeniaModel():
             # print(self.fK.shape)
             Us = [ np.real(jnp.fft.ifft2(fK * fAs[c0])) for fK, c0 in zip(self.fK, self.k_params.kernels["C"]) ]
             ''' calculate growth values for destination channels c1 '''
-            # Gs = [ growth(U, self.k_params.kernels['m'][k], self.k_params.kernels['s'][k]) for U, k in zip(Us, range(len(self.k_params.kernels['m']))) ]
+            Gs = [ growth(U, self.k_params.kernels['m'][k], self.k_params.kernels['s'][k]) for U, k in zip(Us, range(len(self.k_params.kernels['m']))) ]
 
-            # print("--------------", self.k_params.kernels['T'][0])
-            Gs = [funcs[get_index(self.k_params.kernels['T'], k)](U, self.k_params.kernels['m'][k], self.k_params.kernels['s'][k], A[:,:,get_index(
-                self.k_params.kernels['T'], k)]) for U, k in zip(Us, range(self.k_params.n_kernels))]
+            # ASYMPTOTIC UPDATE
+            # Gs = [funcs[get_index(self.k_params.kernels['T'], k)](U, self.k_params.kernels['m'][k], self.k_params.kernels['s'][k], A[:,:,get_index(self.k_params.kernels['T'], k)]) for U, k in zip(Us, range(self.k_params.n_kernels))]
 
             Hs = [sum(self.k_params.kernels['h'][k] * G for G, k in zip(Gs, range(len(self.k_params.kernels['m'])))
                       if k in self.k_params.kernels['T'][c1]) for c1 in range(A.shape[2])]
