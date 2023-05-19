@@ -5,6 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="js/scripts.js"></script>
     <script type="text/javascript" src="./eel.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
 
@@ -67,175 +69,214 @@
 
       <span></span>
 
-      <div class="parameters window">
-        <div class="world-parameters">
-          <div class="parameter-title">
-            <label> WORLD PARAMETERS</label>
-          </div>
-          <div class="version world-param">
-            <label>Select version</label>
-            <select class="version-selector">
-              <option value="FlowLeniaModel">Flow Lenia</option>
-              <option value="LeniaModel">Original Lenia</option>
-            </select>
-          </div>
-          <div class="world-param">
-            <label class="size-lbl">Size (px)</label>
-            <input type="number" class="size" value="128" />
-            <br />
-          </div>
-          <div class="world-param">
-            <label class="num-channels-lbl">Nº of channels</label>
-            <input type="number" class="num-channels" value="3" />
-            <br />
-          </div>
-          <div class="world-param">
-            <label class="seed-lbl">Seed</label>
-            <input type="number" class="seed" value="101" />
-            <br />
-          </div>
-          <div class="world-param">
-            <label class="theta-lbl">Maximum mass concentration</label>
-            <input type="number" class="theta" value="3" />
-            <br />
-          </div>
-          <div class="world-param">
-            <label class="dd-lbl">Maximum flow distance (px)</label>
-            <input type="number" class="dd" value="10" />
-            <br />
-          </div>
-          <div class="world-param">
-            <label class="dt-lbl">Time unit size</label>
-            <input type="number" class="dt" value="0.3" />
-            <br />
-          </div>
+      <div class="control-panel window">
 
-          <div class="world-param">
-            <label class="sigma-lbl">Maximum flow mass (%)</label>
-            <input type="number" class="sigma" value="0.65" />
+        <div class="panel-selector">
+          <button id="parameters" class="panel-selector-btn">
+            Parameters
+          </button>
+          <button id="samples" class="panel-selector-btn">
+            Samples
+          </button>
+        </div>
+        
+        <div id="parameters-content" class="panel-section parameters">
+          <div class="world-parameters">
+            <div class="parameter-title">
+              <label> WORLD PARAMETERS</label>
+            </div>
+            <div class="version world-param">
+              <label>Select version</label>
+              <select class="version-selector">
+                <option value="FlowLeniaModel">Flow Lenia</option>
+                <option value="LeniaModel">Original Lenia</option>
+              </select>
+            </div>
+            <div class="world-param">
+              <label>Visible channels</label>
+              <select multiple class="channels-selector">
+              </select>
+            </div>
+            <div class="world-param">
+              <label class="size-lbl">Size (px)</label>
+              <input type="number" class="size" value="128" />
+              <br />
+            </div>
+            <div class="world-param">
+              <label class="num-channels-lbl">Nº of channels</label>
+              <input type="number" class="num-channels" value="3" />
+              <br />
+            </div>
+            <div class="world-param">
+              <label class="seed-lbl">Seed</label>
+              <input type="number" class="seed" value="101" />
+              <br />
+            </div>
+            <div class="world-param">
+              <label class="theta-lbl">Maximum mass concentration</label>
+              <input type="number" class="theta" value="3" />
+              <br />
+            </div>
+            <div class="world-param">
+              <label class="dd-lbl">Maximum flow distance (px)</label>
+              <input type="number" class="dd" value="10" />
+              <br />
+            </div>
+            <div class="world-param">
+              <label class="dt-lbl">Time unit size</label>
+              <input type="number" class="dt" value="0.3" />
+              <br />
+            </div>
+  
+            <div class="world-param">
+              <label class="sigma-lbl">Maximum flow mass (%)</label>
+              <input type="number" class="sigma" value="0.65" />
+            </div>
+          </div>
+  
+          <div class="kernel-parameters">
+            <div class="parameter-title">
+              <label>KERNEL PARAMETERS</label>
+            </div>
+  
+            <div class="kernel-configuration">
+              <table id="table-preview">
+                <tbody>
+                  <!-- <tr id="2">
+                    <td>
+                      <div class="inputContainer">
+                        <label>r</label><input type="number" name="r" />
+                      </div>
+                      <div class="inputContainer">
+                        <label>m</label><input type="number" name="m" />
+                      </div>
+                      <div class="inputContainer">
+                        <label>s</label><input type="number" name="s" />
+                      </div>
+                      <div class="inputContainer">
+                        <label>h</label><input type="number" name="h" />
+                      </div>
+                    </td>
+                    <td>
+                      <button type="button">Add B</button>
+                      <div class="inputContainer">
+                        <label>B</label><input type="number" name="B" /><button
+                          type="button"
+                        >
+                          Remove Input
+                        </button>
+                      </div>
+                      <div class="inputContainer">
+                        <label>B</label><input type="number" name="B" /><button
+                          type="button"
+                        >
+                          Remove Input
+                        </button>
+                      </div>
+                      <div class="inputContainer">
+                        <label>B</label><input type="number" name="B" /><button
+                          type="button"
+                        >
+                          Remove Input
+                        </button>
+                      </div>
+                    </td>
+                    <td>
+                      <button type="button">Add a</button>
+                      <div class="inputContainer">
+                        <label>a</label><input type="number" name="a" /><button
+                          type="button"
+                        >
+                          Remove Input
+                        </button>
+                      </div>
+                      <div class="inputContainer">
+                        <label>a</label><input type="number" name="a" /><button
+                          type="button"
+                        >
+                          Remove Input
+                        </button>
+                      </div>
+                      <div class="inputContainer">
+                        <label>a</label><input type="number" name="a" /><button
+                          type="button"
+                        >
+                          Remove Input
+                        </button>
+                      </div>
+                    </td>
+                    <td>
+                      <button type="button">Add w</button>
+                      <div class="inputContainer">
+                        <label>w</label><input type="number" name="w" /><button
+                          type="button"
+                        >
+                          Remove Input
+                        </button>
+                      </div>
+                      <div class="inputContainer">
+                        <label>w</label><input type="number" name="w" /><button
+                          type="button"
+                        >
+                          Remove Input
+                        </button>
+                      </div>
+                      <div class="inputContainer">
+                        <label>w</label><input type="number" name="w" /><button
+                          type="button"
+                        >
+                          Remove Input
+                        </button>
+                      </div>
+                    </td>
+                    <td>
+                      <button type="button">Add T</button>
+                      <div class="inputContainer">
+                        <label>T</label><input type="number" name="T" /><button
+                          type="button"
+                        >
+                          Remove Input
+                        </button>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="inputContainer">
+                        <label>C</label><input type="number" name="C" />
+                      </div>
+                      <button type="button">Delete Row</button>
+                    </td>
+                  </tr> -->
+                </tbody>
+              </table>
+  
+              <button class="add-kernel-btn" type="button" onclick="addRow()">
+                <span class="material-symbols-outlined"> add </span>
+              </button>
+            </div>
           </div>
         </div>
 
-        <div class="kernel-parameters">
+        <div id="samples-content" class="panel-section samples">
           <div class="parameter-title">
-            <label>KERNEL PARAMETERS</label>
+            <label>SAMPLES</label>
           </div>
 
-          <div class="kernel-configuration">
-            <table id="table-preview">
-              <tbody>
-                <tr id="2">
-                  <td>
-                    <div class="inputContainer">
-                      <label>r</label><input type="number" name="r" />
-                    </div>
-                    <div class="inputContainer">
-                      <label>m</label><input type="number" name="m" />
-                    </div>
-                    <div class="inputContainer">
-                      <label>s</label><input type="number" name="s" />
-                    </div>
-                    <div class="inputContainer">
-                      <label>h</label><input type="number" name="h" />
-                    </div>
-                  </td>
-                  <td>
-                    <button type="button">Add B</button>
-                    <div class="inputContainer">
-                      <label>B</label><input type="number" name="B" /><button
-                        type="button"
-                      >
-                        Remove Input
-                      </button>
-                    </div>
-                    <div class="inputContainer">
-                      <label>B</label><input type="number" name="B" /><button
-                        type="button"
-                      >
-                        Remove Input
-                      </button>
-                    </div>
-                    <div class="inputContainer">
-                      <label>B</label><input type="number" name="B" /><button
-                        type="button"
-                      >
-                        Remove Input
-                      </button>
-                    </div>
-                  </td>
-                  <td>
-                    <button type="button">Add a</button>
-                    <div class="inputContainer">
-                      <label>a</label><input type="number" name="a" /><button
-                        type="button"
-                      >
-                        Remove Input
-                      </button>
-                    </div>
-                    <div class="inputContainer">
-                      <label>a</label><input type="number" name="a" /><button
-                        type="button"
-                      >
-                        Remove Input
-                      </button>
-                    </div>
-                    <div class="inputContainer">
-                      <label>a</label><input type="number" name="a" /><button
-                        type="button"
-                      >
-                        Remove Input
-                      </button>
-                    </div>
-                  </td>
-                  <td>
-                    <button type="button">Add w</button>
-                    <div class="inputContainer">
-                      <label>w</label><input type="number" name="w" /><button
-                        type="button"
-                      >
-                        Remove Input
-                      </button>
-                    </div>
-                    <div class="inputContainer">
-                      <label>w</label><input type="number" name="w" /><button
-                        type="button"
-                      >
-                        Remove Input
-                      </button>
-                    </div>
-                    <div class="inputContainer">
-                      <label>w</label><input type="number" name="w" /><button
-                        type="button"
-                      >
-                        Remove Input
-                      </button>
-                    </div>
-                  </td>
-                  <td>
-                    <button type="button">Add T</button>
-                    <div class="inputContainer">
-                      <label>T</label><input type="number" name="T" /><button
-                        type="button"
-                      >
-                        Remove Input
-                      </button>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="inputContainer">
-                      <label>C</label><input type="number" name="C" />
-                    </div>
-                    <button type="button">Delete Row</button>
-                  </td>
-                </tr>
-              </tbody>
+          <div id="sample-list">
+            <table id="table-samples">
+              <!-- <thead>
+                <tr>
+                  <th>RMSH</th>
+                  <th>b</th>
+                  <th>a</th>
+                  <th>w</th>
+                  <th>Target Channels</th>
+                </tr> -->
+              </thead>
+              <tbody></tbody>
             </table>
-
-            <button class="add-kernel-btn" type="button" onclick="addRow()">
-              <span class="material-symbols-outlined"> add </span>
-            </button>
           </div>
         </div>
+
       </div>
     </div>
 

@@ -455,6 +455,8 @@ class LeniaModel():
                 return self.g_func(U, m, s)*2-1
             def target(U, m, s, A=None):
                 return self.g_func(U, m, s) - A
+            def soft_clip(x, vmin, vmax):
+                return 1 / (1 + jnp.exp(-4 * (x - 0.5)))
             
             funcs = [growth, growth, target]
 
@@ -479,6 +481,10 @@ class LeniaModel():
             ''' add growth values to channels '''
             #A = np.clip(A + 1/T * np.mean(np.asarray(Gs),axis=0), 0, 1)
             As = [ jnp.clip(A[:,:,cA] + 1/self.world.dt * H, 0, 1) for cA,H in zip(range(A.shape[2]),Hs) ]
+            # As = [ soft_clip(A[:,:,cA] + 1/self.world.dt * H, 0, 1) for cA,H in zip(range(A.shape[2]),Hs) ]
+            ''' rearrange RGB channels for better looking '''
+            # As = [ As[1], As[2], As[0] ]
+            
             nA = jnp.dstack(As)
             return nA
 

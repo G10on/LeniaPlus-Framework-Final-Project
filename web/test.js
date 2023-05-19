@@ -16,6 +16,7 @@ var Baw = ['B', 'a', 'w', 'T'];
 var rowCount = 0;
 var tablePreview = document.getElementById("table-preview");
 var tableKernel = document.getElementById("table-kernel");
+var tableSamples = document.getElementById("table-samples");
 
 function addRow() {
     // rowCount++;
@@ -317,7 +318,9 @@ async function play() {
     }
 }
 
-const playBtn = document.querySelector(".play-btn"),
+const panelSelectorBtn = document.querySelectorAll('.panel-selector-btn'),
+channelSelector = document.querySelector('.channels-selector'),
+playBtn = document.querySelector(".play-btn"),
 nextStepBtn = document.querySelector(".next-step-btn"),
 restartBtn = document.querySelector(".restart-btn"),
 generateFromSeedBtn = document.querySelector(".generate-btn"),
@@ -360,6 +363,7 @@ function getKernelParamsFromWeb() {
 
 async function getParamsFromPython() {
 
+    is_playing = false;
     versionLoadingTxt.innerText = "Compiling...";
     tablePreview.innerHTML = "";
     tableKernel.innerHTML = "";
@@ -419,11 +423,12 @@ async function getParamsFromPython() {
     versionLoadingTxt.innerText = "";
 }
 
-async function setParamsInPython() {
+async function setParamsInPython(sampleName = null) {
 
     versionLoadingTxt.innerText = "Compiling...";
 
     let data = {};
+
     
     data["version"] = document.querySelector(".version-selector").value;
     data["size"] = parseInt(document.querySelector(".size").value);
@@ -493,7 +498,13 @@ async function setParamsInPython() {
     }
 
     
-    await eel.setParameters(data)();
+    
+    if (sampleName != null) {
+        await eel.setSample(sampleName, data)();
+    } else {
+        await eel.setParameters(data)();
+    }
+    
     await updateWorldDisplay();
     getParamsFromPython();
     versionLoadingTxt.innerText = "";
@@ -502,6 +513,7 @@ async function setParamsInPython() {
 // TODO: REDUCE DUPLICATE CODE FROM SETPARAMSINPYTHON FUNCTION
 async function generateKernelParamsInPython() {
 
+    is_playing = false;
     versionLoadingTxt.innerText = "Compiling...";
 
     let data = {};
@@ -580,6 +592,27 @@ async function compile_version(version) {
 
 // versionMenu.addEventListener("change", compile)
 
+
+
+function panelChanger(event) {
+    let divs = document.querySelectorAll('.panel-section');
+    divs.forEach(div => {
+        if (div.id === event.target.id + '-content') {
+            div.style.display = 'flex';
+        } else {
+            div.style.display = 'none';
+        }
+    });
+}
+
+
+
+panelSelectorBtn.forEach(button => {
+  button.addEventListener('click', panelChanger);
+});
+
+
+
 playBtn.addEventListener("click", () => {
 
     is_playing = !is_playing;
@@ -647,11 +680,75 @@ loadStateBtn.addEventListener("click", async () => {
 
 
 
+function addSample (sampleName) {
+
+    var sampleList = document.getElementById("sample-list");
+    
+    // create a new div element for each image
+    var sampleContainer = document.createElement('div');
+    sampleContainer.className = 'sample-container'; // assign a class to style with CSS
+    document.body.appendChild(sampleContainer); // add the div to the body of the HTML document
+
+    // add an img element inside the div
+    var sampleImg = document.createElement('img');
+    sampleImg.className = 'sample-img'; // assign a class to style with CSS
+    sampleImg.setAttribute('data-src', sampleName);
+    sampleImg.src = "./images/" + sampleName + ".png"; // set the src attribute to the current image source
+    sampleContainer.appendChild(sampleImg); // add the img to the div
+
+    // add a label inside the div
+    var sampleLbl = document.createElement('label');
+    sampleLbl.className = 'sample-lbl'; // assign a class to style with CSS
+    sampleLbl.innerHTML = sampleName; // set the label text
+    sampleContainer.appendChild(sampleLbl); // add the label to the div
+
+    sampleContainer.addEventListener('click', function() {
+        let imageSource = this.querySelector('.sample-img').getAttribute('data-src');
+        setParamsInPython(imageSource);
+    });
+
+    sampleList.appendChild(sampleContainer);
+
+}
 
 
 
+async function loadSamples () {
+
+    let sampleNames = await eel.getSampleNames()();
+    console.log(sampleNames);
+    for (var i = 0; i < sampleNames.length; i++) {
+        
+        addSample(sampleNames[i]);
+        
+    }
+}
+    
+
+loadSamples();
 
 
+
+function setChannelSelector () {
+    
+    let options = ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5'];
+    options.forEach((option, index) => {
+        const optionElement = document.createElement('option');
+        optionElement.textContent = option;
+        optionElement.value = index;
+        channelSelector.appendChild(optionElement);
+    });
+
+}
+
+$('.channels-selector').on('change', function() {
+  if ($('select option:selected').length > 3) {
+    $(this).find('option:selected').removeAttr('selected');
+    console.log("No way")
+  }
+});
+
+setChannelSelector();
 
 
 

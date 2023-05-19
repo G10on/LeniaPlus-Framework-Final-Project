@@ -117,7 +117,7 @@ class KernelParameters():
         midX = SX >> 1
         midY = SY >> 1
 
-        r = self.kernels['r'] * (self.kernels['R'] + 15)
+        r = self.kernels['r'] * (self.kernels['R'])
         D = np.linalg.norm(np.mgrid[-midX: midX, -midY: midY], axis=0)
         Ds = [D / r[k] for k in range(self.n_kernels)]
 
