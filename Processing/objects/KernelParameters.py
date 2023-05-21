@@ -119,10 +119,10 @@ class KernelParameters():
 
         r = self.kernels['r'] * (self.kernels['R'])
         D = np.linalg.norm(np.mgrid[-midX: midX, -midY: midY], axis=0)
-        Ds = [D / r[k] for k in range(self.n_kernels)]
+        # Ds = [D / r[k] for k in range(self.n_kernels)]
 
-        # Ds = [ np.linalg.norm(np.mgrid[-midX:midX, -midY:midY], axis=0) /
-        # ((self.kernels['R']+15) * self.kernels['r'][k]) for k in range(self.n_kernels) ]
+        Ds = [ np.linalg.norm(np.mgrid[-midX:midX, -midY:midY], axis=0) /
+        ((self.kernels['R']+15) * self.kernels['r'][k]) for k in range(self.n_kernels) ]
 
         def sigmoid(x):
             return 0.5 * (np.tanh(x / 2) + 1)

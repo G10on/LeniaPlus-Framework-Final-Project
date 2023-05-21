@@ -80,6 +80,8 @@ class World():
 
         if self.A is None:
             self.generateWorld()
+        
+        self.A_initial = self.A
 
         # self.dA = self.compute_gradient(self.A)
         # self.fA = self.compute_fftA(self.A)

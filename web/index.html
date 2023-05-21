@@ -48,6 +48,11 @@
         <button class="generate-btn">
           <span class="material-symbols-outlined"> casino </span>
         </button>
+        <div class="step-n-container">
+          <label class="seed-lbl">Seed</label>
+          <input type="number" class="seed" value="101" />
+          <br />
+        </div>
         <button class="save-state-btn">
           <span class="material-symbols-outlined"> download </span>
         </button>
@@ -105,11 +110,6 @@
             <div class="world-param">
               <label class="num-channels-lbl">Nº of channels</label>
               <input type="number" class="num-channels" value="3" />
-              <br />
-            </div>
-            <div class="world-param">
-              <label class="seed-lbl">Seed</label>
-              <input type="number" class="seed" value="101" />
               <br />
             </div>
             <div class="world-param">
@@ -249,7 +249,7 @@
                 </tbody>
               </table>
   
-              <button class="add-kernel-btn" type="button" onclick="addRow()">
+              <button class="add-kernel-btn" type="button" onclick="addKernel()">
                 <span class="material-symbols-outlined"> add </span>
               </button>
             </div>
@@ -262,18 +262,7 @@
           </div>
 
           <div id="sample-list">
-            <table id="table-samples">
-              <!-- <thead>
-                <tr>
-                  <th>RMSH</th>
-                  <th>b</th>
-                  <th>a</th>
-                  <th>w</th>
-                  <th>Target Channels</th>
-                </tr> -->
-              </thead>
-              <tbody></tbody>
-            </table>
+            
           </div>
         </div>
 

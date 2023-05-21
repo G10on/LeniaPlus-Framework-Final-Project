@@ -1,24 +1,42 @@
-const canvas = document.getElementById("map");
-const ctx = canvas.getContext("2d");
-const new_width = 800;
-const new_height = 800;
+
+
+const canvas = document.getElementById("map"),
+ctx = canvas.getContext("2d"),
+new_width = 800,
+new_height = 800,
+overlay = document.querySelector('#overlay'),
+stream = canvas.captureStream(),
+chunks = [],
+panelSelectorBtns = document.querySelectorAll('.panel-selector-btn'),
+channelSelector = document.querySelector('.channels-selector'),
+playBtn = document.querySelector(".play-btn"),
+nextStepBtn = document.querySelector(".next-step-btn"),
+restartBtn = document.querySelector(".restart-btn"),
+generateFromSeedBtn = document.querySelector(".generate-btn"),
+saveVideoBtn = document.querySelector(".save-video-btn"),
+saveStateBtn = document.querySelector(".save-state-btn"),
+loadStateBtn = document.querySelector(".load-state-btn"),
+versionMenu = document.querySelector(".version-selector"),
+versionLoadingTxt = document.querySelector(".version-loading-txt"),
+stepNTxt = document.querySelector("#step-n-txt"),
+mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+
+
+var rmsh = ['C', 'r', 'm', 's', 'h'],
+Baw = ['B', 'a', 'w', 'T'],
+is_playing = false,
+rowCount = 0,
+tablePreview = document.getElementById("table-preview"),
+tableKernel = document.getElementById("table-kernel"),
+tableSamples = document.getElementById("table-samples");
+
+
 canvas.width = new_width;
 canvas.height = new_height;
+stepNTxt.textContent = 0;
 
 
-const overlay = document.querySelector('#overlay');
-const stream = canvas.captureStream();
-const chunks = [];
-
-var rmsh = ['C', 'r', 'm', 's', 'h'];
-var Baw = ['B', 'a', 'w', 'T'];
-
-var rowCount = 0;
-var tablePreview = document.getElementById("table-preview");
-var tableKernel = document.getElementById("table-kernel");
-var tableSamples = document.getElementById("table-samples");
-
-function addRow() {
+function addKernel() {
     // rowCount++;
     row_preview = tablePreview.insertRow();
     row_kernel = tableKernel.insertRow();
@@ -53,10 +71,10 @@ function addRow() {
 
 
 
-    myAddInputInThisRow(row_preview, 0, rmsh[0], 0, false);
+    addInputToKernel(row_preview, 0, rmsh[0], 0, false);
     
     for (var i = 1; i < rmsh.length; i++) {
-        myAddInputInThisRow(row_kernel, 0, rmsh[i], 0.2, false, innerDiv = true);
+        addInputToKernel(row_kernel, 0, rmsh[i], 0.2, false, innerDiv = true);
         // let inputContainer = document.createElement("div");
         // inputContainer.className = "inputContainer";
         // rmshParamsCell.appendChild(inputContainer);
@@ -102,7 +120,7 @@ function addRow() {
     deleteRowButton.type = "button";
     deleteRowButton.textContent = "Delete Kernel";
     deleteRowButton.onclick = function() { 
-        deleteRow(this);
+        deleteKernel(this);
      };
     deleteRowCell.appendChild(deleteRowButton);
 
@@ -117,14 +135,14 @@ function addRow() {
     return [row_preview, row_kernel];
 }
 
-function deleteRow(btn) {
+function deleteKernel(btn) {
     let row_preview = btn.parentNode.parentNode;
     let id = row_preview.rowIndex;
     row_preview.parentNode.removeChild(row_preview);
     tableKernel.deleteRow(id);
 }
 
-function myAddInputInThisRow(row, cell_n, p, value, removable = true, innerDiv = false) {
+function addInputToKernel(row, cell_n, p, value, removable = true, innerDiv = false) {
 
     var inputList;
     if (innerDiv) {
@@ -163,25 +181,7 @@ function myAddInputInThisRow(row, cell_n, p, value, removable = true, innerDiv =
 
 function addInput(btn, cell_n, p, value, innerDiv) {
   var row = btn.parentNode.parentNode;
-  myAddInputInThisRow(row, cell_n, '', value, true, innerDiv);
-}
-
-function addInputInThisRow(row) {
-  var inputContainer = document.createElement("div");
-  inputContainer.className = "inputContainer";
-  row.cells[0].appendChild(inputContainer);
-  var inputCount = row.cells[0].getElementsByClassName("inputContainer").length;
-  var newInput = document.createElement("input");
-  newInput.type = "number";
-//   newInput.name = "input" + rowCount + "_" + inputCount;
-  newInput.value = 0.2;
-  inputContainer.appendChild(newInput);
-  var removeButton = document.createElement("button");
-  removeButton.type = "button";
-  removeButton.innerHTML = "Remove Input";
-  removeButton.onclick = function() { removeInput(this); };
-  inputContainer.appendChild(removeButton);
-  return newInput;
+  addInputToKernel(row, cell_n, '', value, true, innerDiv);
 }
 
 function removeInput(btn) {
@@ -194,9 +194,6 @@ function removeInput(btn) {
 //     inputs[i].name = "input" + rowCount + "_" + (i+1);
 //   }
 }
-
-
-
 
 
 function displayKernelWindow(btn) {
@@ -217,54 +214,6 @@ function displayKernelWindow(btn) {
 }
 
 
-
-
-
-
-function submitForm() {
-    var rows = tablePreview.getElementsByTagName("tr");
-
-    var rInputs = [];
-    var mInputs = [];
-    var sInputs = [];
-    var hInputs = [];
-    var BInputs = [];
-    var aInputs = [];
-    var wInputs = [];
-
-    var rowData = [];
-
-    for (var i = 0; i < rows.length; i++) {
-      var inputs = rows[i].getElementsByTagName("input");
-      if (inputs[0]) rInputs.push(inputs[0].value);
-      if (inputs[1]) mInputs.push(inputs[1].value);
-      if (inputs[2]) sInputs.push(inputs[2].value);
-      if (inputs[3]) hInputs.push(inputs[3].value);
-
-      var rowValues = [];
-      for (var j = 4; j < inputs.length; j++) {
-        rowValues.push(inputs[j].value);
-      }
-      rowData.push(rowValues);
-
-    }
-
-    params = {'r': rInputs, 'm': mInputs, 's': sInputs, 'h': hInputs, "B": rowData};
-    return params;
-}
-
-
-
-const mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
-mediaRecorder.ondataavailable = function(e) {
-  chunks.push(e.data);
-};
-mediaRecorder.onstop = function() {
-  const blob = new Blob(chunks, { type: "video/webm" });
-  const url = URL.createObjectURL(blob);
-  downloadFile(url, "myVideo.webm");
-};
-
 function downloadFile(url, filename) {
     const link = document.createElement("a");
     link.href = url;
@@ -272,7 +221,6 @@ function downloadFile(url, filename) {
     link.click();
 }
 
-// var sz = 128;
 
 async function updateWorldDisplay() {
     
@@ -303,7 +251,13 @@ async function updateWorldDisplay() {
 
 }
 
-var is_playing = false;
+
+function resetPlayer() {
+    is_playing = false;
+    stepNTxt.textContent = 0;
+    playBtn.innerHTML = "&#9658";
+    playBtn.style.background = "#4CAF50";
+}
 
 
 async function step() {
@@ -318,52 +272,10 @@ async function play() {
     }
 }
 
-const panelSelectorBtn = document.querySelectorAll('.panel-selector-btn'),
-channelSelector = document.querySelector('.channels-selector'),
-playBtn = document.querySelector(".play-btn"),
-nextStepBtn = document.querySelector(".next-step-btn"),
-restartBtn = document.querySelector(".restart-btn"),
-generateFromSeedBtn = document.querySelector(".generate-btn"),
-saveVideoBtn = document.querySelector(".save-video-btn"),
-saveStateBtn = document.querySelector(".save-state-btn"),
-loadStateBtn = document.querySelector(".load-state-btn"),
-versionMenu = document.querySelector(".version-selector"),
-versionLoadingTxt = document.querySelector(".version-loading-txt"),
-stepNTxt = document.querySelector("#step-n-txt");
-
-stepNTxt.textContent = 0;
-
-var versionSelected;
-
-eel.expose(getKernelParamsFromWeb);
-function getKernelParamsFromWeb() {
-    
-    let size = parseInt(document.querySelector(".size").value),
-    numChannels = parseInt(document.querySelector(".num-channels").value),
-    seed = parseInt(document.querySelector(".seed").value),
-    theta = parseFloat(document.querySelector(".theta").value),
-    dd = parseFloat(document.querySelector(".dd").value),
-    dt = parseFloat(document.querySelector(".dt").value),
-    sigma = parseFloat(document.querySelector(".sigma").value);
-    kermel_params = submitForm();
-    
-    return {
-        size: size,
-        numChannels: numChannels,
-        seed: seed,
-        theta: theta,
-        dd: dd,
-        dt: dt,
-        sigma: sigma,
-        kernel_params: kermel_params
-    }
-}
-
-
 
 async function getParamsFromPython() {
 
-    is_playing = false;
+    resetPlayer();
     versionLoadingTxt.innerText = "Compiling...";
     tablePreview.innerHTML = "";
     tableKernel.innerHTML = "";
@@ -383,7 +295,7 @@ async function getParamsFromPython() {
 
     for (var i = 0; i < data["r"].length; i++) {
         
-        let [row_preview, row_kernel] = addRow();
+        let [row_preview, row_kernel] = addKernel();
         rmsh.slice(1).forEach(k =>{
             
             // let inputs = row.cells[0].getElementsByTagName("input");
@@ -399,7 +311,7 @@ async function getParamsFromPython() {
             for (var j = 0; j < data[Baw[k]][i].length; j++) {
                 
                 // let input = row.cells[0].querySelector("input[name='" + j + "']");
-                let input = myAddInputInThisRow(row_kernel, k + 1, '', data[Baw[k]][i][j], true, innerDiv = true);
+                let input = addInputToKernel(row_kernel, k + 1, '', data[Baw[k]][i][j], true, innerDiv = true);
                 // input.value = data[Baw[k]][i][j];
                 
             }
@@ -414,7 +326,7 @@ async function getParamsFromPython() {
 
         for (var j = 0; j < data['T'][c].length; j++) {
 
-            input = myAddInputInThisRow(rows[data['T'][c][j]], Baw.length, '', c, true, innerDiv = true);
+            input = addInputToKernel(rows[data['T'][c][j]], Baw.length, '', c, true, innerDiv = true);
             // input.value = c;
         }
     }
@@ -422,6 +334,7 @@ async function getParamsFromPython() {
     await updateWorldDisplay();
     versionLoadingTxt.innerText = "";
 }
+
 
 async function setParamsInPython(sampleName = null) {
 
@@ -505,8 +418,8 @@ async function setParamsInPython(sampleName = null) {
         await eel.setParameters(data)();
     }
     
+    await getParamsFromPython();
     await updateWorldDisplay();
-    getParamsFromPython();
     versionLoadingTxt.innerText = "";
 }
 
@@ -574,24 +487,9 @@ async function generateKernelParamsInPython() {
     
     await eel.generateKernel(data)();
     await updateWorldDisplay();
-    getParamsFromPython();
+    await getParamsFromPython();
     versionLoadingTxt.innerText = "";
 }
-
-function compile() {
-    versionSelected = versionMenu.value;
-    compile_version(versionSelected);
-}
-
-async function compile_version(version) {
-    versionLoadingTxt.innerText = "Compiling...";
-    await eel.compile_version(version)();
-    await updateWorldDisplay();
-    versionLoadingTxt.innerText = "";
-}
-
-// versionMenu.addEventListener("change", compile)
-
 
 
 function panelChanger(event) {
@@ -603,15 +501,88 @@ function panelChanger(event) {
             div.style.display = 'none';
         }
     });
+
+    // Use SWITCH!!!
+    if (event.target.id === "samples") {
+        loadSamples();
+    }
+}
+
+
+function addSample (sampleName) {
+    
+    // create a new div element for each image
+    var sampleContainer = document.createElement('div');
+    sampleContainer.className = 'sample-container'; // assign a class to style with CSS
+    document.body.appendChild(sampleContainer); // add the div to the body of the HTML document
+
+    // add an img element inside the div
+    var sampleImg = document.createElement('img');
+    sampleImg.className = 'sample-img'; // assign a class to style with CSS
+    sampleImg.setAttribute('data-src', sampleName);
+    sampleImg.src = "./images/" + sampleName + ".png"; // set the src attribute to the current image source
+    sampleContainer.appendChild(sampleImg); // add the img to the div
+
+    // add a label inside the div
+    var sampleLbl = document.createElement('label');
+    sampleLbl.className = 'sample-lbl'; // assign a class to style with CSS
+    sampleLbl.innerHTML = sampleName; // set the label text
+    sampleContainer.appendChild(sampleLbl); // add the label to the div
+
+    sampleContainer.addEventListener('click', function() {
+        let imageSource = this.querySelector('.sample-img').getAttribute('data-src');
+        setParamsInPython(imageSource);
+    });
+
+    return sampleContainer;
+    
 }
 
 
 
-panelSelectorBtn.forEach(button => {
-  button.addEventListener('click', panelChanger);
+async function loadSamples () {
+    
+    var sampleList = document.getElementById("sample-list");
+    sampleList.innerHTML = "";
+    
+    let sampleNames = await eel.getSampleNames()();
+    
+    for (var i = 0; i < sampleNames.length; i++) {
+        
+        let sampleContainer = addSample(sampleNames[i]);
+        sampleList.appendChild(sampleContainer);
+        
+    }
+}
+    
+
+function setChannelSelector () {
+    
+    let options = ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5'];
+    options.forEach((option, index) => {
+        const optionElement = document.createElement('option');
+        optionElement.textContent = option;
+        optionElement.value = index;
+        channelSelector.appendChild(optionElement);
+    });
+
+}
+
+$('.channels-selector').on('change', function() {
+  if ($('select option:selected').length > 3) {
+    $(this).find('option:selected').removeAttr('selected');
+    console.log("No way")
+  }
 });
 
 
+
+
+
+
+panelSelectorBtns.forEach(button => {
+  button.addEventListener('click', panelChanger);
+});
 
 playBtn.addEventListener("click", () => {
 
@@ -639,21 +610,16 @@ nextStepBtn.addEventListener("click", async () => {
 
 
 restartBtn.addEventListener("click", () => {
-    is_playing = false;
-    playBtn.innerHTML = "&#9658";
-    playBtn.style.background = "#4CAF50";
+    
+    
     setParamsInPython();
-    stepNTxt.textContent = 0;
     // getKernelParamsFromWeb();
 })
 
 
 generateFromSeedBtn.addEventListener("click", () => {
-    is_playing = false;
-    playBtn.innerHTML = "&#9658";
-    playBtn.style.background = "#4CAF50";
+    
     generateKernelParamsInPython();
-    stepNTxt.textContent = 0;
     // getKernelParamsFromWeb();
 })
 
@@ -673,82 +639,22 @@ saveStateBtn.addEventListener("click", () => {
 })
 
 loadStateBtn.addEventListener("click", async () => {
+    
     await eel.loadParameterState()();
     getParamsFromPython();
     await updateWorldDisplay();
 })
 
+mediaRecorder.ondataavailable = function(e) {
+  chunks.push(e.data);
+};
 
+mediaRecorder.onstop = function() {
+  const blob = new Blob(chunks, { type: "video/webm" });
+  const url = URL.createObjectURL(blob);
+  downloadFile(url, "myVideo.webm");
+};
 
-function addSample (sampleName) {
-
-    var sampleList = document.getElementById("sample-list");
-    
-    // create a new div element for each image
-    var sampleContainer = document.createElement('div');
-    sampleContainer.className = 'sample-container'; // assign a class to style with CSS
-    document.body.appendChild(sampleContainer); // add the div to the body of the HTML document
-
-    // add an img element inside the div
-    var sampleImg = document.createElement('img');
-    sampleImg.className = 'sample-img'; // assign a class to style with CSS
-    sampleImg.setAttribute('data-src', sampleName);
-    sampleImg.src = "./images/" + sampleName + ".png"; // set the src attribute to the current image source
-    sampleContainer.appendChild(sampleImg); // add the img to the div
-
-    // add a label inside the div
-    var sampleLbl = document.createElement('label');
-    sampleLbl.className = 'sample-lbl'; // assign a class to style with CSS
-    sampleLbl.innerHTML = sampleName; // set the label text
-    sampleContainer.appendChild(sampleLbl); // add the label to the div
-
-    sampleContainer.addEventListener('click', function() {
-        let imageSource = this.querySelector('.sample-img').getAttribute('data-src');
-        setParamsInPython(imageSource);
-    });
-
-    sampleList.appendChild(sampleContainer);
-
-}
-
-
-
-async function loadSamples () {
-
-    let sampleNames = await eel.getSampleNames()();
-    console.log(sampleNames);
-    for (var i = 0; i < sampleNames.length; i++) {
-        
-        addSample(sampleNames[i]);
-        
-    }
-}
-    
-
-loadSamples();
-
-
-
-function setChannelSelector () {
-    
-    let options = ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5'];
-    options.forEach((option, index) => {
-        const optionElement = document.createElement('option');
-        optionElement.textContent = option;
-        optionElement.value = index;
-        channelSelector.appendChild(optionElement);
-    });
-
-}
-
-$('.channels-selector').on('change', function() {
-  if ($('select option:selected').length > 3) {
-    $(this).find('option:selected').removeAttr('selected');
-    console.log("No way")
-  }
-});
-
-setChannelSelector();
 
 
 
@@ -757,15 +663,10 @@ setChannelSelector();
 
 
 
-// for (var i = 0; i < 9; i++) {
-//     addRow();
-// }
-// $(document).ready(async function() {
-//     await getParamsFromPython();
-//     await setParamsInPython();
-// });
+setChannelSelector();
+
 getParamsFromPython();
-// setParamsInPython();
+
 
 
 

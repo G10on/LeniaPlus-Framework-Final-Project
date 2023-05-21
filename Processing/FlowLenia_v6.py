@@ -127,33 +127,26 @@ pattern["emitter"] = {"name":"Smooth glider gun", "version" : "LeniaModel", "R":
 
 
 
-# JITCLASS?
+
 class System():
     
     # Initialization of values of world and kernel parameters
     def __init__(self,
-                world:World = None,
+                # world:World = None,
                 # k_params = None,
-                version = None,
+                # version = None,
                 ) -> None:
         
-        self.set_world_and_kParams(world, 
-                                # k_params,
-                                version,
+        self.set_world_and_kParams(
         )
     
 
     # Set world and/or kernel parameters
     def set_world_and_kParams(self,
-                            world:World = None,
-                            version = None,
+                            # world:World = None,
+                            # version = None,
     ) -> None:
         
-        
-        # self.world = world
-
-        # data = {"world": None, 
-        #         "version": version}
         self.setData()
         self.compile()
         return
@@ -199,6 +192,18 @@ class System():
 
         return self.model.step()
     
+    def getCurrentWorld(self):
+        return self.world.A
+    
+    def setInitialWorld(self, A):
+        self.world.A = A
+    
+    def getInitialWorld(self):
+        return self.world.A_initial
+    
+    def setInitialWorld(self, A):
+        self.world.A_initial = A
+
     def getData(self):
 
         data = {}
@@ -224,11 +229,7 @@ class System():
 
         return data
 
-    def setData(self, data = None):
-
-        print("START of data to set")
-        # print(data)
-        print("END  of data to set")
+    def setData(self, data = None, from_seed = True):
 
         if data == None:
 
@@ -239,9 +240,7 @@ class System():
             self.version = "FlowLeniaModel"
             Model = getattr(Models, self.version)
             self.model = Model(
-                world = self.world,
-                # params = params,
-                # m_params = self.m_params
+                world = self.world
             )
             self.k_params = self.model.getKParams()
             # self.system.compile()
@@ -252,79 +251,24 @@ class System():
 
 
         self.version = data["version"]
-        # self.world = data["world"]
 
-        # if data["world"] is None:
-        #     self.world = World.World()
-        
-        # if self.k_params is None:
-        #     self.k_params = KernelParameters.KernelParameters()
-
-        # Model = getattr(Models, self.version)
-        # self.model = Model(
-        #     world = self.world,
-        #     # params = params,
-        #     # m_params = self.m_params
-        # )
-        # self.k_params = self.model.getKParams()
-
-        # world = self.world
-        # k_params = self.k_params
+        # if (not from_seed):
+        #     data["world"] = self.world.A_initial
 
 
         # Pass through method for kernel params!!!
 
-        self.world.new_world(data, 
-                        # seed = data["seed"], 
-                        # size = data["size"], 
-                        # numChannels = data["numChannels"], 
-                        # theta = data["theta"], 
-                        # dd = data["dd"], 
-                        # dt = data["dt"], 
-                        # sigma = data["sigma"]
-                        )
+        self.world.new_world(data)
 
-        # max_rings = 0
-        # for k in 'Baw':
-        #     temp = max(len(sublist) for sublist in data[k])
-        #     if temp > max_rings:
-        #         max_rings = temp
-            
-        # for k in 'Baw':
-        #     for B in data[k]:
-        #         temp = [0] * (max_rings - len(B))
-        #         B.extend(temp)
-        
-        # for k in 'rmshBaw':
-        #     k_params.kernels[k] = np.array(data[k], dtype=np.float64)
-        
-        # for k in 'C':
-        #     k_params.kernels[k] = np.array(data[k], dtype=np.int64)
 
-        # k_params.kernels['T'] = data['T']
-        # k_params.kernels['R'] = 13
-        
-        # k_params.n_kernels = len(k_params.kernels['r'])
 
         Model = getattr(Models, self.version)
         self.model = Model(
             world = self.world,
-            # params = params,
-            # m_params = self.m_params
         )
         self.k_params = self.model.getKParams()
 
-        self.k_params.new_params(data, 
-                            # data['m'],
-                            # data['s'],
-                            # data['h'],
-                            # data['B'],
-                            # data['a'],
-                            # data['w'],
-                            # data['C'],
-                            # data['T'],
-                            # data['R']
-                            )
+        self.k_params.new_params(data)
         # self.k_params.compile_kernels(self.world.sX, self.world.sY)
         # self.system.compile()
 
@@ -332,8 +276,7 @@ class System():
 
 
 
-# world = World()
-# kernel_params = KernelParameters()
+
 system = System()
 
 eel.init("web")
@@ -352,7 +295,10 @@ def setParameters(data):
 
     global system
 
-    system.setData(data)
+    data["world"] = system.getInitialWorld()
+
+    system.setData(data, 
+                   from_seed = False)
     system.compile()
 
 # REDUCE DUPLICATE CODE FROM SETPARAMETERS FUNCTION!!!
@@ -451,7 +397,7 @@ def sample(name, new_data):
 def saveParameterState():
 
     data = getParameters()
-    # data["world"] = system.world.A
+    data["world"] = system.getCurrentWorld()
     
     # data = sample(data)
 
@@ -468,6 +414,7 @@ def loadParameterState():
     with open('LeniaParameters.pkl', 'rb') as f:
         data = pickle.load(f)
     
+    system.setInitialWorld(data["world"])
     setParameters(data)
     # system.world.A = data["world"]
 
@@ -484,6 +431,7 @@ def getSampleNames():
 @eel.expose
 def setSample(name, new_data):
     data = sample(name, new_data)
+    system.setInitialWorld(data["world"])
     setParameters(data)
 
 
