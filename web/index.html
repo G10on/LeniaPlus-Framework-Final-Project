@@ -54,9 +54,12 @@
           <br />
         </div>
         <button class="save-state-btn">
+          <span class="material-symbols-outlined"> save </span>
+        </button>
+        <button class="export-btn">
           <span class="material-symbols-outlined"> download </span>
         </button>
-        <button class="load-state-btn">
+        <button class="import-btn">
           <span class="material-symbols-outlined"> upload </span>
         </button>
         <!-- <label class="n-save-lbl">Video duration (seconds)</label> -->
@@ -78,10 +81,22 @@
 
         <div class="panel-selector">
           <button id="parameters" class="panel-selector-btn">
+            <span class="material-symbols-outlined">
+              tune
+            </span>
             Parameters
           </button>
           <button id="samples" class="panel-selector-btn">
+            <span class="material-symbols-outlined">
+              pest_control
+            </span>
             Samples
+          </button>
+          <button id="analysis" class="panel-selector-btn">
+            <span class="material-symbols-outlined">
+              monitoring
+            </span>
+            Analysis
           </button>
         </div>
         
@@ -99,8 +114,17 @@
             </div>
             <div class="world-param">
               <label>Visible channels</label>
-              <select multiple class="channels-selector">
-              </select>
+              <form>
+                <div class="multiselect">
+                  <div class="selectBox" onclick="showCheckboxes()">
+                    <select class="channels-selector">
+                      <option>Select an option</option>
+                    </select>
+                    <div class="overSelect"></div>
+                  </div>
+                  <div id="checkboxes"></div>
+                </div>
+              </form>
             </div>
             <div class="world-param">
               <label class="size-lbl">Size (px)</label>
@@ -266,6 +290,16 @@
           </div>
         </div>
 
+        <div id="analysis-content" class="panel-section analysis">
+          <div class="parameter-title">
+            <label>Analysis</label>
+          </div>
+
+          <div id="sample-list">
+            
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -281,19 +315,17 @@
 
     </div> -->
 
-    <div class="kernel-window window">
+    <div class="kernel window">
       <table id="table-kernel">
-        <!-- <thead>
-          <tr>
-            <th>RMSH</th>
-            <th>b</th>
-            <th>a</th>
-            <th>w</th>
-            <th>Target Channels</th>
-          </tr> -->
-        </thead>
-        <tbody><tr style="display: flex;"><td><div class="kernel-parameter-title parameter-title"><label>rmsh</label></div><div class="input-list"><div class="inputContainer"><label>r</label><input type="number" name="r"></div><div class="inputContainer"><label>m</label><input type="number" name="m"></div><div class="inputContainer"><label>s</label><input type="number" name="s"></div><div class="inputContainer"><label>h</label><input type="number" name="h"></div></div></td><td><div class="kernel-parameter-title parameter-title"><label>B</label></div><div class="input-list"><div class="inputContainer"><input type="number" name=""><button type="button">Remove Input</button></div><div class="inputContainer"><input type="number" name=""><button type="button">Remove Input</button></div><div class="inputContainer"><input type="number" name=""><button type="button">Remove Input</button></div></div><button class="add-parameter-btn" type="button">Add B</button></td><td><div class="kernel-parameter-title parameter-title"><label>a</label></div><div class="input-list"><div class="inputContainer"><input type="number" name=""><button type="button">Remove Input</button></div><div class="inputContainer"><input type="number" name=""><button type="button">Remove Input</button></div><div class="inputContainer"><input type="number" name=""><button type="button">Remove Input</button></div></div><button class="add-parameter-btn" type="button">Add a</button></td><td><div class="kernel-parameter-title parameter-title"><label>w</label></div><div class="input-list"><div class="inputContainer"><input type="number" name=""><button type="button">Remove Input</button></div><div class="inputContainer"><input type="number" name=""><button type="button">Remove Input</button></div><div class="inputContainer"><input type="number" name=""><button type="button">Remove Input</button></div></div><button class="add-parameter-btn" type="button">Add w</button></td><td><div class="kernel-parameter-title parameter-title"><label>T</label></div><div class="input-list"><div class="inputContainer"><label>T</label><input type="number" name="T"><button type="button">Remove Input</button></div></div><button class="add-parameter-btn" type="button">Add T</button></td></tr></tbody>
       </table>
+    </div>
+
+    <div class="save-sample window">
+      <label> Save simulation state as </label>
+      <input class="save-sample-name" type="text" />
+      <button class="save-sample-name-btn">
+        <span class="material-symbols-outlined"> save </span> SAVE
+      </button>
     </div>
     <div id="overlay"></div>
 

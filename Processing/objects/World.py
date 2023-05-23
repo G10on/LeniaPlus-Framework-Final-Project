@@ -63,11 +63,6 @@ class World():
                 #   dt=0.2,
                 #   sigma=0.65
                   ) -> None:
-
-        try:
-            self.A = data["world"]
-        except KeyError:
-            self.A = None
             
         self.seed = data["seed"]
         self.sX = data["size"]
@@ -78,7 +73,13 @@ class World():
         self.dt = data["dt"]
         self.sigma = data["sigma"]
 
-        if self.A is None:
+        try:
+            layout = jnp.zeros((self.sX, self.sY, self.numChannels))
+
+            layout = layout.at[self.sX//2-(data["world"].shape[0] + 1)//2 :self.sX//2+(data["world"].shape[0])//2, self.sY//2-(data["world"].shape[1])//2:self.sY//2+(data["world"].shape[1] + 1)//2, :].set(data["world"])
+            
+            self.A = layout
+        except Exception:
             self.generateWorld()
         
         self.A_initial = self.A

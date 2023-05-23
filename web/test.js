@@ -5,9 +5,10 @@ ctx = canvas.getContext("2d"),
 new_width = 800,
 new_height = 800,
 overlay = document.querySelector('#overlay'),
-stream = canvas.captureStream(),
+stream = canvas.captureStream(60),
 chunks = [],
 panelSelectorBtns = document.querySelectorAll('.panel-selector-btn'),
+channelCheckbox = document.getElementById("checkboxes"),
 channelSelector = document.querySelector('.channels-selector'),
 playBtn = document.querySelector(".play-btn"),
 nextStepBtn = document.querySelector(".next-step-btn"),
@@ -15,7 +16,11 @@ restartBtn = document.querySelector(".restart-btn"),
 generateFromSeedBtn = document.querySelector(".generate-btn"),
 saveVideoBtn = document.querySelector(".save-video-btn"),
 saveStateBtn = document.querySelector(".save-state-btn"),
-loadStateBtn = document.querySelector(".load-state-btn"),
+saveSample = document.querySelector(".save-sample"),
+saveSampleName = document.querySelector(".save-sample-name"),
+saveSampleNameBtn = document.querySelector(".save-sample-name-btn"),
+exportBtn = document.querySelector(".export-btn"),
+importBtn = document.querySelector(".import-btn"),
 versionMenu = document.querySelector(".version-selector"),
 versionLoadingTxt = document.querySelector(".version-loading-txt"),
 stepNTxt = document.querySelector("#step-n-txt"),
@@ -25,6 +30,9 @@ mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
 var rmsh = ['C', 'r', 'm', 's', 'h'],
 Baw = ['B', 'a', 'w', 'T'],
 is_playing = false,
+frame_recorded = true,
+expanded = false,
+visibleChannels = [],
 rowCount = 0,
 tablePreview = document.getElementById("table-preview"),
 tableKernel = document.getElementById("table-kernel"),
@@ -201,7 +209,7 @@ function displayKernelWindow(btn) {
     let id = row_preview.rowIndex;
     let row_kernel = tableKernel.rows[id];
 
-    let kernelWindow = document.querySelector(".kernel-window");
+    let kernelWindow = document.querySelector(".kernel");
     kernelWindow.style.display = "block";
     row_kernel.style.display = "flex";
     overlay.style.display = "block";
@@ -247,7 +255,8 @@ async function updateWorldDisplay() {
     let img = new Image();
     ctx.drawImage(img, 0, 0);
     img.src = dataUri;
-
+    frame_recorded = false;
+    // requestAnimationFrame(updateWorldDisplay);
 
 }
 
@@ -330,6 +339,9 @@ async function getParamsFromPython() {
             // input.value = c;
         }
     }
+
+    let optionsList = ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5'];
+    generateCheckboxes(optionsList);
     
     await updateWorldDisplay();
     versionLoadingTxt.innerText = "";
@@ -405,6 +417,7 @@ async function setParamsInPython(sampleName = null) {
         
         var inputs = row_kernel.cells[Baw.length].getElementsByClassName("input-list")[0].getElementsByTagName("input");
 
+        
         for (var j = 0; j < inputs.length; j++) {
             data['T'][inputs[j].value].push(parseInt(i));
         }
@@ -512,30 +525,46 @@ function panelChanger(event) {
 function addSample (sampleName) {
     
     // create a new div element for each image
-    var sampleContainer = document.createElement('div');
+    let sampleContainer = document.createElement('div');
     sampleContainer.className = 'sample-container'; // assign a class to style with CSS
-    document.body.appendChild(sampleContainer); // add the div to the body of the HTML document
+    // document.body.appendChild(sampleContainer); // add the div to the body of the HTML document
+    sampleContainer.id = sampleName;
 
     // add an img element inside the div
-    var sampleImg = document.createElement('img');
+    let sampleImg = document.createElement('img');
     sampleImg.className = 'sample-img'; // assign a class to style with CSS
     sampleImg.setAttribute('data-src', sampleName);
-    sampleImg.src = "./images/" + sampleName + ".png"; // set the src attribute to the current image source
+    sampleImg.src = "images/samples/" + sampleName + ".png"; // set the src attribute to the current image source
+    sampleImg.addEventListener('click', function() {
+        let imageSource = this.getAttribute('data-src');
+        setParamsInPython(imageSource);
+    });
     sampleContainer.appendChild(sampleImg); // add the img to the div
 
     // add a label inside the div
-    var sampleLbl = document.createElement('label');
+    let sampleLbl = document.createElement('label');
     sampleLbl.className = 'sample-lbl'; // assign a class to style with CSS
     sampleLbl.innerHTML = sampleName; // set the label text
     sampleContainer.appendChild(sampleLbl); // add the label to the div
 
-    sampleContainer.addEventListener('click', function() {
-        let imageSource = this.querySelector('.sample-img').getAttribute('data-src');
-        setParamsInPython(imageSource);
-    });
+    let deleteSampleButton = document.createElement("button");
+    deleteSampleButton.type = "button";
+    deleteSampleButton.className = "delete-sample-btn";
+    // deleteSampleButton.innerHTML = ;
+    deleteSampleButton.textContent = "DELETE SAMPLE";
+    deleteSampleButton.onclick = async function() { 
+        await deleteSample(this);
+    };
+    sampleContainer.appendChild(deleteSampleButton);
 
     return sampleContainer;
     
+}
+
+async function deleteSample(btn) {
+    let sampleContainer = btn.parentNode;
+    await eel.deleteSample(sampleContainer.id)();
+    sampleContainer.style.display = "none";
 }
 
 
@@ -544,7 +573,7 @@ async function loadSamples () {
     
     var sampleList = document.getElementById("sample-list");
     sampleList.innerHTML = "";
-    
+
     let sampleNames = await eel.getSampleNames()();
     
     for (var i = 0; i < sampleNames.length; i++) {
@@ -568,12 +597,81 @@ function setChannelSelector () {
 
 }
 
-$('.channels-selector').on('change', function() {
-  if ($('select option:selected').length > 3) {
-    $(this).find('option:selected').removeAttr('selected');
-    console.log("No way")
+function displaySaveNameWindow(btn) {
+    
+    saveSample.style.display = "flex";
+    overlay.style.display = "block";
+
+    overlay.addEventListener('click', () => {
+        saveSample.style.display = "none";
+        overlay.style.display = "none";
+    });
+}
+
+
+
+// function clearCheckboxes() {
+//   var checkboxesDiv = document.getElementById("checkboxes");
+//   while (checkboxesDiv.firstChild) {
+//     checkboxesDiv.removeChild(checkboxesDiv.firstChild);
+//   }
+// }
+
+function generateCheckboxes(options) {
+    var checkboxesDiv = document.getElementById("checkboxes");
+    //   clearCheckboxes();
+    checkboxesDiv.innerHTML = "";
+    options.forEach(function(option, index) {
+        var label = document.createElement('label');
+        var checkbox = document.createElement('input');
+        let numChannels = document.querySelector(".num-channels").value;
+        checkbox.type = 'checkbox';
+        checkbox.id = `channel-${index}`;
+        let maxChannels = Math.min(numChannels, 3);
+        if (index < maxChannels) {checkbox.checked = true;}
+        label.appendChild(checkbox);
+        let opt_txt = document.createTextNode(`channel ${index}`);
+        label.appendChild(opt_txt);
+        checkboxesDiv.appendChild(label);
+    });
+}
+
+
+function showCheckboxes() {
+  var checkboxes = document.getElementById("checkboxes");
+  if (!expanded) {
+    checkboxes.style.display = "block";
+    expanded = true;
+  } else {
+    checkboxes.style.display = "none";
+    expanded = false;
   }
-});
+}
+
+function countSelectedCheckboxes() {
+    var checkboxes = document.querySelectorAll('#checkboxes input[type="checkbox"]');
+    let numChannels = document.querySelector(".num-channels").value;
+    //   var selectedCount = 0;
+    let maxChannels = Math.min(numChannels, 3);
+    visibleChannels = [];
+    checkboxes.forEach(function(checkbox, index) {
+        if (checkbox.checked) {
+        //   selectedCount++;
+        visibleChannels.push(index);
+        }
+    });
+    if (visibleChannels.length >= maxChannels) {
+        checkboxes.forEach(function(checkbox) {
+        if (!checkbox.checked) {
+            checkbox.disabled = true;
+        }
+        });
+    } else {
+        checkboxes.forEach(function(checkbox) {
+        checkbox.disabled = false;
+        });
+    }
+}
 
 
 
@@ -635,10 +733,28 @@ saveVideoBtn.addEventListener("click", () => {
 
 
 saveStateBtn.addEventListener("click", () => {
+    
+    displaySaveNameWindow();
+    
+})
+
+saveSampleNameBtn.addEventListener("click", () => {
+    
+    let name = saveSampleName.value;
+    // Convert the canvas image data to a base64-encoded string
+    let imageData = canvas.toDataURL("image/png");
+    
+    eel.saveParameterState(imageData, name)();
+
+    saveSample.style.display = "none";
+    overlay.style.display = "none";
+})
+
+exportBtn.addEventListener("click", () => {
     eel.saveParameterState()();
 })
 
-loadStateBtn.addEventListener("click", async () => {
+importBtn.addEventListener("click", async () => {
     
     await eel.loadParameterState()();
     getParamsFromPython();
@@ -646,7 +762,10 @@ loadStateBtn.addEventListener("click", async () => {
 })
 
 mediaRecorder.ondataavailable = function(e) {
-  chunks.push(e.data);
+    if (!frame_recorded) {
+        chunks.push(e.data);
+        frame_recorded = true;
+    }
 };
 
 mediaRecorder.onstop = function() {
@@ -655,7 +774,7 @@ mediaRecorder.onstop = function() {
   downloadFile(url, "myVideo.webm");
 };
 
-
+channelCheckbox.addEventListener("change", countSelectedCheckboxes);
 
 
 
