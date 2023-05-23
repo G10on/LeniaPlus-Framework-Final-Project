@@ -240,7 +240,7 @@ async function updateWorldDisplay() {
     // ctx.clearRect(0, 0, canvas.width, canvas.height);
     // ctx.putImageData(img_A, 0, 0);
 
-    var matrix = await eel.getWorld()();
+    var matrix = await eel.getWorld(visibleChannels)();
     // console.log(matrix.length);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < matrix.length; i++) {
@@ -291,7 +291,7 @@ async function getParamsFromPython() {
 
     var data = await eel.getParameters()();
 
-    console.log(data)
+    // console.log(data)
     
     document.querySelector(".version-selector").value = data["version"];
     document.querySelector(".size").value = data["size"];
@@ -341,7 +341,8 @@ async function getParamsFromPython() {
     }
 
     let optionsList = ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5'];
-    generateCheckboxes(optionsList);
+    generateCheckboxes(data['numChannels']);
+    countSelectedCheckboxes();
     
     await updateWorldDisplay();
     versionLoadingTxt.innerText = "";
@@ -395,7 +396,8 @@ async function setParamsInPython(sampleName = null) {
         }
 
         let input_C = row_preview.cells[0].querySelector("input[name='C']");
-        data['C'].push(parseInt(input_C.value));
+        let source_channel = Math.min(parseInt(input_C.value), data["numChannels"] - 1);
+        data['C'].push(parseInt(source_channel));
 
         for (var k = 0; k < Baw.length - 1; k++) {
 
@@ -417,9 +419,10 @@ async function setParamsInPython(sampleName = null) {
         
         var inputs = row_kernel.cells[Baw.length].getElementsByClassName("input-list")[0].getElementsByTagName("input");
 
-        
+
         for (var j = 0; j < inputs.length; j++) {
-            data['T'][inputs[j].value].push(parseInt(i));
+            let target_channel = Math.min(inputs[j].value, data["numChannels"] - 1);
+            data['T'][target_channel].push(parseInt(i));
         }
     }
 
@@ -432,7 +435,7 @@ async function setParamsInPython(sampleName = null) {
     }
     
     await getParamsFromPython();
-    await updateWorldDisplay();
+    // await updateWorldDisplay();
     versionLoadingTxt.innerText = "";
 }
 
@@ -499,7 +502,7 @@ async function generateKernelParamsInPython() {
     }
     
     await eel.generateKernel(data)();
-    await updateWorldDisplay();
+    // await updateWorldDisplay();
     await getParamsFromPython();
     versionLoadingTxt.innerText = "";
 }
@@ -617,14 +620,13 @@ function displaySaveNameWindow(btn) {
 //   }
 // }
 
-function generateCheckboxes(options) {
+function generateCheckboxes(numChannels) {
     var checkboxesDiv = document.getElementById("checkboxes");
     //   clearCheckboxes();
     checkboxesDiv.innerHTML = "";
-    options.forEach(function(option, index) {
+    for (let index = 0; index < numChannels; index++) {
         var label = document.createElement('label');
         var checkbox = document.createElement('input');
-        let numChannels = document.querySelector(".num-channels").value;
         checkbox.type = 'checkbox';
         checkbox.id = `channel-${index}`;
         let maxChannels = Math.min(numChannels, 3);
@@ -633,7 +635,7 @@ function generateCheckboxes(options) {
         let opt_txt = document.createTextNode(`channel ${index}`);
         label.appendChild(opt_txt);
         checkboxesDiv.appendChild(label);
-    });
+    }
 }
 
 
@@ -671,6 +673,7 @@ function countSelectedCheckboxes() {
         checkbox.disabled = false;
         });
     }
+    if (!is_playing) { updateWorldDisplay()}
 }
 
 

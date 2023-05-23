@@ -289,7 +289,7 @@ class LeniaKernelParameters():
         midX = SX >> 1
         midY = SY >> 1
 
-        print(self.kernels)
+        # print(self.kernels)
 
         # self.kernels['B'] = self.kernels['B'].tolist()
         new_B = []

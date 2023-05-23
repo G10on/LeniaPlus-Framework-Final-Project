@@ -59,7 +59,16 @@ sample_parameters_path = "web/sample_parameters"
 
 
 
-# pattern = {}
+pattern = {}
+
+pattern["fish"] = {"name":"K=3 Fish", "version" : "LeniaModel", "R":10,"T":5,"kernels":[
+  {"b":[1,5/12,2/3],"m":0.156,"s":0.0118,"h":1,"c0":0,"c1":0, 'r': 1/3},
+  {"b":[1/12,1],"m":0.193,"s":0.049,"h":1,"c0":0,"c1":0, 'r': 1/2},
+  {"b":[1],"m":0.342,"s":0.0891,"h":1,"c0":0,"c1":0, 'r': 3/3}],
+  "cells":[[0,0,0,0,0,0,0,0,0,0,0,0.06,0.1,0.04,0.02,0.01,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0.15,0.37,0.5,0.44,0.19,0.23,0.3,0.23,0.15,0.01,0,0,0,0], [0,0,0,0,0,0,0.32,0.78,0.26,0,0.11,0.11,0.1,0.08,0.18,0.16,0.17,0.24,0.09,0,0,0], [0,0,0,0,0.45,0.16,0,0,0,0,0,0.15,0.15,0.16,0.15,0.1,0.09,0.21,0.24,0.12,0,0], [0,0,0,0.1,0,0,0,0,0,0,0,0.17,0.39,0.43,0.34,0.25,0.15,0.16,0.15,0.25,0.03,0], [0,0.15,0.06,0,0,0,0,0,0,0,0.24,0.72,0.92,0.85,0.61,0.47,0.39,0.27,0.12,0.18,0.17,0], [0,0.08,0,0,0,0,0,0,0,0,1.0,1.0,1.0,1.0,0.73,0.6,0.56,0.31,0.12,0.15,0.24,0.01], [0,0.16,0,0,0,0,0,0,0,0.76,1.0,1.0,1.0,1.0,0.76,0.72,0.65,0.39,0.1,0.17,0.24,0.05], [0,0.05,0,0,0,0,0,0,0.21,0.83,1.0,1.0,1.0,1.0,0.86,0.85,0.76,0.36,0.17,0.13,0.21,0.07], [0,0.05,0,0,0.02,0,0,0,0.4,0.91,1.0,1.0,1.0,1.0,1.0,0.95,0.79,0.36,0.21,0.09,0.18,0.04], [0.06,0.08,0,0.18,0.21,0.1,0.03,0.38,0.92,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.64,0.31,0.12,0.07,0.25,0], [0.05,0.12,0.27,0.4,0.34,0.42,0.93,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.97,0.33,0.16,0.05,0.1,0.26,0], [0,0.25,0.21,0.39,0.99,1.0,1.0,1.0,1.0,1.0,1.0,0.86,0.89,0.94,0.83,0.13,0,0,0.04,0.21,0.18,0], [0,0.06,0.29,0.63,0.84,0.97,1.0,1.0,1.0,0.96,0.46,0.33,0.36,0,0,0,0,0,0.03,0.35,0,0], [0,0,0.13,0.22,0.59,0.85,0.99,1.0,0.98,0.25,0,0,0,0,0,0,0,0,0.34,0.14,0,0], [0,0,0,0,0.33,0.7,0.95,0.8,0.33,0.11,0,0,0,0,0,0,0,0.11,0.26,0,0,0], [0,0,0,0,0.16,0.56,0.52,0.51,0.4,0.18,0.01,0,0,0,0,0,0,0.42,0,0,0,0], [0,0,0,0,0.01,0,0.33,0.47,0.33,0.05,0,0,0,0,0,0,0.35,0,0,0,0,0], [0,0,0,0,0,0.26,0.32,0.13,0,0,0,0,0,0,0,0.34,0,0,0,0,0,0], [0,0,0,0,0,0.22,0.25,0.03,0,0,0,0,0,0,0.46,0,0,0,0,0,0,0], [0,0,0,0,0,0,0.09,0.2,0.22,0.23,0.23,0.22,0.3,0.3,0,0,0,0,0,0,0,0]]
+}
+
+
 # pattern["aquarium"] = {"name":"Tessellatium gyrans", "version" : "LeniaModel","R":12,"T":2,"kernels":[
 # {"b":[1],"m":0.272,"s":0.0595,"h":0.138,"r":0.91,"c0":0,"c1":0},
 # {"b":[1],"m":0.349,"s":0.1585,"h":0.48,"r":0.62,"c0":0,"c1":0},
@@ -326,7 +335,7 @@ def step():
     system.step()
 
 @eel.expose
-def getWorld():
+def getWorld(visible_channels):
 
     # scl = 512 // system.world.sX
     
@@ -335,10 +344,12 @@ def getWorld():
     # res = np.kron(a, b)
     # res = np.dstack((res, np.ones((system.world.sX * scl, system.world.sY * scl), dtype=np.int8) * 255))
 
-    alpha = np.ones((system.world.sX, system.world.sY))
-    res = jnp.dstack((system.world.A.clip(0, 1), alpha))
+    Ac = system.world.A.clip(0, 1)[:, :, visible_channels]
+    alpha = jnp.ones((system.world.sX, system.world.sY))
+    while Ac.shape[-1] < 3:
+        Ac = jnp.dstack((Ac, alpha * 0))
+    res = jnp.dstack((Ac, alpha))
     res = jnp.uint8(res * 255.0).tolist()
-
     # res = res.flatten().tolist()
     return res
 
@@ -350,10 +361,11 @@ def getWorld():
 def sample(name, new_data):
 
     entity = pattern[name]
-    test = np.asarray(entity["cells"]).transpose((1, 2, 0))
-    SX = new_data["size"]
+    test = np.asarray(entity["cells"]).transpose((1, 0))[:, :, None]
+    # print(test.shape)
+    SX = new_data["size"] = 64
     SY = SX
-    C = new_data["numChannels"]
+    C = new_data["numChannels"] = 1
 
     # print("SUBARRAY:", [sublst['b'] for sublst in entity["kernels"]])
     lst_B = [sublst['b'] for sublst in entity["kernels"]]
@@ -376,7 +388,7 @@ def sample(name, new_data):
         c1[entity["kernels"][kn]["c1"]].append(kn)
     new_world = jnp.zeros((SX, SY, C))
     # print(new_world[SX//2-(test.shape[0])//2 :SX//2+(test.shape[0])//2, SY//2-(test.shape[1])//2:SY//2+(test.shape[1])//2, :].shape, test.shape
-    new_world = new_world.at[SX//2-(test.shape[0] + 1)//2 :SX//2+(test.shape[0])//2, SY//2-(test.shape[1])//2:SY//2+(test.shape[1] + 1)//2, :].set(test)
+    new_world = new_world.at[SX//2-(22)//2 :SX//2+(22)//2, SY//2-(22)//2:SY//2+(20)//2, :].set(test)
     
     
     for k in "rmsh":
@@ -384,6 +396,8 @@ def sample(name, new_data):
         for kernel in entity["kernels"]:
             temp.append(kernel[k])
         new_data[k] = np.asarray(temp, dtype=np.float64)
+
+    # new_data['r'] = np.ones(new_data['m'].shape, dtype=np.float64) * 0.5
 
     # new_data["dt"] = entity['T'] * 0.05
     new_data["world"] = new_world
@@ -442,6 +456,8 @@ def loadParameterState(filename = "screenshot"):
     # load the dictionary from the file
     with open(filepath_parameter, 'rb') as f:
         data = pickle.load(f)
+
+    # data = sample("fish", {"size":64, "numChannels":1, "seed": 101})
     
     system.setInitialWorld(data["world"])
     setParameters(data)
@@ -470,7 +486,7 @@ def getSampleNames():
 def setSample(name, new_data):
     loadParameterState(name)
     return
-    data = sample(name, new_data)
+    data = sample("fish", new_data)
     system.setInitialWorld(data["world"])
     setParameters(data)
 

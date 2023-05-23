@@ -174,7 +174,7 @@ class FlowLeniaModel():
                                 # C : int
                                 ):
 
-            print(A.shape)
+            # print(A.shape)
             fA = jnp.fft.fft2(A, axes=(0,1))  # (x,y,c)
         
             fAk = fA[:, :, self.k_params.kernels['C']]  # (x,y,k)
