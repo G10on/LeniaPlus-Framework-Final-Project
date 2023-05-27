@@ -333,8 +333,10 @@ class LeniaModel():
                               #   dt = 0.1,
                               #   sigma = 0.8,
                               #   theta_A = 1.5,
-                              g_func=jax.jit(lambda x, m, s: (
-                                  jnp.exp(-((x - m) / s)**2 / 2)))
+                            #   g_func=jax.jit(lambda x, m, s: (
+                            #       jnp.exp(-((x - m) / s)**2 / 2)))
+                                g_func=jax.jit(lambda x, m, s: (
+                                    jnp.exp( -((jnp.absolute(x - m))**2) / (2*s*s) )))
                               ):
 
         self.world = world

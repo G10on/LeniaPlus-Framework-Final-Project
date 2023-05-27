@@ -46,8 +46,8 @@ stepNTxt.textContent = 0;
 
 function addKernel() {
     // rowCount++;
-    row_preview = tablePreview.insertRow();
-    row_kernel = tableKernel.insertRow();
+    var row_preview = tablePreview.insertRow();
+    var row_kernel = tableKernel.insertRow();
     // row_preview.id = rowCount;
     // row_kernel.id = rowCount;
     var rmshParamsCell = row_kernel.insertCell(0);
@@ -167,7 +167,7 @@ function addInputToKernel(row, cell_n, p, value, removable = true, innerDiv = fa
     // newInput.name = "input" + rowCount + "_" + i;
     newInput.name = p;
     newInput.value = value;
-    if (p != '') {
+    if (p != '' && p) {
         let newLbl = document.createElement("label");
         newLbl.textContent = p;
         inputContainer.appendChild(newLbl);
@@ -255,8 +255,22 @@ async function updateWorldDisplay() {
     let img = new Image();
     ctx.drawImage(img, 0, 0);
     img.src = dataUri;
+    drawCenterMass();
     frame_recorded = false;
     // requestAnimationFrame(updateWorldDisplay);
+
+}
+
+
+async function drawCenterMass() {
+
+    let creatures = await eel.getMassCenter()();
+    // console.log(creatures);
+    // console.log(Math.round(point[0][0]), Math.round(point[0][1]));
+    ctx.fillStyle = 'white';
+    for (let i = 0; i < creatures.length; i++) {
+        ctx.fillRect(creatures[i][0] * new_width, creatures[i][1] * new_height, 20, 20);
+    }
 
 }
 
@@ -340,7 +354,6 @@ async function getParamsFromPython() {
         }
     }
 
-    let optionsList = ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5'];
     generateCheckboxes(data['numChannels']);
     countSelectedCheckboxes();
     
@@ -744,6 +757,7 @@ saveStateBtn.addEventListener("click", () => {
 saveSampleNameBtn.addEventListener("click", () => {
     
     let name = saveSampleName.value;
+    saveSampleName.value = "";
     // Convert the canvas image data to a base64-encoded string
     let imageData = canvas.toDataURL("image/png");
     
