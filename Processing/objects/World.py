@@ -94,6 +94,7 @@ class World():
         self.A = np.zeros((self.sX, self.sY, self.numChannels))
         self.A[self.sX//2-init_size//2:self.sX//2+init_size//2, self.sY//2-init_size //
                2:self.sY//2+init_size//2, :] = rand_gen.rand(init_size, init_size, self.numChannels)
+        # self.A = np.ones((self.sX, self.sY, self.numChannels))
 
     # VECTORIZE OR VRAM CUPY?
 

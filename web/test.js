@@ -2,6 +2,8 @@
 
 const canvas = document.getElementById("map"),
 ctx = canvas.getContext("2d"),
+tracker = document.getElementById("tracker"),
+ctx_tracker = tracker.getContext("2d"),
 new_width = 800,
 new_height = 800,
 overlay = document.querySelector('#overlay'),
@@ -255,21 +257,58 @@ async function updateWorldDisplay() {
     let img = new Image();
     ctx.drawImage(img, 0, 0);
     img.src = dataUri;
-    drawCenterMass();
+    // getAnalysisFromPython();
     frame_recorded = false;
     // requestAnimationFrame(updateWorldDisplay);
 
 }
 
 
+async function getAnalysisFromPython() {
+    
+    drawCenterMass();
+    // let coordinates = await eel.getCoordinatesFromPython()();
+    // drawDots(coordinates);
+}
+
+function drawDots(coordinates) {
+  const pointSize = 0.5;
+  ctx_tracker.fillStyle = "#ff2626"; // Red color
+  const canvasWidth = tracker.width;
+  const canvasHeight = tracker.height;
+
+  for (let i = 0; i < coordinates.length; i++) {
+    const [xPercent, yPercent] = coordinates[i];
+    const x = xPercent * canvasWidth;
+    const y = yPercent * canvasHeight;
+    ctx_tracker.beginPath(); 
+    ctx_tracker.arc(x, y, pointSize, 0, Math.PI * 2, true);
+    ctx_tracker.fill(); 
+  }
+}
+
+
+
 async function drawCenterMass() {
 
-    let creatures = await eel.getMassCenter()();
-    // console.log(creatures);
-    // console.log(Math.round(point[0][0]), Math.round(point[0][1]));
-    ctx.fillStyle = 'white';
-    for (let i = 0; i < creatures.length; i++) {
-        ctx.fillRect(creatures[i][0] * new_width, creatures[i][1] * new_height, 20, 20);
+    let centers = await eel.getCoordinatesFromPython()();
+    ctx.lineWidth = 4;
+
+    for (let id in centers) {
+        
+        let number = Math.floor(id * 50);
+        let red =  (12345 % (number + 2) * 567) % 256;
+        let green =  (123456 % (number + 3) + 890) % 256;
+        let blue =  (1234567 % (number + 4) + 1117) % 256;
+        ctx.strokeStyle = `rgb(${red}, ${green}, ${blue})`;
+
+        let x = centers[id][0];
+        let y = centers[id][1];
+        let detection_width = centers[id][2] * new_width;
+        let detection_height = centers[id][3] * new_height;
+        let half_width = detection_width / 2;
+        let half_height = detection_height / 2;
+        ctx.strokeRect(x * new_width - half_width, y * new_height - half_height, detection_width, detection_height);
     }
 
 }
@@ -292,6 +331,7 @@ async function step() {
 async function play() {
     while (is_playing) {
         await step();
+        getAnalysisFromPython();
     }
 }
 
@@ -689,6 +729,11 @@ function countSelectedCheckboxes() {
     if (!is_playing) { updateWorldDisplay()}
 }
 
+
+function openNewWindow() {
+    window.open("tracker.html", "TEST_New_Window", "width=600,height=400");
+}
+eel.expose(openNewWindow);
 
 
 

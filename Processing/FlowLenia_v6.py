@@ -6,7 +6,7 @@ import timeit
 from functools import partial
 # import subprocess
 # import sys
-# import cv2
+import cv2
 
 # import cupy
 
@@ -354,6 +354,8 @@ class System():
         
         self.setData()
         self.compile()
+        self.center_points = {}
+        self.next_id = 0
         return
 
         self.version = version
@@ -479,6 +481,118 @@ class System():
 
     # Getter and setters for world and k_params!!!
 
+    def getCoordinatesOfIndividuals(self):
+
+        min_size = 10 * 2
+
+        # Sum the values along the last axis
+        summed_world = np.sum(self.world.A, axis=-1)
+
+        # Threshold the array
+        mask = np.where(summed_world > 0, True, False)
+
+        # Label the connected regions
+        labels, num_features = ndimage.label(mask)
+
+        # Count the number of non-zero values in each group
+        counts = np.bincount(labels.ravel())
+
+        # Find the bounding box of each region
+        slices = ndimage.find_objects(labels)
+
+        # Calculate the length of each bounding box
+        lengths = [tuple(slice_.stop - slice_.start for slice_ in slice_tuple)
+                for slice_tuple in slices]
+
+        # Filter out regions that don't meet the minimum size threshold
+        lengths = [(length[0] / self.world.A.shape[0], length[1] / self.world.A.shape[1]) for i, length in enumerate(
+            lengths) if np.bincount(labels.ravel())[i+1] >= min_size]
+
+        # Find the center of mass of each connected region that meets the minimum size threshold
+        new_center_points = np.array([ndimage.center_of_mass(summed_world, labels=labels, index=i)
+                        for i in range(1, num_features+1) if counts[i] >= min_size])
+        
+        # if len(new_center_points) == 0:
+        #     new_center_points.append = np.asarray([0.5, 0.5])
+        
+        new_center_points = (new_center_points / self.world.A.shape[0]).tolist()
+        temp_CP = {}
+        # print("Found 0", new_center_points)
+        
+        # if len(self.center_points) is 0:
+        #     for i, center in center_points:
+        #         self.center_points[]
+
+        # Update self.center_points coordinates with nearthest ones 
+        # from new_center_points, remove the updated ones from 
+        # new_center_points
+        # print("Updating", self.center_points, new_center_points)
+        
+        for k, v in self.center_points.items():
+
+            if len(new_center_points) == 0:
+                break
+
+            # Convert the list of tuples to a NumPy array
+            new_center_points_np = np.array(new_center_points)
+            
+            # Calculate the Euclidean distance between the target point and each point in the list
+            # print(new_center_points_np[:, None], v)
+            # distances = toroidal_distances(new_center_points_np, np.asarray(v[:2]))
+            distances = np.linalg.norm(new_center_points_np[:, None] - v[:2], axis=2)
+            
+            # Find the index of the nearest point
+            nearest_index = np.argmin(distances)
+            
+            # print(distances[nearest_index] < lengths[nearest_index][0])
+            # 
+            if distances[nearest_index] < lengths[nearest_index][0] * 1.5:
+
+                temp_CP[k] = [
+                    new_center_points[nearest_index][0], 
+                    new_center_points[nearest_index][1], 
+                    lengths[nearest_index][0], 
+                    lengths[nearest_index][1]]
+                
+                # print("Found", self.center_points, distances)
+                
+                # Remove the nearest point from the list
+                new_center_points.pop(nearest_index)
+                lengths.pop(nearest_index)
+
+        # self.center_points = {}
+        # temp = 0
+        # for i in range(len(temp_CP)):
+        #     self.center_points[temp] = v
+
+        self.center_points = temp_CP
+
+
+        # Now only new detections remain in new_center_points.
+        for new_center, size in zip(new_center_points, lengths):
+            self.center_points[self.next_id] = [
+                new_center[0], 
+                new_center[1], 
+                size[0], 
+                size[1] ]
+            self.next_id += 1
+        
+
+
+        # self.center_points = self.center_points / self.world.shape[0]
+
+        # print(centers.shape)
+
+        return self.center_points, self.world.A.shape[0]
+
+    def setCurrentCoordinates(self):
+        return
+
+    def getPreviousCoordinates(self):
+        return 
+
+
+
 
 
 
@@ -546,19 +660,40 @@ def getWorld(visible_channels):
 def getMassCenter():
 
     world = system.getCurrentWorld()
+    min_size = 10 * 2
+
+    # Sum the values along the last axis
+    summed_world = np.sum(world, axis=-1)
 
     # Threshold the array
-    mask = np.where(world > 0, True, False)
+    mask = np.where(summed_world > 0, True, False)
 
     # Label the connected regions
     labels, num_features = ndimage.label(mask)
 
-    # Find the center of mass of each connected region
-    centers = ndimage.center_of_mass(mask, labels=labels, index= jnp.arange(1, num_features+1))
+    # Count the number of non-zero values in each group
+    counts = np.bincount(labels.ravel())
+    
+    # Find the bounding box of each region
+    slices = ndimage.find_objects(labels)
 
-    centers = np.asarray(centers) / world.shape[0]
+    # Calculate the length of each bounding box
+    lengths = [tuple(slice_.stop - slice_.start for slice_ in slice_tuple)
+               for slice_tuple in slices]
 
-    return centers.tolist()
+    # Filter out regions that don't meet the minimum size threshold
+    lengths = [(length[0] / world.shape[0], length[1] / world.shape[1]) for i, length in enumerate(
+        lengths) if np.bincount(labels.ravel())[i+1] >= min_size]
+
+
+    # Find the center of mass of each connected region that meets the minimum size threshold
+    centers = np.array([ndimage.center_of_mass(summed_world, labels=labels, index=i) for i in range(1, num_features+1) if counts[i] >= min_size])
+
+    centers = centers / world.shape[0]
+    
+    # print(centers.shape)
+
+    return centers.tolist(), lengths
 
 
 
@@ -699,11 +834,142 @@ def setSample(name, new_data):
     # setParameters(data)
 
 
+# @eel.expose
+# def open_new_window():
+#     eel.browsers.open('tracker.html', options={
+#         'port': 8001,
+#         'host': '127.0.0.1',
+#         'size': (500, 500),
+#         'position': (0, 0)
+#     })
+
+@eel.expose
+def test_new_window():
+    
+    return "Hi from Python"
+
+
+
+
+
+@eel.expose
+def getCoordinatesFromPython2():
+
+    world = system.getCurrentWorld()
+    min_size = 10 * 10
+
+    # Sum the values along the last axis
+    summed_world = np.sum(world, axis=-1)
+
+    # Threshold the array
+    mask = np.where(summed_world > 0, True, False)
+
+    # Label the connected regions
+    labels, num_features = ndimage.label(mask)
+
+    # Count the number of non-zero values in each group
+    counts = np.bincount(labels.ravel())
+    
+    # Find the bounding box of each region
+    # slices = ndimage.find_objects(labels)
+
+    # Calculate the length of each bounding box
+    # lengths = [tuple(slice_.stop - slice_.start for slice_ in slice_tuple)
+    #            for slice_tuple in slices]
+
+    # # Filter out regions that don't meet the minimum size threshold
+    # lengths = [(length[0] / world.shape[0], length[1] / world.shape[1]) for i, length in enumerate(
+    #     lengths) if np.bincount(labels.ravel())[i+1] >= min_size]
+
+
+    # Find the center of mass of each connected region that meets the minimum size threshold
+    centers = np.array([ndimage.center_of_mass(summed_world, labels=labels, index=i) for i in range(1, num_features+1) if counts[i] >= min_size])
+
+
+
+    centers = centers / world.shape[0]
+    
+    # print(centers.shape)
+
+    return centers.tolist()
+
+
+trackers = None
+
+@eel.expose
+def detectIndividuals():
+
+    world = system.getCurrentWorld()
+    min_size = 10 * 10
+
+    # Sum the values along the last axis
+    summed_world = np.sum(world, axis=-1)
+
+    # Threshold the array
+    mask = np.where(summed_world > 0, True, False)
+
+    # Label the connected regions
+    labels, num_features = ndimage.label(mask)
+
+    # Count the number of non-zero values in each group
+    counts = np.bincount(labels.ravel())
+    
+    # Find the bounding box of each region
+    slices = ndimage.find_objects(labels)
+
+    # Calculate the length of each bounding box
+    lengths = [tuple(slice_.stop - slice_.start for slice_ in slice_tuple)
+               for slice_tuple in slices]
+
+    # Filter out regions that don't meet the minimum size threshold
+    lengths = [(length[0] / world.shape[0], length[1] / world.shape[1]) for i, length in enumerate(
+        lengths) if np.bincount(labels.ravel())[i+1] >= min_size]
+
+
+    # Find the center of mass of each connected region that meets the minimum size threshold
+    centers = np.array([ndimage.center_of_mass(summed_world, labels=labels, index=i) for i in range(1, num_features+1) if counts[i] >= min_size])
+
+    boxes_list = []
+
+    # temp = world.shape[0]
+
+    for [x, y], [w, h] in zip(centers, lengths):
+        boxes_list.append([x, y, w, h])
+    
+    trackers = cv2.MultiTracker_create()
+
+    for bbox in boxes_list:
+        trackers.add(cv2.TrackerKCF_create(), world, bbox)
+
+
+# detectIndividuals()
+
+@eel.expose
+def getCoordinatesFromPython():
+
+    centers, world_size = system.getCoordinatesOfIndividuals()
+
+    for k, v in centers.items():
+        centers[k] = [v[0], #/ world_size,
+                     v[1], #/ world_size,
+                     v[2], # / world_size,
+                     v[3] # / world_size
+                     ]
+    
+    return centers
+
+
+
+
+
+
+
 
 
 
 eel.start("index.html", mode="chrome-app")
 
+# eel.openNewWindow()
 
 
 

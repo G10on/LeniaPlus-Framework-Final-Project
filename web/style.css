@@ -9,7 +9,9 @@
 
 body {
     /* background-color: #0e1414; */
-    background-color: #001A23;
+    background-color: #002234;
+    /* background-image: linear-gradient(to bottom right, #8360c3, #2ebf91); */
+    background-image: linear-gradient(to bottom right, #002234, #1e6f61);
     color: aliceblue;
     font-family: 'Poppins', sans-serif;
     box-sizing: border-box;
@@ -39,10 +41,11 @@ input, button {
 
 .window {
   background-color: #465362;
+  /* background-image: linear-gradient(to bottom right, #002234, #1e6f61); */
   padding: 15px 25px;
   border: #48E5C2 1px solid;
   box-shadow: 0 0 30px -5px #48E5C2;
-  border-radius: 5px;
+  border-radius: 12px;
 }
 
 .nav-menu {
@@ -164,7 +167,7 @@ input, button {
   justify-content: center;
   float: left;
   border-radius: 4px;
-  width: calc(100% - 550px);
+  width: calc(100% - 650px);
   /* width: 800px; */
   height: 100%;
   /* width: 256px;
@@ -173,13 +176,13 @@ input, button {
   overflow: hidden;
 }
 
-canvas {
+#map {
 }
 
 
 .control-panel {
 
-  width: 500px;
+  width: 600px;
   height: 100%;
   padding: 0;
   overflow: hidden;
@@ -577,6 +580,22 @@ canvas {
 .add-parameter-btn {
   background-color: #4CAF50;
 }
+
+
+
+
+
+
+
+#tracker {
+  background-color: white;
+  height: 300px;
+  width: 100%;
+
+  border-radius: 16px;
+}
+
+
 
 
 
