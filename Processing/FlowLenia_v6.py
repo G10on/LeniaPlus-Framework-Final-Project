@@ -1,6 +1,7 @@
 import base64
 from datetime import datetime
 import os
+import random
 import time
 import timeit
 from functools import partial
@@ -23,10 +24,14 @@ from numba.experimental import jitclass
 # import pygame as pg
 import numpy as np
 import scipy as sp
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import typing as t
 
 from scipy import ndimage
+import skimage
+
+from skimage.feature import hog
+from skimage import exposure
 
 # import os
 
@@ -355,6 +360,8 @@ class System():
         self.setData()
         self.compile()
         self.center_points = {}
+        self.original_indivs = {}
+        self.accum_neighbour = {}
         self.next_id = 0
         return
 
@@ -492,13 +499,13 @@ class System():
         mask = np.where(summed_world > 0, True, False)
 
         # Label the connected regions
-        labels, num_features = ndimage.label(mask)
+        self.labels, num_features = ndimage.label(mask)
 
         # Count the number of non-zero values in each group
-        counts = np.bincount(labels.ravel())
+        counts = np.bincount(self.labels.ravel())
 
         # Find the bounding box of each region
-        slices = ndimage.find_objects(labels)
+        slices = ndimage.find_objects(self.labels)
 
         # Calculate the length of each bounding box
         lengths = [tuple(slice_.stop - slice_.start for slice_ in slice_tuple)
@@ -506,10 +513,10 @@ class System():
 
         # Filter out regions that don't meet the minimum size threshold
         lengths = [(length[0] / self.world.A.shape[0], length[1] / self.world.A.shape[1]) for i, length in enumerate(
-            lengths) if np.bincount(labels.ravel())[i+1] >= min_size]
+            lengths) if np.bincount(self.labels.ravel())[i+1] >= min_size]
 
         # Find the center of mass of each connected region that meets the minimum size threshold
-        new_center_points = np.array([ndimage.center_of_mass(summed_world, labels=labels, index=i)
+        new_center_points = np.array([ndimage.center_of_mass(summed_world, labels=self.labels, index=i)
                         for i in range(1, num_features+1) if counts[i] >= min_size])
         
         # if len(new_center_points) == 0:
@@ -570,12 +577,16 @@ class System():
 
         # Now only new detections remain in new_center_points.
         for new_center, size in zip(new_center_points, lengths):
-            self.center_points[self.next_id] = [
+            bbox = [
                 new_center[0], 
                 new_center[1], 
                 size[0], 
                 size[1] ]
+            self.center_points[self.next_id] = bbox
+            self.original_indivs[self.next_id] = self.getIndividualsAsArrays(bbox)
+            self.accum_neighbour[self.next_id] = 0
             self.next_id += 1
+
         
 
 
@@ -585,8 +596,236 @@ class System():
 
         return self.center_points, self.world.A.shape[0]
 
-    def setCurrentCoordinates(self):
-        return
+    def getIndividualsAsArrays(self, bbox):
+
+        # # Empty list to store the extracted n-dimensional arrays
+        # extracted_arrays = {}
+
+        # for k, v in self.center_points.items():
+        #     # Calculate the start and end indices for slicing
+        #     start_row = v[0]
+        #     end_row = start_row + v[3]
+        #     start_col = v[1]
+        #     end_col = start_col + v[2]
+
+        #     # Slice the array and store the subarray in the result dictionary
+        #     subarray = self.world.A[start_row:end_row, start_col:end_col]
+        #     extracted_arrays[k] = subarray
+
+        
+        # Empty list to store the extracted n-dimensional arrays
+
+        # Calculate the start and end indices for slicing
+        start_row = int((bbox[0] - bbox[3] / 2) * self.world.A.shape[0])
+        end_row = int((bbox[0] + bbox[3] / 2) * self.world.A.shape[0])
+        start_col = int((bbox[1] - bbox[2] / 2) * self.world.A.shape[1])
+        end_col = int((bbox[1] + bbox[2] / 2) * self.world.A.shape[1])
+
+        start_row = max(start_row, 0)
+        end_row = min(end_row, self.world.A.shape[0])
+        start_col = max(start_col, 0)
+        end_col = min(end_col, self.world.A.shape[1])
+
+        # print(start_row, end_row, start_col, end_col)
+
+        # Slice the array and store the subarray in the result dictionary
+        subarray = self.world.A[start_row:end_row, start_col:end_col, :]
+        # print(start_row, end_row, start_col, end_col, subarray.shape)
+
+        return subarray
+    
+    def resize_individual(self, arr, new_shape):
+        """
+        Interpolates a NumPy array to change its dimensions using linear interpolation.
+        
+        Parameters:
+            arr (ndarray): The input NumPy array.
+            new_shape (tuple): The desired new dimensions as a tuple (new_rows, new_cols, new_depth).
+        
+        Returns:
+            ndarray: The interpolated array with the new dimensions.
+        """
+        # Create the coordinates for the original array
+        curr_shape = arr.shape
+        coords = [np.linspace(0, curr_dim-1, curr_dim) for curr_dim in curr_shape]
+        
+        # Create the interpolator
+        interpolator = sp.interpolate.RegularGridInterpolator(coords, arr, method='linear', bounds_error=False, fill_value=0)
+        
+        # Create the coordinates for the interpolated array
+        new_coords = [np.linspace(0, new_dim-1, new_dim) for new_dim in new_shape]
+        interp_coords = np.meshgrid(*new_coords, indexing='ij')
+        points = np.stack(interp_coords, axis=-1)
+
+        # print("Interpolating", new_coords)
+        
+        # Perform interpolation
+        interpolated = interpolator(points)
+        
+        return interpolated
+    
+    def normalize_individual(self, array):
+        min_val = np.min(array)
+        max_val = np.max(array)
+        return (array - min_val) / (max_val - min_val)
+
+    def computeSurvivalScore(self):
+
+        density_scores = {}
+
+        # print(self.accum_neighbour)
+
+        for k, bbox in self.center_points.items():
+
+            indiv = self.getIndividualsAsArrays(bbox)
+
+            total_mass = np.sum(indiv)
+            total_volume = np.count_nonzero(indiv)
+            density_scores[k] = (total_mass / total_volume).item()
+
+        # print(self.accum_neighbour.keys(), self.center_points.keys())
+
+        # for key in remaining_indiv:
+        #     scores[key] = self.accum_neighbour[key]
+
+        # self.accum_neighbour = scores
+
+        # print("Surviv:", density_scores)
+        # print("Surviv:", density_scores[0])
+        # print("Surviv:", density_scores[0].items())
+
+        return density_scores
+
+
+
+
+    def computeReproductionScore(self):
+
+        # scores = {}
+        # remaining_indiv = []
+
+        # print(self.accum_neighbour)
+
+        for k, bbox in self.center_points.items():
+
+            indiv = self.getIndividualsAsArrays(bbox)
+
+            keys = [key for key in self.center_points.keys() if key != k]
+
+            # print(keys, k)
+
+            if len(keys) == 0: continue
+
+            # remaining_indiv.append(k)
+            
+            neighbour = self.getIndividualsAsArrays(self.center_points[random.choice(keys)])
+
+
+            
+            neighbour = self.original_indivs[k]
+            resized_target = self.resize_individual(indiv, neighbour.shape)
+
+            # Create a 2x1 grid of subplots
+            # fig, axes = plt.subplots(2, 1)
+
+            # Display the images in the subplots
+            # axes[0].imshow(original)
+            # axes[0].set_title('Image 1')
+            # axes[1].imshow(resized_target)
+            # axes[1].set_title('Image 2')
+
+            # plt.show()
+
+
+            # normalized_original = self.normalize_individual(original)
+            # normalized_target = self.normalize_individual(np.rot90(original, 2))
+            # normalized_target = self.normalize_individual(resized_target)
+
+            # print(original.shape, resized_target.shape)
+            
+            similarity_score = self.calculate_similarity(neighbour, resized_target)
+            # n_cross_corr = self.calculate_similarity(original, np.rot90(original, 2))
+
+
+            self.accum_neighbour[k] = (self.accum_neighbour[k] + similarity_score) / 2
+
+        common_keys = set(self.center_points.keys()) & set(self.accum_neighbour.keys())
+        self.accum_neighbour = {key: self.accum_neighbour[key] for key in common_keys}
+
+        # print(self.accum_neighbour.keys(), self.center_points.keys())
+
+        # for key in remaining_indiv:
+        #     scores[key] = self.accum_neighbour[key]
+        
+        # self.accum_neighbour = scores
+
+        # print("Reprod:", self.accum_neighbour)
+
+        return self.accum_neighbour
+
+    def computeMorphologyScore(self):
+
+        scores = {}
+
+        for k, bbox in self.center_points.items():
+
+            indiv = self.getIndividualsAsArrays(bbox)
+            
+            original = self.original_indivs[k]
+            resized_target = self.resize_individual(indiv, original.shape)
+
+            # Create a 2x1 grid of subplots
+            # fig, axes = plt.subplots(2, 1)
+
+            # Display the images in the subplots
+            # axes[0].imshow(original)
+            # axes[0].set_title('Image 1')
+            # axes[1].imshow(resized_target)
+            # axes[1].set_title('Image 2')
+
+            # plt.show()
+
+
+            normalized_original = self.normalize_individual(original)
+            normalized_target = self.normalize_individual(np.rot90(original, 2))
+            # normalized_target = self.normalize_individual(resized_target)
+
+            # print(original.shape, resized_target.shape)
+            
+            n_cross_corr = self.calculate_similarity(original, resized_target)
+            # n_cross_corr = self.calculate_similarity(original, np.rot90(original, 2))
+
+
+            scores[k] = n_cross_corr
+            # print(n_cross_corr)
+
+        # print("Morph:", scores)
+        return scores
+
+
+    def calculate_similarity(self, image1, image2):
+        """
+        Calculates the similarity score between two 3D NumPy arrays.
+        Assumes the arrays have the same shape.
+
+        Parameters:
+            array1 (np.ndarray): The first 3D NumPy array.
+            array2 (np.ndarray): The second 3D NumPy array.
+
+        Returns:
+            float: The similarity score between the two arrays.
+        """
+        # Calculate the element-wise difference between the arrays
+        diff = np.abs(image1 - image2)
+        
+        # Calculate the sum of the differences
+        total_diff = np.sum(diff)
+        
+        # Normalize the total difference by the total number of elements
+        similarity = 1 - (total_diff / image1.size)
+        
+        return similarity
+    
 
     def getPreviousCoordinates(self):
         return 
@@ -960,6 +1199,28 @@ def getCoordinatesFromPython():
 
 
 
+
+
+@eel.expose
+def getGlobalSurvivalStats():
+
+    data = system.computeSurvivalScore()
+    
+    return data
+
+@eel.expose
+def getGlobalReproductionStats():
+
+    data = system.computeReproductionScore()
+    
+    return data
+
+@eel.expose
+def getGlobalMorphologyStats():
+
+    data = system.computeMorphologyScore()
+    
+    return data
 
 
 

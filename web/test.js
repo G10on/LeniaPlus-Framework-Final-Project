@@ -266,41 +266,39 @@ async function updateWorldDisplay() {
 
 async function getAnalysisFromPython() {
     
-    drawCenterMass();
+    const centers = await eel.getCoordinatesFromPython()();
+    drawCenterMass(centers);
+    drawDots(centers);
+    updateStats();
     // let coordinates = await eel.getCoordinatesFromPython()();
-    // drawDots(coordinates);
 }
 
-function drawDots(coordinates) {
-  const pointSize = 0.5;
-  ctx_tracker.fillStyle = "#ff2626"; // Red color
-  const canvasWidth = tracker.width;
-  const canvasHeight = tracker.height;
+async function drawDots(coordinates) {
 
-  for (let i = 0; i < coordinates.length; i++) {
-    const [xPercent, yPercent] = coordinates[i];
-    const x = xPercent * canvasWidth;
-    const y = yPercent * canvasHeight;
-    ctx_tracker.beginPath(); 
-    ctx_tracker.arc(x, y, pointSize, 0, Math.PI * 2, true);
-    ctx_tracker.fill(); 
-  }
+    const pointSize = 1;
+    const canvasWidth = tracker.width;
+    const canvasHeight = tracker.height;
+  
+    for (let id in coordinates) {
+        ctx_tracker.fillStyle = getColorByKey(id);
+        const [xPercent, yPercent] = coordinates[id];
+        const x = xPercent * canvasWidth;
+        const y = yPercent * canvasHeight;
+        ctx_tracker.beginPath(); 
+        ctx_tracker.arc(x, y, pointSize, 0, Math.PI * 2, true);
+        ctx_tracker.fill(); 
+    }
 }
 
 
 
-async function drawCenterMass() {
+async function drawCenterMass(centers) {
 
-    let centers = await eel.getCoordinatesFromPython()();
     ctx.lineWidth = 4;
 
     for (let id in centers) {
-        
-        let number = Math.floor(id * 50);
-        let red =  (12345 % (number + 2) * 567) % 256;
-        let green =  (123456 % (number + 3) + 890) % 256;
-        let blue =  (1234567 % (number + 4) + 1117) % 256;
-        ctx.strokeStyle = `rgb(${red}, ${green}, ${blue})`;
+
+        ctx.strokeStyle = getColorByKey(id);
 
         let x = centers[id][0];
         let y = centers[id][1];
@@ -312,6 +310,15 @@ async function drawCenterMass() {
     }
 
 }
+
+async function updateStats() {
+    // updateGlobalSurvival();
+    // updateGlobalreproduction(1);
+    getNewStats(2);
+    getNewStats(1);
+    getNewStats(0);
+}
+
 
 
 function resetPlayer() {
@@ -326,12 +333,12 @@ async function step() {
     stepNTxt.textContent = parseInt(stepNTxt.textContent) + 1;
     await eel.step()();
     await updateWorldDisplay();
+    getAnalysisFromPython();
 }
 
 async function play() {
     while (is_playing) {
         await step();
-        getAnalysisFromPython();
     }
 }
 
