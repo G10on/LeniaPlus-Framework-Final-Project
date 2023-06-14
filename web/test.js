@@ -1,6 +1,7 @@
 
 
-const canvas = document.getElementById("map"),
+const body = document.getElementsByTagName("body"),
+canvas = document.getElementById("map"),
 ctx = canvas.getContext("2d"),
 tracker = document.getElementById("tracker"),
 ctx_tracker = tracker.getContext("2d"),
@@ -26,6 +27,7 @@ importBtn = document.querySelector(".import-btn"),
 versionMenu = document.querySelector(".version-selector"),
 versionLoadingTxt = document.querySelector(".version-loading-txt"),
 stepNTxt = document.querySelector("#step-n-txt"),
+closeBtn = document.querySelector(".close-btn"),
 mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
 
 
@@ -266,10 +268,13 @@ async function updateWorldDisplay() {
 
 async function getAnalysisFromPython() {
     
-    const centers = await eel.getCoordinatesFromPython()();
+    let centers = await eel.getCoordinatesFromPython()();
     drawCenterMass(centers);
     drawDots(centers);
     updateStats();
+    updateIndividualsButtons();
+    // updateIndividualsStatWindows();
+    updateAllIndividuals();
     // let coordinates = await eel.getCoordinatesFromPython()();
 }
 
@@ -412,6 +417,11 @@ async function getParamsFromPython() {
 async function setParamsInPython(sampleName = null) {
 
     versionLoadingTxt.innerText = "Compiling...";
+    ctx_tracker.clearRect(0, 0, tracker.width, tracker.height);
+    let container = document.getElementById('individual-selector');
+    container.innerHTML = "";
+
+
 
     let data = {};
 
@@ -845,7 +855,10 @@ mediaRecorder.onstop = function() {
 
 channelCheckbox.addEventListener("change", countSelectedCheckboxes);
 
-
+closeBtn.addEventListener("click", async () => {
+    await eel.shutdown();
+    window.close();
+})
 
 
 
@@ -854,6 +867,8 @@ channelCheckbox.addEventListener("change", countSelectedCheckboxes);
 setChannelSelector();
 
 getParamsFromPython();
+
+getAnalysisFromPython();
 
 
 

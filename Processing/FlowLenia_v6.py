@@ -2,6 +2,7 @@ import base64
 from datetime import datetime
 import os
 import random
+import sys
 import time
 import timeit
 from functools import partial
@@ -11,7 +12,7 @@ import cv2
 
 # import cupy
 
-# import jax
+import jax
 import jax.numpy as jnp
 import jax.scipy as jsp
 # import jax.scipy as jsp
@@ -32,6 +33,7 @@ import skimage
 
 from skimage.feature import hog
 from skimage import exposure
+from skimage.measure import moments, moments_central, moments_normalized, moments_hu
 
 # import os
 
@@ -361,7 +363,9 @@ class System():
         self.compile()
         self.center_points = {}
         self.original_indivs = {}
-        self.accum_neighbour = {}
+        self.survival_scores = {}
+        self.accum_neighbour_scores = {}
+        self.morphology_scores = {}
         self.next_id = 0
         return
 
@@ -584,7 +588,7 @@ class System():
                 size[1] ]
             self.center_points[self.next_id] = bbox
             self.original_indivs[self.next_id] = self.getIndividualsAsArrays(bbox)
-            self.accum_neighbour[self.next_id] = 0
+            self.accum_neighbour_scores[self.next_id] = 0
             self.next_id += 1
 
         
@@ -694,10 +698,9 @@ class System():
         # print("Surviv:", density_scores[0])
         # print("Surviv:", density_scores[0].items())
 
+        # print("SURVIVAL:", density_scores)
+        self.survival_scores = density_scores
         return density_scores
-
-
-
 
     def computeReproductionScore(self):
 
@@ -722,7 +725,7 @@ class System():
 
 
             
-            neighbour = self.original_indivs[k]
+            # neighbour = self.original_indivs[k]
             resized_target = self.resize_individual(indiv, neighbour.shape)
 
             # Create a 2x1 grid of subplots
@@ -747,10 +750,10 @@ class System():
             # n_cross_corr = self.calculate_similarity(original, np.rot90(original, 2))
 
 
-            self.accum_neighbour[k] = (self.accum_neighbour[k] + similarity_score) / 2
+            self.accum_neighbour_scores[k] = (self.accum_neighbour_scores[k] + similarity_score) / 2
 
-        common_keys = set(self.center_points.keys()) & set(self.accum_neighbour.keys())
-        self.accum_neighbour = {key: self.accum_neighbour[key] for key in common_keys}
+        common_keys = set(self.center_points.keys()) & set(self.accum_neighbour_scores.keys())
+        self.accum_neighbour_scores = {key: self.accum_neighbour_scores[key] for key in common_keys}
 
         # print(self.accum_neighbour.keys(), self.center_points.keys())
 
@@ -761,7 +764,9 @@ class System():
 
         # print("Reprod:", self.accum_neighbour)
 
-        return self.accum_neighbour
+        # print("REPRODUCTION:", self.accum_neighbour)
+
+        return self.accum_neighbour_scores
 
     def computeMorphologyScore(self):
 
@@ -772,7 +777,8 @@ class System():
             indiv = self.getIndividualsAsArrays(bbox)
             
             original = self.original_indivs[k]
-            resized_target = self.resize_individual(indiv, original.shape)
+            # resized_target = self.resize_individual(indiv, original.shape)
+            resized_target = jnp.rot90(original, 0)
 
             # Create a 2x1 grid of subplots
             # fig, axes = plt.subplots(2, 1)
@@ -799,36 +805,85 @@ class System():
             scores[k] = n_cross_corr
             # print(n_cross_corr)
 
-        # print("Morph:", scores)
-        return scores
+        self.morphology_scores = scores
+
+        # print("MORPHOLOGY:", scores)
+        return self.morphology_scores
 
 
     def calculate_similarity(self, image1, image2):
-        """
-        Calculates the similarity score between two 3D NumPy arrays.
-        Assumes the arrays have the same shape.
-
-        Parameters:
-            array1 (np.ndarray): The first 3D NumPy array.
-            array2 (np.ndarray): The second 3D NumPy array.
-
-        Returns:
-            float: The similarity score between the two arrays.
-        """
-        # Calculate the element-wise difference between the arrays
-        diff = np.abs(image1 - image2)
+        # Convert arrays to JAX DeviceArrays
+        image1 = jnp.asarray(image1)
+        image2 = jnp.asarray(image2)
         
-        # Calculate the sum of the differences
-        total_diff = np.sum(diff)
+        # Normalize the arrays
+        arr1_norm = (image1 - jnp.mean(image1)) / jnp.std(image1)
+        arr2_norm = (image2 - jnp.mean(image2)) / jnp.std(image2)
         
-        # Normalize the total difference by the total number of elements
-        similarity = 1 - (total_diff / image1.size)
+        # Compute the cross-correlation
+        cross_corr = jnp.correlate(arr1_norm.flatten(), arr2_norm.flatten(), mode='same')
         
-        return similarity
+        # Compute the similarity
+        similarity = jnp.max(cross_corr) / (jnp.linalg.norm(arr1_norm) * jnp.linalg.norm(arr2_norm))
+        
+        return similarity.item()
     
+    def align_images(self, image1, image2):
+        """
+        Align two input images using translation and rotation.
+        
+        Args:
+            image1 (jnp.ndarray): First input image.
+            image2 (jnp.ndarray): Second input image.
+            
+        Returns:
+            jnp.ndarray: Aligned image (image2) after the alignment.
+        """
+        # Convert images to grayscale
+        gray1 = jnp.mean(image1, axis=-1)
+        gray2 = jnp.mean(image2, axis=-1)
+        
+        # Convert JAX DeviceArray to NumPy array
+        gray1 = jnp.array(gray1)
+        gray2 = jnp.array(gray2)
+        
+        # Calculate the rotation angle
+        h, w = gray1.shape
+        rotation_matrix = cv2.getRotationMatrix2D((w // 2, h // 2), 0, 1)
+        
+        # Convert the rotation matrix to NumPy array
+        rotation_matrix = jnp.array(rotation_matrix)
+        
+        # Convert NumPy arrays back to JAX DeviceArray
+        gray1 = jax.device_put(gray1)
+        gray2 = jax.device_put(gray2)
+        rotation_matrix = jax.device_put(rotation_matrix)
+        
+        # Perform the alignment
+        aligned_image2 = cv2.warpAffine(gray2.get(), rotation_matrix.get(), (w, h))
+        
+        return aligned_image2
+    
+    def getIndividuals(self):
 
-    def getPreviousCoordinates(self):
-        return 
+        # print(self.morphology_scores)
+
+        return self.morphology_scores
+    
+    def getAllStatsFromKey(self, key):
+        
+        stats = {}
+
+        # print(self.survival_scores, self.accum_neighbour_scores, self.morphology_scores)
+        
+        try:
+            stats["survival"] = self.survival_scores[key]
+            stats["reproduction"] = self.accum_neighbour_scores[key]
+            stats["morphology"] = self.morphology_scores[key]
+        except KeyError:
+            stats = {}
+
+        return stats
 
 
 
@@ -1223,12 +1278,26 @@ def getGlobalMorphologyStats():
     return data
 
 
+@eel.expose
+def getIndividualsFromPython():
+
+    return system.getIndividuals()
+
+@eel.expose
+def getAllStatsFromPython(id):
+
+    return system.getAllStatsFromKey(id)
 
 
 
 
+@eel.expose
+def shutdown():
+    
+    sys.exit()
 
-eel.start("index.html", mode="chrome-app")
+
+eel.start("index.html", mode="chrome-app", shtudown_delay = 2.0)
 
 # eel.openNewWindow()
 

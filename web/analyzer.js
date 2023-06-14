@@ -139,6 +139,8 @@ async function getNewStats(chart_id) {
     
     // let data = await eel.getGlobalReproductionStats()();
 
+    var data;
+
     switch (chart_id) {
         case 0:
             data = await eel.getGlobalSurvivalStats()();
