@@ -107,25 +107,6 @@ async function updateIndividual(windID) {
     for (let name of graphNames) {
         activeIndividuals[windID][2][name][2](activeIndividuals[windID][0], scores[name]);
     }
-    // updateGraph(barCharts[0], [scores["survival"]]);
-
-
-
-    // console.log(scores);
-
-    // for (let idc in individualDivContainer) {
-    //     if (idc.getAttribute("data-custom") === id) {
-    //     updateIndividual(i, activeIndividuals[i]);
-    // }
-
-
-
-    // if (drg_wind.getAttribute("data-custom") != String(id)) {
-    //     // Clear existing stats
-    //     pass
-    // }
-
-    
 
     
 }
