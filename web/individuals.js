@@ -389,7 +389,7 @@ function createBarChart(id) {
     .padding(0.1);
 
   const yScale = d3.scaleLinear()
-    .domain([0, 100])
+    .domain([-1, 1]) // Set the y-axis domain to be between 0 and 1
     .range([200, 0]);
 
   // Create the axis

@@ -28,6 +28,9 @@ versionMenu = document.querySelector(".version-selector"),
 versionLoadingTxt = document.querySelector(".version-loading-txt"),
 stepNTxt = document.querySelector("#step-n-txt"),
 closeBtn = document.querySelector(".close-btn"),
+confirmExitWindow = document.getElementById("exit-confirmation-window"),
+undoExitBtn = document.getElementById("undo-exit-btn"),
+confirmExitBtn = document.getElementById("confirm-exit-btn"),
 mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
 
 
@@ -856,6 +859,21 @@ mediaRecorder.onstop = function() {
 channelCheckbox.addEventListener("change", countSelectedCheckboxes);
 
 closeBtn.addEventListener("click", async () => {
+    confirmExitWindow.style.display = "flex";
+    overlay.style.display = "block";
+
+    overlay.addEventListener('click', () => {
+        confirmExitWindow.style.display = "none";
+        overlay.style.display = "none";
+    });
+})
+
+undoExitBtn.addEventListener("click", async () => {
+    confirmExitWindow.style.display = "none";
+    overlay.style.display = "none";
+})
+
+confirmExitBtn.addEventListener("click", async () => {
     await eel.shutdown();
     window.close();
 })

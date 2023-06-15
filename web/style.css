@@ -661,6 +661,39 @@ input, button {
 }
 
 
+#exit-confirmation-window {
+  display: none;
+  /* display: flex; */
+  flex-direction: column;
+  align-items: center;
+  position: fixed;
+  /* padding: 10px 30px 30px 30px; */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+
+  gap: 10px;
+}
+
+#exit-confirmation-window > div {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+}
+
+.exit-options-btn button{
+  width: 100%;
+}
+
+.exit-options-btn #undo-exit-btn{
+  background-color: tomato;
+}
+
+.exit-options-btn #confirm-exit-btn {
+  background-color: #4CAF50;
+}
 
 
 #overlay {

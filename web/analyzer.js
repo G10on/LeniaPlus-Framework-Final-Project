@@ -28,7 +28,7 @@ for (let i = 0; i < chart_ids.length; i++) {
 
   // Create y scale
   const yScale = d3.scaleLinear()
-    .domain([0, 100])
+    .domain([-1, 1])
     .range([height, 0]);
   yScale_all.push(yScale);
 
@@ -126,7 +126,7 @@ function updateChart(data, chart_id) {
     .remove();
 
   // Update y axis domain with a maximum value of 1.0
-  yScale_all[chart_id].domain([0, 1.0]);
+  yScale_all[chart_id].domain([-1, 1.0]);
 
   svg_all[chart_id].select(".y.axis")
     .call(yAxis_all[chart_id]);

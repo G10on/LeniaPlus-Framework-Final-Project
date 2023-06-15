@@ -364,6 +364,7 @@ class System():
         self.center_points = {}
         self.original_indivs = {}
         self.survival_scores = {}
+        self.previous_survival_scores = {}
         self.accum_neighbour_scores = {}
         self.morphology_scores = {}
         self.next_id = 0
@@ -588,6 +589,8 @@ class System():
                 size[1] ]
             self.center_points[self.next_id] = bbox
             self.original_indivs[self.next_id] = self.getIndividualsAsArrays(bbox)
+            self.survival_scores[self.next_id] = 0
+            self.previous_survival_scores[self.next_id] = 0
             self.accum_neighbour_scores[self.next_id] = 0
             self.next_id += 1
 
@@ -686,6 +689,8 @@ class System():
             total_mass = np.sum(indiv)
             total_volume = np.count_nonzero(indiv)
             density_scores[k] = (total_mass / total_volume).item()
+            self.survival_scores[k] = density_scores[k] - self.previous_survival_scores[k]
+            self.previous_survival_scores[k] = density_scores[k]
 
         # print(self.accum_neighbour.keys(), self.center_points.keys())
 
@@ -699,7 +704,7 @@ class System():
         # print("Surviv:", density_scores[0].items())
 
         # print("SURVIVAL:", density_scores)
-        self.survival_scores = density_scores
+        # self.survival_scores = density_scores
         return density_scores
 
     def computeReproductionScore(self):
