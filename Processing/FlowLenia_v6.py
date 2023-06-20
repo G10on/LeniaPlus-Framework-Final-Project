@@ -495,7 +495,7 @@ class System():
 
     def getCoordinatesOfIndividuals(self):
 
-        min_size = 10 * 2
+        min_size = 10 * 5
 
         # Sum the values along the last axis
         summed_world = np.sum(self.world.A, axis=-1)
@@ -687,7 +687,11 @@ class System():
             indiv = self.getIndividualsAsArrays(bbox)
 
             total_mass = np.sum(indiv)
+            if total_mass == 0: total_mass = 1e-9
             total_volume = np.count_nonzero(indiv)
+            if total_volume == 0: total_volume = jnp.asarray([1])
+            # print(total_mass, total_volume, (total_mass / total_volume), indiv.shape)
+            # if indiv.shape[0] == 14: print(indiv)
             density_scores[k] = (total_mass / total_volume).item()
             self.survival_scores[k] = density_scores[k] - self.previous_survival_scores[k]
             self.previous_survival_scores[k] = density_scores[k]
@@ -733,6 +737,8 @@ class System():
             # neighbour = self.original_indivs[k]
             resized_target = self.resize_individual(indiv, neighbour.shape)
 
+            # print("RESIZED", np.isnan(resized_target).any())
+
             # Create a 2x1 grid of subplots
             # fig, axes = plt.subplots(2, 1)
 
@@ -755,6 +761,7 @@ class System():
             # n_cross_corr = self.calculate_similarity(original, np.rot90(original, 2))
 
 
+            # print("REPROD: ", self.accum_neighbour_scores[k], similarity_score, (self.accum_neighbour_scores[k] + similarity_score) / 2)
             self.accum_neighbour_scores[k] = (self.accum_neighbour_scores[k] + similarity_score) / 2
 
         common_keys = set(self.center_points.keys()) & set(self.accum_neighbour_scores.keys())
@@ -782,8 +789,8 @@ class System():
             indiv = self.getIndividualsAsArrays(bbox)
             
             original = self.original_indivs[k]
-            # resized_target = self.resize_individual(indiv, original.shape)
-            resized_target = jnp.rot90(original, 0)
+            resized_target = self.resize_individual(indiv, original.shape)
+            # resized_target = jnp.rot90(original, 0)
 
             # Create a 2x1 grid of subplots
             # fig, axes = plt.subplots(2, 1)
@@ -797,8 +804,8 @@ class System():
             # plt.show()
 
 
-            normalized_original = self.normalize_individual(original)
-            normalized_target = self.normalize_individual(np.rot90(original, 2))
+            # normalized_original = self.normalize_individual(original)
+            # normalized_target = self.normalize_individual(np.rot90(original, 2))
             # normalized_target = self.normalize_individual(resized_target)
 
             # print(original.shape, resized_target.shape)
@@ -817,9 +824,20 @@ class System():
 
 
     def calculate_similarity(self, image1, image2):
+
+        # print("SIMILARITY", np.isnan(image1).any(), np.isnan(image2).any())
+
         # Convert arrays to JAX DeviceArrays
         image1 = jnp.asarray(image1)
         image2 = jnp.asarray(image2)
+
+        # epsilon = 1e-9  # Small constant value
+        # arr1_norm = (image1 - jnp.mean(image1)) / (jnp.std(image1) + epsilon)
+        # arr2_norm = (image2 - jnp.mean(image2)) / (jnp.std(image2) + epsilon)
+
+        # Check if the standard deviation is zero
+        if jnp.std(image1) == 0 or jnp.std(image2) == 0:
+            return 0.0  # Return a default similarity value when there is zero variance
         
         # Normalize the arrays
         arr1_norm = (image1 - jnp.mean(image1)) / jnp.std(image1)
@@ -827,11 +845,21 @@ class System():
         
         # Compute the cross-correlation
         cross_corr = jnp.correlate(arr1_norm.flatten(), arr2_norm.flatten(), mode='same')
+
+        # print("SIMILARITY", np.isnan(cross_corr).any(), np.isnan(jnp.max(cross_corr)).any(), np.isnan(jnp.linalg.norm(arr1_norm).any()))
         
         # Compute the similarity
         similarity = jnp.max(cross_corr) / (jnp.linalg.norm(arr1_norm) * jnp.linalg.norm(arr2_norm))
-        
-        return similarity.item()
+
+        score = similarity.item()
+        if type(score) != float:
+            score = 0.0
+    
+        return score
+        # except Exception:
+        #     print("ERROR in calculate_similarity", Exception)
+            
+        #     return 0.5
     
     def align_images(self, image1, image2):
         """
@@ -1265,6 +1293,8 @@ def getCoordinatesFromPython():
 def getGlobalSurvivalStats():
 
     data = system.computeSurvivalScore()
+
+    # print("Survival score: " + str(data))
     
     return data
 
@@ -1272,6 +1302,7 @@ def getGlobalSurvivalStats():
 def getGlobalReproductionStats():
 
     data = system.computeReproductionScore()
+    # print("Reprod score: " + str(data))
     
     return data
 
@@ -1279,6 +1310,9 @@ def getGlobalReproductionStats():
 def getGlobalMorphologyStats():
 
     data = system.computeMorphologyScore()
+    # print("Morph score: " + str(data))
+
+    # print()
     
     return data
 

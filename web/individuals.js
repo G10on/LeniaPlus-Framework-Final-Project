@@ -47,19 +47,6 @@ async function updateActiveIndividualStatsList(id) {
 
 }
 
-function updateIndividualsStatWindows() {
-
-    // individualDivContainer = [];
-
-    for (let i = 0; i < activeIndividuals.length; i++) {
-        individualDivContainer.push(createDraggableDiv(i, activeIndividuals[i]));
-        
-        individualDivContainer[i].style.display = "flex";
-        document.body.appendChild(individualDivContainer[i]);
-    }
-
-}
-
 function addIndividualStats(index) {
 
     // let openedWindows = [];
@@ -94,7 +81,14 @@ async function updateIndividual(windID) {
 
     // let key = activeIndividuals[key][1].getAttribute("data-custom");
 
-    let scores = await eel.getAllStatsFromPython(parseInt(activeIndividuals[windID][0]))();
+    // console.log("Updating individual");
+    let scores = {};
+    try {
+        scores = await eel.getAllStatsFromPython(parseInt(activeIndividuals[windID][0]))();
+    } catch (error) {
+        console.error('Error parsing JSON:', error);
+        console.log(scores);
+    }
 
     if (scores.length === 0) { return; }
 
@@ -105,7 +99,9 @@ async function updateIndividual(windID) {
 
     // console.log(activeIndividuals[windID][2][0], scores["survival"]);
     for (let name of graphNames) {
-        activeIndividuals[windID][2][name][2](activeIndividuals[windID][0], scores[name]);
+        if (activeIndividuals[windID] != undefined) { 
+            activeIndividuals[windID][2][name][2](activeIndividuals[windID][0], scores[name]);
+        }
     }
 
     
@@ -247,109 +243,6 @@ function closeIndivWindow(windID) {
 }
 
 
-
-function createBarChart2(id) {
-    // Initialize an empty dataset
-    let dataset = [];
-
-    // Create the initial empty bar graph
-    const svg = d3.create("svg")
-        .attr("class", "individual-chart-container");
-
-    const chart = svg.append("g")
-        .attr("id", id)
-        .attr("class", "bar-chart individual-chart")
-        .attr("transform", "translate(50, 50)");
-
-    // Set up the scales
-    const xScale = d3.scaleBand()
-        .domain(d3.range(10))
-        .range([0, 400])
-        .padding(0.1);
-
-    const yScale = d3.scaleLinear()
-        .domain([0, 100])
-        .range([200, 0]);
-
-    // Create the axis
-    const xAxis = d3.axisBottom(xScale).tickSize(0).tickPadding(10);
-    const yAxis = d3.axisLeft(yScale).tickSize(0).tickPadding(10);
-
-    chart.append("g")
-        .attr("transform", "translate(0, 200)")
-        .call(xAxis)
-        .selectAll("text")
-        .style("fill", "black");
-
-    chart.append("g")
-        .call(yAxis)
-        .selectAll("text")
-        .style("fill", "black");
-
-    // Add axis labels
-    chart.append("text")
-        .attr("class", "axis-label")
-        .attr("x", 220)
-        .attr("y", 250)
-        .style("fill", "black")
-        .text("Bars");
-
-    chart.append("text")
-        .attr("class", "axis-label")
-        .attr("x", -140)
-        .attr("y", -40)
-        .attr("transform", "rotate(-90)")
-        .style("fill", "black")
-        .text("Height");
-
-    // Update the graph with new data
-    function updateGraph(newData) {
-        // Generate random data for the new bar
-        // const newData = Math.random() * 100;
-
-        // Add the new data to the dataset
-        dataset.push(newData);
-
-        // Limit the dataset to 10 bars
-        if (dataset.length > 10) {
-            dataset.shift(); // Remove the oldest data point
-        }
-
-        // Update the scales
-        xScale.domain(d3.range(dataset.length));
-        yScale.domain([0, d3.max(dataset)]);
-
-        // Update the vertical bar graph
-        const bars = chart.selectAll("rect")
-        .data(dataset);
-
-        // Enter
-        bars.enter()
-        .append("rect")
-        .attr("class", "bar")
-        .attr("x", (d, i) => xScale(i))
-        .attr("y", (d) => yScale(d))
-        .attr("width", xScale.bandwidth())
-        .attr("height", (d) => 200 - yScale(d));
-
-        // Update
-        bars.attr("x", (d, i) => xScale(i))
-        .attr("y", (d) => yScale(d))
-        .attr("width", xScale.bandwidth())
-        .attr("height", (d) => 200 - yScale(d));
-
-        // Exit
-        bars.exit().remove();
-    }
-
-    // Update the graph every 1 second (1000 milliseconds)
-    // setInterval(updateGraph, 1000);
-
-    // Return the created chart
-    return svg.node();
-}
-
-
 function createBarChart(id) {
   // Initialize an empty dataset
   let dataset = [];
@@ -410,7 +303,7 @@ function createBarChart(id) {
 
     // Update the scales
     xScale.domain(d3.range(dataset.length));
-    yScale.domain([0, d3.max(dataset)]);
+    yScale.domain([-1, 1]);
 
     // Update the vertical bar graph
     const bars = chart.selectAll("rect")

@@ -25,6 +25,7 @@ body {
     justify-content: space-between;
     align-items: stretch;
     flex-wrap: nowrap;
+    overflow: hidden;
 }
 
 
