@@ -495,7 +495,7 @@ class System():
 
     def getCoordinatesOfIndividuals(self):
 
-        min_size = 10 * 5
+        min_size = 10 * 2
 
         # Sum the values along the last axis
         summed_world = np.sum(self.world.A, axis=-1)
