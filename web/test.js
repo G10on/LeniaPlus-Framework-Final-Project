@@ -52,17 +52,15 @@ stepNTxt.textContent = 0;
 
 
 function addKernel() {
-    // rowCount++;
     var row_preview = tablePreview.insertRow();
     var row_kernel = tableKernel.insertRow();
-    // row_preview.id = rowCount;
-    // row_kernel.id = rowCount;
+    
     var rmshParamsCell = row_kernel.insertCell(0);
     var BParamsCell = row_kernel.insertCell(1);
     var aParamsCell = row_kernel.insertCell(2);
     var wParamsCell = row_kernel.insertCell(3);
     var TParamsCell = row_kernel.insertCell(4);
-    // var addBInputCell = row.insertCell(4);
+
     var deleteRowCell = row_preview.insertCell(0);
     var previewCell = row_preview.insertCell(1);
 
@@ -90,32 +88,8 @@ function addKernel() {
     
     for (var i = 1; i < rmsh.length; i++) {
         addInputToKernel(row_kernel, 0, rmsh[i], 0.2, false, innerDiv = true);
-        // let inputContainer = document.createElement("div");
-        // inputContainer.className = "inputContainer";
-        // rmshParamsCell.appendChild(inputContainer);
-        // let newLbl = document.createElement("label");
-        // newLbl.textContent = rmsh[i];
-        // let newInput = document.createElement("input");
-        // newInput.type = "number";
-        // // newInput.name = "input" + rowCount + "_" + i;
-        // newInput.name = rmsh[i];
-        // newInput.value = 0.2;
-        // inputContainer.appendChild(newLbl);
-        // inputContainer.appendChild(newInput);
     }
 
-    // let inputContainer = document.createElement("div");
-    // inputContainer.className = "inputContainer";
-    // rmshParamsCell.appendChild(inputContainer);
-    // let newLbl = document.createElement("label");
-    // newLbl.textContent = 'B';
-    // let newInput = document.createElement("input");
-    // newInput.type = "number";
-    // // newInput.name = "input" + rowCount + "_" + i;
-    // newInput.name = 'B';
-    // newInput.value = 0.2;
-    // inputContainer.appendChild(newLbl);
-    // inputContainer.appendChild(newInput);
     for (let k = 0; k < Baw.length; k++) {
 
         let addInputButton = document.createElement("button");
@@ -171,7 +145,6 @@ function addInputToKernel(row, cell_n, p, value, removable = true, innerDiv = fa
     inputList.appendChild(inputContainer);
     let newInput = document.createElement("input");
     newInput.type = "number";
-    // newInput.name = "input" + rowCount + "_" + i;
     newInput.name = p;
     newInput.value = value;
     if (p != '' && p) {
@@ -202,12 +175,6 @@ function addInput(btn, cell_n, p, value, innerDiv) {
 function removeInput(btn) {
   var inputContainer = btn.parentNode;
   inputContainer.parentNode.removeChild(inputContainer);
-//   var row = btn.parentNode.parentNode.parentNode;
-//   var inputCount = row.cells[0].getElementsByClassName("inputContainer").length;
-//   var inputs = row.cells[0].getElementsByTagName("input");
-//   for (var i = 4; i < inputs.length; i++) {
-//     inputs[i].name = "input" + rowCount + "_" + (i+1);
-//   }
 }
 
 
@@ -238,17 +205,7 @@ function downloadFile(url, filename) {
 
 
 async function updateWorldDisplay() {
-    
-    // let A = new Uint8ClampedArray(await eel.getWorld()());
-    // let sz = Math.sqrt(A.length / 4);
-    // let img_A = new ImageData(A, sz, sz);
-
-    // ctx.createImageData(canvas.height, canvas.width);
-    // ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // ctx.putImageData(img_A, 0, 0);
-
     var matrix = await eel.getWorld(visibleChannels)();
-    // console.log(matrix.length);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < matrix.length; i++) {
         for (var j = 0; j < matrix[i].length; j++) {
@@ -262,9 +219,7 @@ async function updateWorldDisplay() {
     let img = new Image();
     ctx.drawImage(img, 0, 0);
     img.src = dataUri;
-    // getAnalysisFromPython();
     frame_recorded = false;
-    // requestAnimationFrame(updateWorldDisplay);
 
 }
 
@@ -276,9 +231,7 @@ async function getAnalysisFromPython() {
     drawDots(centers);
     updateStats();
     updateIndividualsButtons();
-    // updateIndividualsStatWindows();
     updateAllIndividuals();
-    // let coordinates = await eel.getCoordinatesFromPython()();
 }
 
 async function drawDots(coordinates) {
@@ -320,8 +273,6 @@ async function drawCenterMass(centers) {
 }
 
 async function updateStats() {
-    // updateGlobalSurvival();
-    // updateGlobalreproduction(1);
     getNewStats(2);
     getNewStats(1);
     getNewStats(0);
@@ -359,8 +310,6 @@ async function getParamsFromPython() {
     tableKernel.innerHTML = "";
 
     var data = await eel.getParameters()();
-
-    // console.log(data)
     
     document.querySelector(".version-selector").value = data["version"];
     document.querySelector(".size").value = data["size"];
@@ -375,8 +324,6 @@ async function getParamsFromPython() {
         
         let [row_preview, row_kernel] = addKernel();
         rmsh.slice(1).forEach(k =>{
-            
-            // let inputs = row.cells[0].getElementsByTagName("input");
             let input = row_kernel.cells[0].getElementsByClassName("input-list")[0].querySelector("input[name='" + k + "']");
             input.value = data[k][i];
         })
@@ -387,10 +334,7 @@ async function getParamsFromPython() {
         for (var k = 0; k < Baw.length - 1; k++) {
 
             for (var j = 0; j < data[Baw[k]][i].length; j++) {
-                
-                // let input = row.cells[0].querySelector("input[name='" + j + "']");
                 let input = addInputToKernel(row_kernel, k + 1, '', data[Baw[k]][i][j], true, innerDiv = true);
-                // input.value = data[Baw[k]][i][j];
                 
             }
         }
@@ -405,7 +349,6 @@ async function getParamsFromPython() {
         for (var j = 0; j < data['T'][c].length; j++) {
 
             input = addInputToKernel(rows[data['T'][c][j]], Baw.length, '', c, true, innerDiv = true);
-            // input.value = c;
         }
     }
 
@@ -438,8 +381,6 @@ async function setParamsInPython(sampleName = null) {
     data["dt"] = parseFloat(document.querySelector(".dt").value);
     data["sigma"] = parseFloat(document.querySelector(".sigma").value);
 
-    // let kernelParmas = submitForm();
-
     for (var k = 0; k < rmsh.length; k++) {
         data[rmsh[k]] = [];
     }
@@ -463,7 +404,6 @@ async function setParamsInPython(sampleName = null) {
 
         for (var k = 1; k < rmsh.length; k++) {
             
-            // let inputs = row.cells[0].getElementsByTagName("input");
             let input = row_kernel.cells[0].getElementsByClassName("input-list")[0].querySelector("input[name='" + rmsh[k] + "']");
             data[rmsh[k]].push(parseFloat(input.value));
         }
@@ -474,15 +414,12 @@ async function setParamsInPython(sampleName = null) {
 
         for (var k = 0; k < Baw.length - 1; k++) {
 
-            // data[Baw[k]].push([]);
-            // console.log(data);
             var inputs = row_kernel.cells[k + 1].getElementsByClassName("input-list")[0].getElementsByTagName("input");
 
             let B = [];
 
             for (var j = 0; j < inputs.length; j++) {
-                
-                // let input = row.cells[0].querySelector("input[name='" + j + "']");
+
                 B.push(parseFloat(inputs[j].value));
                 
             }
@@ -508,7 +445,6 @@ async function setParamsInPython(sampleName = null) {
     }
     
     await getParamsFromPython();
-    // await updateWorldDisplay();
     versionLoadingTxt.innerText = "";
 }
 
@@ -550,22 +486,18 @@ async function generateKernelParamsInPython() {
 
         rmsh.slice(1).forEach(k =>{
             
-            // let inputs = row.cells[0].getElementsByTagName("input");
             let input = row_kernel.cells[0].querySelector("input[name='" + k + "']");
             data[k].push(parseFloat(input.value));
         })
 
         for (var k = 0; k < Baw.length; k++) {
 
-            // data[Baw[k]].push([]);
-            // console.log(data);
             inputs = row_kernel.cells[k + 1].getElementsByTagName("input");
 
             let B = [];
 
             for (var j = 0; j < inputs.length; j++) {
                 
-                // let input = row.cells[0].querySelector("input[name='" + j + "']");
                 B.push(parseFloat(inputs[j].value));
                 
             }
@@ -575,7 +507,7 @@ async function generateKernelParamsInPython() {
     }
     
     await eel.generateKernel(data)();
-    // await updateWorldDisplay();
+    
     await getParamsFromPython();
     versionLoadingTxt.innerText = "";
 }
@@ -590,8 +522,7 @@ function panelChanger(event) {
             div.style.display = 'none';
         }
     });
-
-    // Use SWITCH!!!
+    
     if (event.target.id === "samples") {
         loadSamples();
     }
@@ -684,14 +615,6 @@ function displaySaveNameWindow(btn) {
     });
 }
 
-
-
-// function clearCheckboxes() {
-//   var checkboxesDiv = document.getElementById("checkboxes");
-//   while (checkboxesDiv.firstChild) {
-//     checkboxesDiv.removeChild(checkboxesDiv.firstChild);
-//   }
-// }
 
 function generateCheckboxes(numChannels) {
     var checkboxesDiv = document.getElementById("checkboxes");
@@ -790,22 +713,18 @@ nextStepBtn.addEventListener("click", async () => {
 
 restartBtn.addEventListener("click", () => {
     
-    
     setParamsInPython();
-    // getKernelParamsFromWeb();
 })
 
 
 generateFromSeedBtn.addEventListener("click", () => {
     
     generateKernelParamsInPython();
-    // getKernelParamsFromWeb();
 })
 
 saveVideoBtn.addEventListener("click", () => {
 
     let nSteps = parseInt(document.querySelector(".sec-to-save").value);
-    // eel.saveNStepsToVideo(nSteps);
     mediaRecorder.start();
     setTimeout(function() {
         mediaRecorder.stop();

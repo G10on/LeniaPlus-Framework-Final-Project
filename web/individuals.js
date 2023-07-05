@@ -9,7 +9,6 @@ async function updateIndividualsButtons() {
 
     const container = document.getElementById('individual-selector');
     var dictionary = await eel.getIndividualsFromPython()();
-    // console.log(dictionary);
     container.innerHTML = "";
 
     for (let key in dictionary) {
@@ -20,7 +19,6 @@ async function updateIndividualsButtons() {
 
         button.addEventListener('click', function() {
             updateActiveIndividualStatsList(key);
-            // console.log("You pressed key: " + key);
         });
         
         container.appendChild(button);
@@ -38,33 +36,12 @@ async function updateActiveIndividualStatsList(id) {
     activeIndividuals[windowID] = [id];
     addIndividualStats(windowID);
     windowID = (windowID + 1) % 2;
-    // console.log(windowID);
-    
-    // console.log(activeIndividuals);
-    
-
-    // updateIndividualsStatWindows();
 
 }
 
 function addIndividualStats(index) {
 
-    // let openedWindows = [];
-
-    // for (let idc in individualDivContainer) {
-    //     openedWindows.push(idc.getAttribute("data-custom"));
-    //     updateIndividual(i, activeIndividuals[i]);
-    // }
-
-    // for (let i = 0; i < activeIndividuals.length; i++) {
-    //     if (openedWindows.includes(activeIndividuals[i])) {
-    //         continue;
-    //     }
-    //     individualDivContainer.push(createDraggableDiv(i, activeIndividuals[i]));
-    // }
-
     let [container, allChartComponents] = createDraggableDiv(index, activeIndividuals[index][0]);
-    // individualDivContainer.push(chartComponents[0]);
     activeIndividuals[index].push(container);
     activeIndividuals[index].push(allChartComponents);
     activeIndividuals[index][1].style.display = "inline";
@@ -78,10 +55,7 @@ async function updateAllIndividuals() {
 }
 
 async function updateIndividual(windID) {
-
-    // let key = activeIndividuals[key][1].getAttribute("data-custom");
-
-    // console.log("Updating individual");
+    
     let scores = {};
     try {
         scores = await eel.getAllStatsFromPython(parseInt(activeIndividuals[windID][0]))();
@@ -93,11 +67,6 @@ async function updateIndividual(windID) {
     if (scores.length === 0) { return; }
 
     // Get all the bar chart SVG elements inside the div
-    // const barCharts = individualDivContainer[index].querySelectorAll('g');
-
-    // console.log(scores, barCharts[0]);
-
-    // console.log(activeIndividuals[windID][2][0], scores["survival"]);
     for (let name of graphNames) {
         if (activeIndividuals[windID] != undefined) { 
             activeIndividuals[windID][2][name][2](activeIndividuals[windID][0], scores[name]);
@@ -122,13 +91,10 @@ function createDraggableDiv(windID, id) {
   // Create a new div element
   var div = document.createElement('div');
 
-//   div.id = "individual-stat-window-" + String(index);
   div.setAttribute('data-custom', id);
   div.className = "individual-stat-window window"
 
   // Set some styles for the div
-//   div.style.width = '200px';
-//   div.style.height = '200px';
   div.style.position = 'absolute';
   div.style.left = '50%';
   div.style.top = '50%';
@@ -184,17 +150,6 @@ function createDraggableDiv(windID, id) {
 
         closeIndivWindow(windID);
         
-        // for (let name in activeIndividuals[windID][2]) {
-        //     // indiv[2][name].remove();
-
-        //     delete activeIndividuals[windID][2][name];
-        // }
-        // // chartComponents[1].remove();
-        // div.remove();
-        
-        // delete activeIndividuals[windID];
-        // windowID = windID;
-        // activeIndividuals
     };
     
     div.appendChild(closeIndividualStatsButton);
@@ -206,17 +161,8 @@ function createDraggableDiv(windID, id) {
 
         div.appendChild(chartComponents[0]);
         allChartComponents[name] = chartComponents
-        // console.log(name)
 
     }
-    // let [survivalChartNode, survivalChart, survivalUpdateFunc] = createBarChart("indiv-surv-" + id);
-    // let [reproductionChartNode, reproductionChart, reproductionUpdateFunc] = createBarChart("indiv-reprod-" + id);
-    // let [morphologyChartNode, morphologyChart, morphologyUpdateFunc] = createBarChart("indiv-morph-" + id);
-    // let reproductionBarChart = createBarChart("indiv-reprod-" + id, []);
-    // let morphologyBarChart = createBarChart("indiv-morph-" + id, []);
-    
-    // div.appendChild(reproductionBarChart);
-    // div.appendChild(morphologyBarChart);
 
 
     // Return the created div
@@ -231,11 +177,10 @@ function closeIndivWindow(windID) {
     }
 
     for (let name in activeIndividuals[windID][2]) {
-        // indiv[2][name].remove();
 
         delete activeIndividuals[windID][2][name];
     }
-    // chartComponents[1].remove();
+
     activeIndividuals[windID][1].remove();
     
     delete activeIndividuals[windID];
@@ -324,7 +269,6 @@ function createBarChart(id) {
       .attr("y", (d) => yScale(d))
       .attr("width", xScale.bandwidth())
       .attr("height", (d) => 200 - yScale(d));
-    //   .attr("fill", getColorByKey(color));
 
     // Exit
     bars.exit().remove();
@@ -333,11 +277,3 @@ function createBarChart(id) {
   // Return the created chart and the update function
   return [svg.node(), chart, updateGraph];
 }
-
-// Example usage:
-// const { chart, updateGraph } = createBarChart();
-// // Use the updateGraph function to update the chart with new data
-// updateGraph(50);
-// updateGraph(75);
-// updateGraph(30);
-// ... and so on

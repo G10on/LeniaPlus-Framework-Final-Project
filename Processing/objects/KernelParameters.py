@@ -29,17 +29,10 @@ import typing as t
 
 class KernelParameters():
 
-    # INITIALIZE CALLING ANOTHER SETTER, LIKE THE OTHERS AND CHOOSE PARAMETER VALUES
     # Initialization of N of kernels, size and parameters
-
     def __init__(self,
                  connection_matrix=None,
-                 ker_params=None,
-                 #  r,
-                 #  m,
-                 #  s,
-                 #  h
-                 #  R = 15,
+                 ker_params=None
                  ) -> None:
 
         self.generateRandomParameters(connection_matrix, ker_params)
@@ -48,11 +41,6 @@ class KernelParameters():
                                  connection_matrix=None,
                                  ker_params=None,
                                  seed=101
-                                 #  r,
-                                 #  m,
-                                 #  s,
-                                 #  h
-                                 #  R = 15,
                                  ) -> None:
 
         rand_gen = np.random.RandomState(seed)
@@ -80,7 +68,6 @@ class KernelParameters():
                 "m": {'low': .05, 'high': .5, 'mut_std': .2, 'shape': None},
                 "s": {'low': .001, 'high': .18, 'mut_std': .01, 'shape': None},
                 "h": {'low': .01, 'high': 1., 'mut_std': .2, 'shape': None},
-                # 'T' : {'low' : 10., 'high' : 50., 'mut_std' : .1, 'shape' : None},
                 'R': {'low': 2., 'high': 25., 'mut_std': .2, 'shape': None},
             }
 
@@ -95,7 +82,6 @@ class KernelParameters():
                         self.n_kernels, 3)
                 ), 4)
 
-        # self.ker_params = ker_params
         self.kernels = {}
 
         for k in 'rmshBaw':
@@ -103,11 +89,10 @@ class KernelParameters():
 
         self.kernels.update({
             'R': rand_gen.uniform(self.spaces['R']['low'], self.spaces['R']['high'])
-            # 'init' : np.random.rand(*k_shape)
         })
         self.kernels['R'] = 13
 
-        # CHANGE WAY TO INPUT CONNCTIONS MATRIX
+        # CHANGE WAY TO INPUT CONNECTIONS MATRIX
         self.conn_from_matrix(connection_matrix)
 
     # Return kernels compiled
@@ -139,12 +124,10 @@ class KernelParameters():
         return fK
 
     # Connection matrix where M[i, j] = number of kernels from channel i to channel j
-
     def conn_from_matrix(self, connection_matrix):
         C = connection_matrix.shape[0]
         c0 = []
         c1 = [[] for _ in range(C)]
-        # self.c1 = List([List([]) for _ in range(C)])
         i = 0
         for s in range(C):
             for t in range(C):
@@ -156,17 +139,6 @@ class KernelParameters():
 
         self.kernels['C'] = c0
         self.kernels['T'] = c1
-
-        # self.c1 = np.asarray(self.c1, dtype=object)
-        # self.c1 = numba.typed.List(self.c1)
-        # temp = List()
-        # for l in self.c1:
-        #     temp2 = List()
-        #     for i in l:
-        #         temp2.append(i)
-        #     temp.append(l)
-
-        # self.c1 = temp
 
     def new_params(self, data):
 
@@ -207,12 +179,7 @@ class LeniaKernelParameters():
 
     def __init__(self,
                  connection_matrix=None,
-                 ker_params=None,
-                 #  r,
-                 #  m,
-                 #  s,
-                 #  h
-                 #  R = 15,
+                 ker_params=None
                  ) -> None:
 
         self.generateRandomParameters(connection_matrix, ker_params)
@@ -221,11 +188,6 @@ class LeniaKernelParameters():
                                  connection_matrix=None,
                                  ker_params=None,
                                  seed=101
-                                 #  r,
-                                 #  m,
-                                 #  s,
-                                 #  h
-                                 #  R = 15,
                                  ) -> None:
 
         rand_gen = np.random.RandomState(seed)
@@ -252,7 +214,6 @@ class LeniaKernelParameters():
                 "m": {'low': .05, 'high': .5, 'mut_std': .2, 'shape': None},
                 "s": {'low': .001, 'high': .18, 'mut_std': .01, 'shape': None},
                 "h": {'low': .01, 'high': 1., 'mut_std': .2, 'shape': None},
-                # 'T' : {'low' : 10., 'high' : 50., 'mut_std' : .1, 'shape' : None},
                 'R': {'low': 2., 'high': 25., 'mut_std': .2, 'shape': None},
             }
 
@@ -267,7 +228,6 @@ class LeniaKernelParameters():
                         self.n_kernels, 3)
                 ), 4)
 
-        # self.ker_params = ker_params
         self.kernels = {}
 
         for k in 'rmshBaw':
@@ -275,7 +235,6 @@ class LeniaKernelParameters():
 
         self.kernels.update({
             'R': rand_gen.uniform(self.spaces['R']['low'], self.spaces['R']['high'])
-            # 'init' : np.random.rand(*k_shape)
         })
         self.kernels['R'] = 13
 
@@ -289,18 +248,7 @@ class LeniaKernelParameters():
         midX = SX >> 1
         midY = SY >> 1
 
-        # print(self.kernels)
-
-        # self.kernels['B'] = self.kernels['B'].tolist()
         new_B = []
-
-        # for lst in self.kernels['B']:
-        #     subarray = lst[lst != 0]
-        #     new_B.append(subarray)
-
-        # self.kernels['B'] = new_B
-
-        # print(self.kernels['B'])
 
         def sigmoid(x):
             return 0.5 * (np.tanh(x / 2) + 1)
@@ -311,8 +259,6 @@ class LeniaKernelParameters():
         # The correct
         # Ds = [D / r[k] for k in range(self.n_kernels)]
 
-        # The test
-        # print("B SHAPE", self.kernels['B'])
         Ds = [D_norm /
               self.kernels['R'] * len(self.kernels['B'][k]) / self.kernels['r'][k] for k in range(self.n_kernels)]
 
@@ -345,7 +291,6 @@ class LeniaKernelParameters():
         C = connection_matrix.shape[0]
         c0 = []
         c1 = [[] for _ in range(C)]
-        # self.c1 = List([List([]) for _ in range(C)])
         i = 0
         for s in range(C):
             for t in range(C):
@@ -358,30 +303,10 @@ class LeniaKernelParameters():
         self.kernels['C'] = c0
         self.kernels['T'] = c1
 
-        # self.c1 = np.asarray(self.c1, dtype=object)
-        # self.c1 = numba.typed.List(self.c1)
-        # temp = List()
-        # for l in self.c1:
-        #     temp2 = List()
-        #     for i in l:
-        #         temp2.append(i)
-        #     temp.append(l)
-
-        # self.c1 = temp
-
 
     def new_params(self, data):
 
         max_rings = 0
-        # for k in 'Baw':
-        #     temp = max(len(sublist) for sublist in data[k])
-        #     if temp > max_rings:
-        #         max_rings = temp
-
-        # for k in 'Baw':
-        #     for B in data[k]:
-        #         temp = [0] * (max_rings - len(B))
-        #         B.extend(temp)
 
         for k in 'rmsh':
             self.kernels[k] = np.array(data[k], dtype=np.float64)

@@ -32,42 +32,10 @@ from objects import World, KernelParameters, ModelParameters
 
 
 class FlowLeniaModel():
-
-    # def borrar(
-            # self, 
-
-            # C,
-            # c0, # : List(List()),
-            # c1,
-            # m : np.ndarray,
-            # s : np.ndarray,
-            # h : np.ndarray,
-            # pos,
-            # dt,
-            # theta_A,
-            # g_func = jax.jit(lambda x, m, s: jnp.exp(-((x - m) / s)**2 / 2) * 2 - 1), # : t.Callable,
-    # ) -> None:
-    #     self.C = C
-    #     self.c0 = c0
-    #     self.c1 = c1
-    #     self.m = m
-    #     self.s = s
-    #     self.h = h
-    #     self.pos = pos
-    #     self.dt = dt
-    #     self.theta_A = theta_A
-    #     self.g_func = g_func
-    #     # self.compute_G = self
-
-        # self.G_func = self.compile_G_func()
-        # self.gradient_func = self.compile_gradient_func()
-        # self.mus_func = self.compile_mus_func()
-        # self.flow_func = self.compile_flow_function()
     
 
     def __init__(self,
                 world:World.World,
-                # params,
                 ) -> None:
         
         self.set_world_and_kParams(world)
@@ -76,23 +44,16 @@ class FlowLeniaModel():
     # Set world and/or kernel parameters
     def set_world_and_kParams(self,
                               world:World.World,
-                            #   k_params,
-                            #   params,
-                            #   dd = 3,
-                            #   dt = 0.1,
-                            #   sigma = 0.8,
-                            #   theta_A = 1.5,
                               g_func = jax.jit(lambda x, m, s: (jnp.exp(-((x - m) / s)**2 / 2)) * 2 - 1)
     ):
         
         self.world = world
         self.k_params = self.getNewKParams()
         self.g_func = g_func
-        # self.fK = self.k_params.compile_kernels(self.world.sX, self.world.sY)
 
         self.x, self.y = np.arange(self.world.sX), np.arange(self.world.sY)
         X, Y = np.meshgrid(self.x, self.y)
-        self.pos = np.dstack((Y, X)) + .5  # (SX, SY, 2)
+        self.pos = np.dstack((Y, X)) + .5
 
         self.rollxs = []
         self.rollys = []
@@ -110,7 +71,6 @@ class FlowLeniaModel():
             [1., 0., -1.]
         ])
 
-        # self.compile()
 
     def compile(self):
 
@@ -124,57 +84,16 @@ class FlowLeniaModel():
 
     def step(self):
 
-        # fA = np.fft.fft2(self.world.A, axes=(0,1))  # (x,y,c)
-        
-        # fAk = fA[:, :, self.k_params.c0]  # (x,y,k)
-
-        # U = np.real(np.fft.ifft2(self.fK * fAk, axes=(0,1)))  # (x,y,k)
-
         nA = self.next_gen_func(self.world.A)
-        # F = self.gradient_func(H)
-        # dA = self.gradient_func(self.world.A.sum(axis = -1, keepdims = True))
-        
-        # mus = self.mus_func(
-        #     self.world.A,
-        #     dA,
-        #     F
-        # )
-        
-        # nA = self.flow_func(
-        #     self.rollxs,
-        #     self.rollys,
-        #     self.world.A,
-        #     mus
-        # ).sum(axis = 0)
-
         self.world.A = nA
 
         return nA
 
-    
-    
-    # @jax.jit
-    def compile_next_gen_func(
-            self
-            # g_func, # : t.Callable,
-            # c2, # : List(List()),
-            # m : np.ndarray,
-            # s : np.ndarray,
-            # h : np.ndarray
-    ):
 
-        # A = jnp.empty((2**8, 2**8, 3))
-        #  IN LINUX, PASS ALL NP TO JNP
-        def from_U_compute_H(A : np.asarray
-                                # g_func, # : t.Callable,
-                                # c2, # : List(List()),
-                                # m : np.ndarray,
-                                # s : np.ndarray,
-                                # h : np.ndarray,
-                                # C : int
-                                ):
+    def compile_next_gen_func(self):
 
-            # print(A.shape)
+        def from_U_compute_H(A : np.asarray):
+            
             fA = jnp.fft.fft2(A, axes=(0,1))  # (x,y,c)
         
             fAk = fA[:, :, self.k_params.kernels['C']]  # (x,y,k)
@@ -209,13 +128,7 @@ class FlowLeniaModel():
 
             return nA
         
-        # return jax.jit(f, static_argnames = ["A"])
         return jax.jit(from_U_compute_H)
-
-        
-        # fAk = fA[:, :, c0]  # (x,y,k)
-
-        # U = np.real(np.fft.ifft2(fK * fAk, axes=(0,1)))  # (x,y,k)
 
 
     def compile_gradient_func(
@@ -227,11 +140,8 @@ class FlowLeniaModel():
             return jnp.dstack([jsp.signal.convolve2d(A[:, :, c], k, mode = 'same') 
                             for c in range(A.shape[-1])])
         
-
-        # @jax.jit
         def compute_gradient(H):
 
-            # @jax.jit
             return jnp.concatenate((sobel(H, self.sobel_k.transpose())[:, :, None, :],
                                     sobel(H, self.sobel_k)[:, :, None, :]),
                                     axis = 2)
@@ -244,7 +154,7 @@ class FlowLeniaModel():
     ):
         
         @partial(jax.vmap, in_axes = (0, 0, None, None))
-        # @jax.jit
+        
         def step_flow(
             x : int, 
             y : int, 
@@ -252,12 +162,8 @@ class FlowLeniaModel():
             mus : jnp.ndarray
         ):
             rollA = jnp.roll(A, (x, y), axis=(0, 1))
-            # rollA = np.roll(A, (x, y), axis=(0, 1))
-            # dpmu = jnp.absolute(self.pos[..., None] - jnp.roll(mus, (x, y), axis = (0, 1))) # (x, y, 2, c)
             dpmu = jnp.absolute(self.pos[..., None] - jnp.roll(mus, (x, y), axis = (0, 1))) # (x, y, 2, c)
-            # sz = .5 - dpmu + self.sigma #(x, y, 2, c)
             sz = .5 - dpmu + self.world.sigma #(x, y, 2, c)
-            # area = jnp.prod(np.clip(sz, 0, min(1, 2 * self.sigma)) , axis = 2) / (4 * self.sigma**2) # (x, y, c)
             area = jnp.prod(jnp.clip(sz, 0, min(1, 2 * self.world.sigma)) , axis = 2) / (4 * self.world.sigma**2) # (x, y, c)
             nA = rollA * area
             return nA
@@ -283,58 +189,15 @@ class FlowLeniaModel():
 
 class LeniaModel():
 
-    # def borrar(
-            # self, 
-
-            # C,
-            # c0, # : List(List()),
-            # c1,
-            # m : np.ndarray,
-            # s : np.ndarray,
-            # h : np.ndarray,
-            # pos,
-            # dt,
-            # theta_A,
-            # g_func = jax.jit(lambda x, m, s: jnp.exp(-((x - m) / s)**2 / 2) * 2 - 1), # : t.Callable,
-    # ) -> None:
-    #     self.C = C
-    #     self.c0 = c0
-    #     self.c1 = c1
-    #     self.m = m
-    #     self.s = s
-    #     self.h = h
-    #     self.pos = pos
-    #     self.dt = dt
-    #     self.theta_A = theta_A
-    #     self.g_func = g_func
-    #     # self.compute_G = self
-
-        # self.G_func = self.compile_G_func()
-        # self.gradient_func = self.compile_gradient_func()
-        # self.mus_func = self.compile_mus_func()
-        # self.flow_func = self.compile_flow_function()
-    
-
     def __init__(self,
                 world:World.World,
                 # params,
                 ) -> None:
         
         self.set_world_and_kParams(world)
-    
-
-    # Set world and/or kernel parameters
 
     def set_world_and_kParams(self,
-                              world: World.World,
-                              #   k_params,
-                              #   params,
-                              #   dd = 3,
-                              #   dt = 0.1,
-                              #   sigma = 0.8,
-                              #   theta_A = 1.5,
-                            #   g_func=jax.jit(lambda x, m, s: (
-                            #       jnp.exp(-((x - m) / s)**2 / 2)))
+                                world: World.World,
                                 g_func=jax.jit(lambda x, m, s: (
                                     jnp.exp( -((jnp.absolute(x - m))**2) / (2*s*s) )))
                               ):
@@ -342,7 +205,6 @@ class LeniaModel():
         self.world = world
         self.k_params = self.getNewKParams()
         self.g_func = g_func
-        # self.fK = self.k_params.compile_kernels(self.world.sX, self.world.sY)
 
         self.x, self.y = np.arange(self.world.sX), np.arange(self.world.sY)
         X, Y = np.meshgrid(self.x, self.y)
@@ -364,9 +226,6 @@ class LeniaModel():
                 [1., 0., -1.]
         ])
 
-        # self.compile()
-
-
     
     def compile(self):
         
@@ -379,79 +238,15 @@ class LeniaModel():
 
     def step(self):
 
-        # fA = np.fft.fft2(self.world.A, axes=(0,1))  # (x,y,c)
-        
-        # fAk = fA[:, :, self.k_params.c0]  # (x,y,k)
-
-        # U = np.real(np.fft.ifft2(self.fK * fAk, axes=(0,1)))  # (x,y,k)
-
         nA = self.next_gen_func(self.world.A)
-        # F = self.gradient_func(H)
-        # dA = self.gradient_func(self.world.A.sum(axis = -1, keepdims = True))
-        
-        # mus = self.mus_func(
-        #     self.world.A,
-        #     dA,
-        #     F
-        # )
-        
-        # nA = self.flow_func(
-        #     self.rollxs,
-        #     self.rollys,
-        #     self.world.A,
-        #     mus
-        # ).sum(axis = 0)
-
         self.world.A = nA
 
         return nA
 
     
-    
-    # @jax.jit
-    def compile_next_gen_func(
-            self
-            # g_func, # : t.Callable,
-            # c2, # : List(List()),
-            # m : np.ndarray,
-            # s : np.ndarray,
-            # h : np.ndarray
-    ):
+    def compile_next_gen_func(self):
 
-        # A = jnp.empty((2**8, 2**8, 3))
-        #  IN LINUX, PASS ALL NP TO JNP
-        def from_U_compute_H(A : np.asarray
-                                # g_func, # : t.Callable,
-                                # c2, # : List(List()),
-                                # m : np.ndarray,
-                                # s : np.ndarray,
-                                # h : np.ndarray,
-                                # C : int
-                                ):
-
-            # fA = jnp.fft.fft2(A, axes=(0,1))  # (x,y,c)
-        
-            # fAk = fA[:, :, self.k_params.kernels['C']]  # (x,y,k)
-
-            # U = jnp.real(jnp.fft.ifft2(self.fK * fAk, axes=(0,1)))  # (x,y,k)
-
-            # G = self.g_func(
-            #     U, 
-            #     self.k_params.kernels['m'], 
-            #     self.k_params.kernels['s']
-            # ) * self.k_params.kernels['h']  # (x,y,k)
-
-            # H = jnp.dstack([ G[:, :, self.k_params.kernels['T'][c]].sum(axis=-1)
-            #                for c in range(self.world.numChannels) ])  # (x,y,c)
-            
-            # nA = jnp.clip(A + (1 / self.world.dt) * H, 0., 1.)
-
-            # # self.world.A = nA
-
-            # return nA
-
-            # fAs = [ jnp.fft.fft2(cA) for cA in A ]
-            # print("SHAPE IN LENIA", A.shape)
+        def from_U_compute_H(A : np.asarray):
 
             def growth(U, m, s, A=None):
                 return self.g_func(U, m, s)*2-1
@@ -470,9 +265,10 @@ class LeniaModel():
                 return -1
 
             fAs = [ jnp.fft.fft2(A[:,:,c]) for c in range(self.world.numChannels) ]
-            # print(self.fK.shape)
+            
             Us = [ np.real(jnp.fft.ifft2(fK * fAs[c0])) for fK, c0 in zip(self.fK, self.k_params.kernels["C"]) ]
-            ''' calculate growth values for destination channels c1 '''
+           
+           # calculate growth values for destination channels c1
             Gs = [ growth(U, self.k_params.kernels['m'][k], self.k_params.kernels['s'][k]) for U, k in zip(Us, range(len(self.k_params.kernels['m']))) ]
 
             # ASYMPTOTIC UPDATE
@@ -483,39 +279,25 @@ class LeniaModel():
             ''' add growth values to channels '''
             #A = np.clip(A + 1/T * np.mean(np.asarray(Gs),axis=0), 0, 1)
             As = [ jnp.clip(A[:,:,cA] + 1/self.world.dt * H, 0, 1) for cA,H in zip(range(A.shape[2]),Hs) ]
-            # As = [ soft_clip(A[:,:,cA] + 1/self.world.dt * H, 0, 1) for cA,H in zip(range(A.shape[2]),Hs) ]
+
             ''' rearrange RGB channels for better looking '''
             # As = [ As[1], As[2], As[0] ]
             
             nA = jnp.dstack(As)
             return nA
-
-
-
         
-        # return jax.jit(f, static_argnames = ["A"])
         return jax.jit(from_U_compute_H)
 
-        
-        # fAk = fA[:, :, c0]  # (x,y,k)
 
-        # U = np.real(np.fft.ifft2(fK * fAk, axes=(0,1)))  # (x,y,k)
-
-
-    def compile_gradient_func(
-            self
-    ):
+    def compile_gradient_func(self):
     
         @jax.jit
         def sobel(A, k):
             return jnp.dstack([jsp.signal.convolve2d(A[:, :, c], k, mode = 'same') 
                             for c in range(A.shape[-1])])
         
-
-        # @jax.jit
         def compute_gradient(H):
-
-            # @jax.jit
+            
             return jnp.concatenate((sobel(H, self.sobel_k.transpose())[:, :, None, :],
                                     sobel(H, self.sobel_k)[:, :, None, :]),
                                     axis = 2)
@@ -528,7 +310,7 @@ class LeniaModel():
     ):
         
         @partial(jax.vmap, in_axes = (0, 0, None, None))
-        # @jax.jit
+
         def step_flow(
             x : int, 
             y : int, 
@@ -536,12 +318,8 @@ class LeniaModel():
             mus : jnp.ndarray
         ):
             rollA = jnp.roll(A, (x, y), axis=(0, 1))
-            # rollA = np.roll(A, (x, y), axis=(0, 1))
-            # dpmu = jnp.absolute(self.pos[..., None] - jnp.roll(mus, (x, y), axis = (0, 1))) # (x, y, 2, c)
             dpmu = jnp.absolute(self.pos[..., None] - jnp.roll(mus, (x, y), axis = (0, 1))) # (x, y, 2, c)
-            # sz = .5 - dpmu + self.sigma #(x, y, 2, c)
             sz = .5 - dpmu + self.world.sigma #(x, y, 2, c)
-            # area = jnp.prod(np.clip(sz, 0, min(1, 2 * self.sigma)) , axis = 2) / (4 * self.sigma**2) # (x, y, c)
             area = jnp.prod(jnp.clip(sz, 0, min(1, 2 * self.world.sigma)) , axis = 2) / (4 * self.world.sigma**2) # (x, y, c)
             nA = rollA * area
             return nA

@@ -24,8 +24,6 @@ import scipy as sp
 # import matplotlib.pyplot as plt
 import typing as t
 
-import os
-
 
 class World():
 
@@ -54,14 +52,6 @@ class World():
 
     # Set/generate new world
     def new_world(self, data
-                #   A=None,
-                #   seed=101,
-                #   size=128,
-                #   numChannels=3,
-                #   theta=3,
-                #   dd=7,
-                #   dt=0.2,
-                #   sigma=0.65
                   ) -> None:
             
         self.seed = data["seed"]
@@ -84,17 +74,15 @@ class World():
         
         self.A_initial = self.A
 
-        # self.dA = self.compute_gradient(self.A)
-        # self.fA = self.compute_fftA(self.A)
-
     def generateWorld(self):
+        
         # Generate random world
         rand_gen = np.random.RandomState(self.seed)
         init_size = self.sX // 2
         self.A = np.zeros((self.sX, self.sY, self.numChannels))
         self.A[self.sX//2-init_size//2:self.sX//2+init_size//2, self.sY//2-init_size //
                2:self.sY//2+init_size//2, :] = rand_gen.rand(init_size, init_size, self.numChannels)
-        # self.A = np.ones((self.sX, self.sY, self.numChannels))
+        
 
     # VECTORIZE OR VRAM CUPY?
 

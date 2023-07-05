@@ -57,12 +57,6 @@ import pickle
 
 
 
-
-# if not os.path.exists("web/images/samples"):
-#     os.makedirs("web/images/samples")
-
-
-
 sample_images_path = "web/images/samples"
 sample_parameters_path = "web/sample_parameters"
 
@@ -343,21 +337,13 @@ pattern["Star"] = {"name":"Star", "version" : "LeniaModel", 'R':17, 'T':10, "ker
 class System():
     
     # Initialization of values of world and kernel parameters
-    def __init__(self,
-                # world:World = None,
-                # k_params = None,
-                # version = None,
-                ) -> None:
+    def __init__(self) -> None:
         
-        self.set_world_and_kParams(
-        )
+        self.set_world_and_kParams()
     
 
     # Set world and/or kernel parameters
-    def set_world_and_kParams(self,
-                            # world:World = None,
-                            # version = None,
-    ) -> None:
+    def set_world_and_kParams(self) -> None:
         
         self.setData()
         self.compile()
@@ -370,37 +356,8 @@ class System():
         self.next_id = 0
         return
 
-        self.version = version
-
-        if self.world is None:
-            self.world = World.World()
-        
-        # if self.k_params is None:
-        #     self.k_params = KernelParameters.KernelParameters()
-        
-        if self.version is None:
-            self.version = "FlowLeniaModel"
-
-        Model = getattr(Models, self.version)
-        self.model = Model(
-            world = self.world,
-            # params = params,
-            # m_params = self.m_params
-        )
-        self.k_params = self.model.getKParams()
-        
-        # self.compile()
-
     def compile(self):
 
-        # Model = getattr(Models, self.version)
-        # self.model = Model(
-        #     world = self.world,
-        #     # params = params,
-        #     # m_params = self.m_params
-        # )
-        # self.k_params = self.model.getKParams()
-        # self.k_params.compile_kernels(self.world.sX, self.world.sY)
         self.model.compile()
     
     def generateRandomParams(self):
@@ -436,15 +393,11 @@ class System():
         data["dt"] = self.world.dt
         data["sigma"] = self.world.sigma
 
-        # print(k_params.ker_params)
-
         for k in 'CrmshBawT':
             temp = self.k_params.kernels[k]
             if type(temp) is np.ndarray:
                 temp = temp.tolist()
             data[k] = temp
-
-        # data.update(k_params.kernels)
 
         return data
 
@@ -452,34 +405,18 @@ class System():
 
         if data == None:
 
-            # data = getParameters()!!!
-
             self.world = World.World()
-            # self.world.generateWorld()
             self.version = "FlowLeniaModel"
             Model = getattr(Models, self.version)
             self.model = Model(
                 world = self.world
             )
             self.k_params = self.model.getKParams()
-            # self.system.compile()
             return
-
-        # if self.k_params is None:
-        #     self.k_params = KernelParameters.KernelParameters()
-
 
         self.version = data["version"]
 
-        # if (not from_seed):
-        #     data["world"] = self.world.A_initial
-
-
-        # Pass through method for kernel params!!!
-
         self.world.new_world(data)
-
-
 
         Model = getattr(Models, self.version)
         self.model = Model(
@@ -488,10 +425,6 @@ class System():
         self.k_params = self.model.getKParams()
 
         self.k_params.new_params(data)
-        # self.k_params.compile_kernels(self.world.sX, self.world.sY)
-        # self.system.compile()
-
-    # Getter and setters for world and k_params!!!
 
     def getCoordinatesOfIndividuals(self):
 
@@ -524,21 +457,9 @@ class System():
         new_center_points = np.array([ndimage.center_of_mass(summed_world, labels=self.labels, index=i)
                         for i in range(1, num_features+1) if counts[i] >= min_size])
         
-        # if len(new_center_points) == 0:
-        #     new_center_points.append = np.asarray([0.5, 0.5])
-        
         new_center_points = (new_center_points / self.world.A.shape[0]).tolist()
-        temp_CP = {}
-        # print("Found 0", new_center_points)
         
-        # if len(self.center_points) is 0:
-        #     for i, center in center_points:
-        #         self.center_points[]
-
-        # Update self.center_points coordinates with nearthest ones 
-        # from new_center_points, remove the updated ones from 
-        # new_center_points
-        # print("Updating", self.center_points, new_center_points)
+        temp_CP = {}
         
         for k, v in self.center_points.items():
 
@@ -549,15 +470,11 @@ class System():
             new_center_points_np = np.array(new_center_points)
             
             # Calculate the Euclidean distance between the target point and each point in the list
-            # print(new_center_points_np[:, None], v)
-            # distances = toroidal_distances(new_center_points_np, np.asarray(v[:2]))
             distances = np.linalg.norm(new_center_points_np[:, None] - v[:2], axis=2)
             
             # Find the index of the nearest point
             nearest_index = np.argmin(distances)
             
-            # print(distances[nearest_index] < lengths[nearest_index][0])
-            # 
             if distances[nearest_index] < lengths[nearest_index][0] * 1.5:
 
                 temp_CP[k] = [
@@ -566,16 +483,9 @@ class System():
                     lengths[nearest_index][0], 
                     lengths[nearest_index][1]]
                 
-                # print("Found", self.center_points, distances)
-                
                 # Remove the nearest point from the list
                 new_center_points.pop(nearest_index)
                 lengths.pop(nearest_index)
-
-        # self.center_points = {}
-        # temp = 0
-        # for i in range(len(temp_CP)):
-        #     self.center_points[temp] = v
 
         self.center_points = temp_CP
 
@@ -594,33 +504,9 @@ class System():
             self.accum_neighbour_scores[self.next_id] = 0
             self.next_id += 1
 
-        
-
-
-        # self.center_points = self.center_points / self.world.shape[0]
-
-        # print(centers.shape)
-
         return self.center_points, self.world.A.shape[0]
 
     def getIndividualsAsArrays(self, bbox):
-
-        # # Empty list to store the extracted n-dimensional arrays
-        # extracted_arrays = {}
-
-        # for k, v in self.center_points.items():
-        #     # Calculate the start and end indices for slicing
-        #     start_row = v[0]
-        #     end_row = start_row + v[3]
-        #     start_col = v[1]
-        #     end_col = start_col + v[2]
-
-        #     # Slice the array and store the subarray in the result dictionary
-        #     subarray = self.world.A[start_row:end_row, start_col:end_col]
-        #     extracted_arrays[k] = subarray
-
-        
-        # Empty list to store the extracted n-dimensional arrays
 
         # Calculate the start and end indices for slicing
         start_row = int((bbox[0] - bbox[3] / 2) * self.world.A.shape[0])
@@ -633,13 +519,11 @@ class System():
         start_col = max(start_col, 0)
         end_col = min(end_col, self.world.A.shape[1])
 
-        # print(start_row, end_row, start_col, end_col)
-
         # Slice the array and store the subarray in the result dictionary
         subarray = self.world.A[start_row:end_row, start_col:end_col, :]
-        # print(start_row, end_row, start_col, end_col, subarray.shape)
-
+        
         return subarray
+    
     
     def resize_individual(self, arr, new_shape):
         """
@@ -652,6 +536,7 @@ class System():
         Returns:
             ndarray: The interpolated array with the new dimensions.
         """
+
         # Create the coordinates for the original array
         curr_shape = arr.shape
         coords = [np.linspace(0, curr_dim-1, curr_dim) for curr_dim in curr_shape]
@@ -664,23 +549,23 @@ class System():
         interp_coords = np.meshgrid(*new_coords, indexing='ij')
         points = np.stack(interp_coords, axis=-1)
 
-        # print("Interpolating", new_coords)
-        
         # Perform interpolation
         interpolated = interpolator(points)
         
         return interpolated
     
+
     def normalize_individual(self, array):
+
         min_val = np.min(array)
         max_val = np.max(array)
+        
         return (array - min_val) / (max_val - min_val)
+
 
     def computeSurvivalScore(self):
 
         density_scores = {}
-
-        # print(self.accum_neighbour)
 
         for k, bbox in self.center_points.items():
 
@@ -690,33 +575,13 @@ class System():
             if total_mass == 0: total_mass = 1e-9
             total_volume = np.count_nonzero(indiv)
             if total_volume == 0: total_volume = jnp.asarray([1])
-            # print(total_mass, total_volume, (total_mass / total_volume), indiv.shape)
-            # if indiv.shape[0] == 14: print(indiv)
             density_scores[k] = (total_mass / total_volume).item()
             self.survival_scores[k] = density_scores[k] - self.previous_survival_scores[k]
             self.previous_survival_scores[k] = density_scores[k]
 
-        # print(self.accum_neighbour.keys(), self.center_points.keys())
-
-        # for key in remaining_indiv:
-        #     scores[key] = self.accum_neighbour[key]
-
-        # self.accum_neighbour = scores
-
-        # print("Surviv:", density_scores)
-        # print("Surviv:", density_scores[0])
-        # print("Surviv:", density_scores[0].items())
-
-        # print("SURVIVAL:", density_scores)
-        # self.survival_scores = density_scores
         return density_scores
 
     def computeReproductionScore(self):
-
-        # scores = {}
-        # remaining_indiv = []
-
-        # print(self.accum_neighbour)
 
         for k, bbox in self.center_points.items():
 
@@ -724,59 +589,19 @@ class System():
 
             keys = [key for key in self.center_points.keys() if key != k]
 
-            # print(keys, k)
-
             if len(keys) == 0: continue
 
-            # remaining_indiv.append(k)
-            
             neighbour = self.getIndividualsAsArrays(self.center_points[random.choice(keys)])
-
-
             
-            # neighbour = self.original_indivs[k]
             resized_target = self.resize_individual(indiv, neighbour.shape)
 
-            # print("RESIZED", np.isnan(resized_target).any())
-
-            # Create a 2x1 grid of subplots
-            # fig, axes = plt.subplots(2, 1)
-
-            # Display the images in the subplots
-            # axes[0].imshow(original)
-            # axes[0].set_title('Image 1')
-            # axes[1].imshow(resized_target)
-            # axes[1].set_title('Image 2')
-
-            # plt.show()
-
-
-            # normalized_original = self.normalize_individual(original)
-            # normalized_target = self.normalize_individual(np.rot90(original, 2))
-            # normalized_target = self.normalize_individual(resized_target)
-
-            # print(original.shape, resized_target.shape)
-            
             similarity_score = self.calculate_similarity(neighbour, resized_target)
-            # n_cross_corr = self.calculate_similarity(original, np.rot90(original, 2))
-
-
-            # print("REPROD: ", self.accum_neighbour_scores[k], similarity_score, (self.accum_neighbour_scores[k] + similarity_score) / 2)
+            
             self.accum_neighbour_scores[k] = (self.accum_neighbour_scores[k] + similarity_score) / 2
 
         common_keys = set(self.center_points.keys()) & set(self.accum_neighbour_scores.keys())
+
         self.accum_neighbour_scores = {key: self.accum_neighbour_scores[key] for key in common_keys}
-
-        # print(self.accum_neighbour.keys(), self.center_points.keys())
-
-        # for key in remaining_indiv:
-        #     scores[key] = self.accum_neighbour[key]
-        
-        # self.accum_neighbour = scores
-
-        # print("Reprod:", self.accum_neighbour)
-
-        # print("REPRODUCTION:", self.accum_neighbour)
 
         return self.accum_neighbour_scores
 
@@ -790,53 +615,25 @@ class System():
             
             original = self.original_indivs[k]
             resized_target = self.resize_individual(indiv, original.shape)
-            # resized_target = jnp.rot90(original, 0)
-
-            # Create a 2x1 grid of subplots
-            # fig, axes = plt.subplots(2, 1)
-
-            # Display the images in the subplots
-            # axes[0].imshow(original)
-            # axes[0].set_title('Image 1')
-            # axes[1].imshow(resized_target)
-            # axes[1].set_title('Image 2')
-
-            # plt.show()
-
-
-            # normalized_original = self.normalize_individual(original)
-            # normalized_target = self.normalize_individual(np.rot90(original, 2))
-            # normalized_target = self.normalize_individual(resized_target)
-
-            # print(original.shape, resized_target.shape)
             
             n_cross_corr = self.calculate_similarity(original, resized_target)
-            # n_cross_corr = self.calculate_similarity(original, np.rot90(original, 2))
-
 
             scores[k] = n_cross_corr
-            # print(n_cross_corr)
 
         self.morphology_scores = scores
 
-        # print("MORPHOLOGY:", scores)
         return self.morphology_scores
 
 
     def calculate_similarity(self, image1, image2):
 
-        # print("SIMILARITY", np.isnan(image1).any(), np.isnan(image2).any())
-
         # Convert arrays to JAX DeviceArrays
         image1 = jnp.asarray(image1)
         image2 = jnp.asarray(image2)
 
-        # epsilon = 1e-9  # Small constant value
-        # arr1_norm = (image1 - jnp.mean(image1)) / (jnp.std(image1) + epsilon)
-        # arr2_norm = (image2 - jnp.mean(image2)) / (jnp.std(image2) + epsilon)
-
         # Check if the standard deviation is zero
         if jnp.std(image1) == 0 or jnp.std(image2) == 0:
+            
             return 0.0  # Return a default similarity value when there is zero variance
         
         # Normalize the arrays
@@ -846,8 +643,6 @@ class System():
         # Compute the cross-correlation
         cross_corr = jnp.correlate(arr1_norm.flatten(), arr2_norm.flatten(), mode='same')
 
-        # print("SIMILARITY", np.isnan(cross_corr).any(), np.isnan(jnp.max(cross_corr)).any(), np.isnan(jnp.linalg.norm(arr1_norm).any()))
-        
         # Compute the similarity
         similarity = jnp.max(cross_corr) / (jnp.linalg.norm(arr1_norm) * jnp.linalg.norm(arr2_norm))
 
@@ -856,10 +651,6 @@ class System():
             score = 0.0
     
         return score
-        # except Exception:
-        #     print("ERROR in calculate_similarity", Exception)
-            
-        #     return 0.5
     
     def align_images(self, image1, image2):
         """
@@ -872,6 +663,7 @@ class System():
         Returns:
             jnp.ndarray: Aligned image (image2) after the alignment.
         """
+
         # Convert images to grayscale
         gray1 = jnp.mean(image1, axis=-1)
         gray2 = jnp.mean(image2, axis=-1)
@@ -899,16 +691,12 @@ class System():
     
     def getIndividuals(self):
 
-        # print(self.morphology_scores)
-
         return self.morphology_scores
     
     def getAllStatsFromKey(self, key):
         
         stats = {}
 
-        # print(self.survival_scores, self.accum_neighbour_scores, self.morphology_scores)
-        
         try:
             stats["survival"] = self.survival_scores[key]
             stats["reproduction"] = self.accum_neighbour_scores[key]
@@ -967,20 +755,13 @@ def step():
 @eel.expose
 def getWorld(visible_channels):
 
-    # scl = 512 // system.world.sX
-    
-    # a = jnp.uint8(system.world.A.clip(0, 1) * 255.0)
-    # b = np.ones((scl, scl, 1))
-    # res = np.kron(a, b)
-    # res = np.dstack((res, np.ones((system.world.sX * scl, system.world.sY * scl), dtype=np.int8) * 255))
-
     Ac = system.world.A.clip(0, 1)[:, :, visible_channels]
     alpha = jnp.ones((system.world.sX, system.world.sY))
     while Ac.shape[-1] < 3:
         Ac = jnp.dstack((Ac, alpha * 0))
     res = jnp.dstack((Ac, alpha))
     res = jnp.uint8(res * 255.0).tolist()
-    # res = res.flatten().tolist()
+    
     return res
 
 @eel.expose
@@ -1017,8 +798,6 @@ def getMassCenter():
     centers = np.array([ndimage.center_of_mass(summed_world, labels=labels, index=i) for i in range(1, num_features+1) if counts[i] >= min_size])
 
     centers = centers / world.shape[0]
-    
-    # print(centers.shape)
 
     return centers.tolist(), lengths
 
@@ -1030,33 +809,21 @@ def sample(name, new_data):
 
     entity = pattern[name]
     test = np.asarray(entity["cells"])
-    print(test.shape)
+    
     test = test.transpose((1, 2, 0))
-    # print(test.shape)
     SX = new_data["size"] = 64
     SY = SX
     C = new_data["numChannels"] = test.shape[-1]
-
-    # print("SUBARRAY:", [sublst['b'] for sublst in entity["kernels"]])
+    
     lst_B = [sublst['b'] for sublst in entity["kernels"]]
     max_rings = max(len(sublist) for sublist in lst_B)
-
-    # for B in lst_B:
-    #     temp = [0.0] * (max_rings - len(B))
-    #     B.extend(temp)
-        # B.reverse()
-
-    # for k in "ms":
-        
-        # temp = []
-        # for kernel in entity["kernels"]:
-        #     temp.append(kernel[k] * np.ones(max_rings))
-
         
     c1 = [[] for _ in range(C)]
     for kn in range(len(entity["kernels"])):
         c1[entity["kernels"][kn]["c1"]].append(kn)
+    
     new_world = jnp.zeros((SX, SY, C))
+    
     # print(new_world[SX//2-(test.shape[0])//2 :SX//2+(test.shape[0])//2, SY//2-(test.shape[1])//2:SY//2+(test.shape[1])//2, :].shape, test.shape
     new_world = new_world.at[SX//2-(test.shape[0] + 1)//2 :SX//2+(test.shape[0])//2, SY//2-(test.shape[1])//2:SY//2+(test.shape[1])//2, :].set(test)
     
@@ -1066,13 +833,9 @@ def sample(name, new_data):
         for kernel in entity["kernels"]:
             temp.append(kernel[k])
         new_data[k] = np.asarray(temp, dtype=np.float64)
-
-    # new_data['r'] = np.ones(new_data['m'].shape, dtype=np.float64) * 0.5
-
-    # new_data["dt"] = entity['T'] * 0.05
+    
     new_data["world"] = new_world
     new_data['B'] = lst_B
-    # print(new_data['B'])
     new_data['a'] = 0.5 * np.ones((len(entity["kernels"]), max_rings))
     new_data['a'] = new_data['a'].tolist()
     new_data['w'] = 0.15 * np.ones((len(entity["kernels"]), max_rings))
@@ -1111,11 +874,6 @@ def saveParameterState(imageData=None, filename="screenshot"):
     
     with open(filepath_parameter, 'wb') as f:
         pickle.dump(data, f)
-    
-    
-    
-    # print(os.path.abspath('LeniaParameters.pkl'))
-    # print(imageData, screenshot)
 
 @eel.expose
 def loadParameterState(filename = "screenshot"):
@@ -1126,12 +884,9 @@ def loadParameterState(filename = "screenshot"):
     # load the dictionary from the file
     with open(filepath_parameter, 'rb') as f:
         data = pickle.load(f)
-
-    # data = sample("fish", {"size":64, "numChannels":1, "seed": 101})
     
     system.setInitialWorld(data["world"])
     setParameters(data)
-    # system.world.A = data["world"]
 
 @eel.expose
 def deleteSample(filename = "screenshot"):
@@ -1154,21 +909,10 @@ def getSampleNames():
 
 @eel.expose
 def setSample(name, new_data):
+
     loadParameterState(name)
     return
-    # data = sample("Star", new_data)
-    # system.setInitialWorld(data["world"])
-    # setParameters(data)
 
-
-# @eel.expose
-# def open_new_window():
-#     eel.browsers.open('tracker.html', options={
-#         'port': 8001,
-#         'host': '127.0.0.1',
-#         'size': (500, 500),
-#         'position': (0, 0)
-#     })
 
 @eel.expose
 def test_new_window():
@@ -1196,18 +940,6 @@ def getCoordinatesFromPython2():
 
     # Count the number of non-zero values in each group
     counts = np.bincount(labels.ravel())
-    
-    # Find the bounding box of each region
-    # slices = ndimage.find_objects(labels)
-
-    # Calculate the length of each bounding box
-    # lengths = [tuple(slice_.stop - slice_.start for slice_ in slice_tuple)
-    #            for slice_tuple in slices]
-
-    # # Filter out regions that don't meet the minimum size threshold
-    # lengths = [(length[0] / world.shape[0], length[1] / world.shape[1]) for i, length in enumerate(
-    #     lengths) if np.bincount(labels.ravel())[i+1] >= min_size]
-
 
     # Find the center of mass of each connected region that meets the minimum size threshold
     centers = np.array([ndimage.center_of_mass(summed_world, labels=labels, index=i) for i in range(1, num_features+1) if counts[i] >= min_size])
@@ -1215,8 +947,6 @@ def getCoordinatesFromPython2():
 
 
     centers = centers / world.shape[0]
-    
-    # print(centers.shape)
 
     return centers.tolist()
 
@@ -1258,8 +988,6 @@ def detectIndividuals():
 
     boxes_list = []
 
-    # temp = world.shape[0]
-
     for [x, y], [w, h] in zip(centers, lengths):
         boxes_list.append([x, y, w, h])
     
@@ -1267,9 +995,6 @@ def detectIndividuals():
 
     for bbox in boxes_list:
         trackers.add(cv2.TrackerKCF_create(), world, bbox)
-
-
-# detectIndividuals()
 
 @eel.expose
 def getCoordinatesFromPython():
@@ -1293,8 +1018,6 @@ def getCoordinatesFromPython():
 def getGlobalSurvivalStats():
 
     data = system.computeSurvivalScore()
-
-    # print("Survival score: " + str(data))
     
     return data
 
@@ -1302,7 +1025,6 @@ def getGlobalSurvivalStats():
 def getGlobalReproductionStats():
 
     data = system.computeReproductionScore()
-    # print("Reprod score: " + str(data))
     
     return data
 
@@ -1310,10 +1032,6 @@ def getGlobalReproductionStats():
 def getGlobalMorphologyStats():
 
     data = system.computeMorphologyScore()
-    # print("Morph score: " + str(data))
-
-    # print()
-    
     return data
 
 
@@ -1332,13 +1050,10 @@ def getAllStatsFromPython(id):
 
 @eel.expose
 def shutdown():
-    
     sys.exit()
 
 
 eel.start("index.html", mode="chrome-app", shtudown_delay = 2.0)
-
-# eel.openNewWindow()
 
 
 
@@ -1346,9 +1061,8 @@ eel.start("index.html", mode="chrome-app", shtudown_delay = 2.0)
 @eel.expose
 def saveNStepsToVideo(nSteps):
 
-    # global sX, sY, world, system
-    obs = np.zeros((nSteps, *world.A.shape))
-    obs[0] = world.A
+    obs = np.zeros((nSteps, *system.world.A.shape))
+    obs[0] = system.world.A
     
     params = eel.getParameters()()
     size = params["size"]
