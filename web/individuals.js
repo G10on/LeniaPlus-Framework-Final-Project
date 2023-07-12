@@ -8,10 +8,10 @@ const graphNames = ["survival", "reproduction", "morphology"];
 async function updateIndividualsButtons() {
 
     const container = document.getElementById('individual-selector');
-    var dictionary = await eel.getIndividualsFromPython()();
+    var keys = await eel.get_individuals_ID_from_python()();
     container.innerHTML = "";
 
-    for (let key in dictionary) {
+    for (let key in keys) {
         let button = document.createElement('button');
         button.textContent = key;
         button.style.backgroundColor = getColorByKey(key);
@@ -58,7 +58,7 @@ async function updateIndividual(windID) {
     
     let scores = {};
     try {
-        scores = await eel.getAllStatsFromPython(parseInt(activeIndividuals[windID][0]))();
+        scores = await eel.get_all_stats_from_python(parseInt(activeIndividuals[windID][0]))();
     } catch (error) {
         console.error('Error parsing JSON:', error);
         console.log(scores);
@@ -111,8 +111,8 @@ function createDraggableDiv(windID, id) {
     var startY = e.clientY || e.touches[0].clientY;
 
     // Get initial div position
-    var initialLeft = parseFloat(div.style.left);
-    var initialTop = parseFloat(div.style.top);
+    var initialLeft = startX; // parseFloat(div.style.left);
+    var initialTop = startY; // parseFloat(div.style.top);
 
     // Function to handle drag move event
     function moveDiv(e) {
@@ -159,9 +159,15 @@ function createDraggableDiv(windID, id) {
     for (let name of graphNames) {
         let chartComponents = createBarChart("indiv-" + name + '-' + id);
 
+        let titleContainer = document.createElement("div");
+        titleContainer.className = "kernel-parameter-title parameter-title";
+        div.appendChild(titleContainer);
+        let newLbl = document.createElement("label");
+        newLbl.textContent = name.toUpperCase();
+        titleContainer.appendChild(newLbl);
+
         div.appendChild(chartComponents[0]);
         allChartComponents[name] = chartComponents
-
     }
 
 
@@ -227,14 +233,14 @@ function createBarChart(id) {
     .attr("class", "axis-label")
     .attr("x", 220)
     .attr("y", 250)
-    .text("Bars");
+    .text("Time Units");
 
   chart.append("text")
     .attr("class", "axis-label")
     .attr("x", -140)
     .attr("y", -40)
     .attr("transform", "rotate(-90)")
-    .text("Height");
+    .text("Score");
 
   // Function to update the graph with new data
   function updateGraph(color, newData) {
@@ -242,7 +248,7 @@ function createBarChart(id) {
     dataset.push(newData);
 
     // Limit the dataset to 10 bars
-    if (dataset.length > 10) {
+    if (dataset.length > 100) {
       dataset.shift(); // Remove the oldest data point
     }
 

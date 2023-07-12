@@ -137,19 +137,19 @@ function updateChart(data, chart_id) {
 
 async function getNewStats(chart_id) {
     
-    // let data = await eel.getGlobalReproductionStats()();
+    // let data = await eel.get_global_reproduction_stats()();
 
     var data;
 
     switch (chart_id) {
         case 0:
-            data = await eel.getGlobalSurvivalStats()();
+            data = await eel.get_global_survival_stats()();
             break;
         case 1:
-            data = await eel.getGlobalReproductionStats()();
+            data = await eel.get_global_reproduction_stats()();
             break;
         default:
-            data = await eel.getGlobalMorphologyStats()();
+            data = await eel.get_global_morphology_stats()();
     }
 
     updateChart(data, chart_id);

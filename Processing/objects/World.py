@@ -27,12 +27,6 @@ import typing as t
 
 class World():
 
-    k = np.array([
-        [1., 0., -1.],
-        [2., 0., -2.],
-        [1., 0., -1.]
-    ])
-
     # Initialize world
     def __init__(self,
                  A=None,
@@ -83,7 +77,5 @@ class World():
         self.A[self.sX//2-init_size//2:self.sX//2+init_size//2, self.sY//2-init_size //
                2:self.sY//2+init_size//2, :] = rand_gen.rand(init_size, init_size, self.numChannels)
         
-
-    # VECTORIZE OR VRAM CUPY?
 
     

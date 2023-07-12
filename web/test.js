@@ -205,7 +205,7 @@ function downloadFile(url, filename) {
 
 
 async function updateWorldDisplay() {
-    var matrix = await eel.getWorld(visibleChannels)();
+    var matrix = await eel.get_world(visibleChannels)();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < matrix.length; i++) {
         for (var j = 0; j < matrix[i].length; j++) {
@@ -226,7 +226,7 @@ async function updateWorldDisplay() {
 
 async function getAnalysisFromPython() {
     
-    let centers = await eel.getCoordinatesFromPython()();
+    let centers = await eel.get_coordinates_from_python()();
     drawCenterMass(centers);
     drawDots(centers);
     updateStats();
@@ -309,7 +309,7 @@ async function getParamsFromPython() {
     tablePreview.innerHTML = "";
     tableKernel.innerHTML = "";
 
-    var data = await eel.getParameters()();
+    var data = await eel.get_parameters_from_python()();
     
     document.querySelector(".version-selector").value = data["version"];
     document.querySelector(".size").value = data["size"];
@@ -439,9 +439,9 @@ async function setParamsInPython(sampleName = null) {
     
     
     if (sampleName != null) {
-        await eel.setSample(sampleName, data)();
+        await eel.set_sample(sampleName, data)();
     } else {
-        await eel.setParameters(data)();
+        await eel.set_parameters_in_python(data)();
     }
     
     await getParamsFromPython();
@@ -506,7 +506,7 @@ async function generateKernelParamsInPython() {
         }
     }
     
-    await eel.generateKernel(data)();
+    await eel.generate_kernel(data)();
     
     await getParamsFromPython();
     versionLoadingTxt.innerText = "";
@@ -570,7 +570,7 @@ function addSample (sampleName) {
 
 async function deleteSample(btn) {
     let sampleContainer = btn.parentNode;
-    await eel.deleteSample(sampleContainer.id)();
+    await eel.delete_sample(sampleContainer.id)();
     sampleContainer.style.display = "none";
 }
 
@@ -581,7 +581,7 @@ async function loadSamples () {
     var sampleList = document.getElementById("sample-list");
     sampleList.innerHTML = "";
 
-    let sampleNames = await eel.getSampleNames()();
+    let sampleNames = await eel.get_sample_names()();
     
     for (var i = 0; i < sampleNames.length; i++) {
         
@@ -745,19 +745,19 @@ saveSampleNameBtn.addEventListener("click", () => {
     // Convert the canvas image data to a base64-encoded string
     let imageData = canvas.toDataURL("image/png");
     
-    eel.saveParameterState(imageData, name)();
+    eel.save_parameter_state(imageData, name)();
 
     saveSample.style.display = "none";
     overlay.style.display = "none";
 })
 
 exportBtn.addEventListener("click", () => {
-    eel.saveParameterState()();
+    eel.save_parameter_state()();
 })
 
 importBtn.addEventListener("click", async () => {
     
-    await eel.loadParameterState()();
+    await eel.load_parameter_state()();
     getParamsFromPython();
     await updateWorldDisplay();
 })
