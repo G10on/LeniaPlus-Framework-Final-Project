@@ -227,9 +227,10 @@ async function updateWorldDisplay() {
 
 
 async function getAnalysisFromPython() {
-    for (let func in activeStats) {
+    
+    activeStats.forEach((func) => {
         func();
-    }
+    });
 }
 
 async function generalAnalysis() {
