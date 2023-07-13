@@ -11,17 +11,17 @@ async function updateIndividualsButtons() {
     var keys = await eel.get_individuals_ID_from_python()();
     container.innerHTML = "";
 
-    for (let key in keys) {
+    for (let i = 0; i < keys.length; i++) {
         let button = document.createElement('button');
-        button.textContent = key;
-        button.style.backgroundColor = getColorByKey(key);
+        button.textContent = keys[i];
+        button.style.backgroundColor = getColorByKey(keys[i]);
         button.className = "individual-btn";
 
         button.addEventListener('click', function() {
-            updateActiveIndividualStatsList(key);
-            if (!activeStats.includes(updateAllIndividuals)) {
-              activeStats.push(updateAllIndividuals);
-            }
+          updateActiveIndividualStatsList(keys[i]);
+          if (!activeStats.includes(updateAllIndividuals)) {
+            activeStats.push(updateAllIndividuals);
+          }
         });
         
         container.appendChild(button);

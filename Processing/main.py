@@ -344,7 +344,9 @@ class System():
     
     def get_individuals_ID(self):
 
-        return self.centroids.keys()
+        # print(list(self.centroids.keys()))
+
+        return list(self.centroids.keys())
     
     def get_all_stats_from_key(self, key):
         

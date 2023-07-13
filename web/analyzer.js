@@ -60,27 +60,13 @@ for (let i = 0; i < chart_ids.length; i++) {
 }
 
 
-
-// Function to generate random data
-function generateData() {
-  const numBars = Math.floor(Math.random() * 10) + 1;
-  const data = {};
-  for (let i = 0; i < numBars; i++) {
-    data[String.fromCharCode(65 + i)] = Math.floor(Math.random() * 100);
-  }
-  return data;
-}
-
 // Define a color function that maps keys to colors
 function getColorByKey(id) {
-    // Define your color mapping logic here
-    // For example, you can use a switch statement or an object lookup
-    // to assign a specific color to each key
-    let inputNum = Math.floor((id + 50) * 103);
+    id = parseInt(id);
+    let inputNum = Math.floor((id + 50) * 104);
     let r = (inputNum * 937) % 128 + 64;
     let g = (inputNum * 961) % 128 + 96;
     let b = (inputNum * 989) % 128 + 100;
-    // console.log(number, red, green, blue);
     return `rgb(${r}, ${g}, ${b})`;
 }
 
@@ -100,12 +86,12 @@ function updateChart(data, chart_id) {
     .attr("y", d => yScale_all[chart_id](d[1]))
     .attr("width", xScale_all[chart_id].bandwidth())
     .attr("height", d => height - yScale_all[chart_id](d[1]))
-    .attr("fill", d => getColorByKey(d[0])); // Set the fill color based on the key
+    .attr("fill", d => getColorByKey(d[0]));
 
   bars.exit()
     .remove();
 
-  // Add numeric labels for each sample below their respective bar in the horizontal axis
+  // Numeric labels for each sample below their respective bar in the horizontal axis
   svg_all[chart_id].selectAll(".label")
     .data(Object.entries(data), d => d[0])
     .enter()

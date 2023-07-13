@@ -239,6 +239,7 @@ async function generalAnalysis() {
     drawCenterMass(centers);
     drawDots(centers);
     updateStats();
+    updateIndividualsButtons();
 }
 
 async function drawDots(coordinates) {
