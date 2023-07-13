@@ -1,5 +1,3 @@
-
-
 const body = document.getElementsByTagName("body"),
 canvas = document.getElementById("map"),
 ctx = canvas.getContext("2d"),
@@ -86,7 +84,7 @@ function addKernel() {
 
 
 
-    addInputToKernel(row_preview, 0, rmsh[0], 0, false);
+    addInputToKernel(row_preview, 0, "Input Channel: ", 0, false);
     
     for (var i = 1; i < rmsh.length; i++) {
         addInputToKernel(row_kernel, 0, rmsh[i], 0.2, false, innerDiv = true);
@@ -336,7 +334,7 @@ async function getParamsFromPython() {
             input.value = data[k][i];
         })
 
-        let input_C = row_preview.cells[0].querySelector("input[name='C']");
+        let input_C = row_preview.cells[0].querySelector("input[name='Input Channel: ']");
         input_C.value = data['C'][i];
 
         for (var k = 0; k < BawT.length - 1; k++) {
@@ -428,7 +426,7 @@ async function setParamsInPython(sampleName = null) {
             data[rmsh[k]].push(parseFloat(input.value));
         }
 
-        let input_C = row_preview.cells[0].querySelector("input[name='C']");
+        let input_C = row_preview.cells[0].querySelector("input[name='Input Channel: ']");
         let source_channel = Math.min(parseInt(input_C.value), data["numChannels"] - 1);
         data['C'].push(parseInt(source_channel));
 
@@ -567,33 +565,29 @@ function panelChanger(event) {
 
 function addSample (sampleName) {
     
-    // create a new div element for each image
     let sampleContainer = document.createElement('div');
-    sampleContainer.className = 'sample-container'; // assign a class to style with CSS
-    // document.body.appendChild(sampleContainer); // add the div to the body of the HTML document
+    sampleContainer.className = 'sample-container';
     sampleContainer.id = sampleName;
 
-    // add an img element inside the div
     let sampleImg = document.createElement('img');
-    sampleImg.className = 'sample-img'; // assign a class to style with CSS
+    sampleImg.className = 'sample-img';
     sampleImg.setAttribute('data-src', sampleName);
-    sampleImg.src = "images/samples/" + sampleName + ".png"; // set the src attribute to the current image source
+    sampleImg.src = "images/samples/" + sampleName + ".png";
     sampleImg.addEventListener('click', function() {
         let imageSource = this.getAttribute('data-src');
         setParamsInPython(imageSource);
     });
-    sampleContainer.appendChild(sampleImg); // add the img to the div
+    sampleContainer.appendChild(sampleImg);
 
     // add a label inside the div
     let sampleLbl = document.createElement('label');
-    sampleLbl.className = 'sample-lbl'; // assign a class to style with CSS
-    sampleLbl.innerHTML = sampleName; // set the label text
-    sampleContainer.appendChild(sampleLbl); // add the label to the div
+    sampleLbl.className = 'sample-lbl';
+    sampleLbl.innerHTML = sampleName;
+    sampleContainer.appendChild(sampleLbl);
 
     let deleteSampleButton = document.createElement("button");
     deleteSampleButton.type = "button";
     deleteSampleButton.className = "delete-sample-btn";
-    // deleteSampleButton.innerHTML = ;
     deleteSampleButton.textContent = "DELETE SAMPLE";
     deleteSampleButton.onclick = async function() { 
         await deleteSample(this);
@@ -654,7 +648,6 @@ function displaySaveNameWindow(btn) {
 
 function generateCheckboxes(numChannels) {
     var checkboxesDiv = document.getElementById("checkboxes");
-    //   clearCheckboxes();
     checkboxesDiv.innerHTML = "";
     for (let index = 0; index < numChannels; index++) {
         var label = document.createElement('label');
@@ -685,12 +678,10 @@ function showCheckboxes() {
 function countSelectedCheckboxes() {
     var checkboxes = document.querySelectorAll('#checkboxes input[type="checkbox"]');
     let numChannels = document.querySelector(".num-channels").value;
-    //   var selectedCount = 0;
     let maxChannels = Math.min(numChannels, 3);
     visibleChannels = [];
     checkboxes.forEach(function(checkbox, index) {
         if (checkbox.checked) {
-        //   selectedCount++;
         visibleChannels.push(index);
         }
     });
@@ -840,9 +831,6 @@ confirmExitBtn.addEventListener("click", async () => {
 setChannelSelector();
 
 getParamsFromPython();
-
-getAnalysisFromPython();
-
 
 
 

@@ -466,6 +466,7 @@ input, button {
   flex-direction: row;
   gap: 5px;
   width: 50%;
+  align-items: center;
 }
 
 #table-preview tr td:nth-child(1) button {

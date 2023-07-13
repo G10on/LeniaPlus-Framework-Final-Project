@@ -97,13 +97,13 @@ function createDraggableDiv(windID, id) {
   div.setAttribute('data-custom', id);
   div.className = "individual-stat-window window"
 
-  // Set some styles for the div
+  
   div.style.position = 'absolute';
   div.style.left = '50%';
   div.style.top = '50%';
   div.style.cursor = 'move';
 
-  // Add event listeners for dragging functionality
+  
   div.addEventListener('mousedown', startDrag);
   div.addEventListener('touchstart', startDrag);
 
@@ -113,19 +113,19 @@ function createDraggableDiv(windID, id) {
     var startX = e.clientX || e.touches[0].clientX;
     var startY = e.clientY || e.touches[0].clientY;
 
-    // Get initial div position
-    var initialLeft = startX; // parseFloat(div.style.left);
-    var initialTop = startY; // parseFloat(div.style.top);
+    
+    var initialLeft = startX; 
+    var initialTop = startY; 
 
     // Function to handle drag move event
     function moveDiv(e) {
       e.preventDefault();
 
-      // Calculate the distance moved by the mouse
+      
       var deltaX = (e.clientX || e.touches[0].clientX) - startX;
       var deltaY = (e.clientY || e.touches[0].clientY) - startY;
 
-      // Update the div position
+      
       div.style.left = initialLeft + deltaX + 'px';
       div.style.top = initialTop + deltaY + 'px';
     }
@@ -138,8 +138,7 @@ function createDraggableDiv(windID, id) {
       document.removeEventListener('mouseup', stopDrag);
       document.removeEventListener('touchend', stopDrag);
     }
-
-    // Add event listeners for move and end events
+    
     document.addEventListener('mousemove', moveDiv);
     document.addEventListener('touchmove', moveDiv);
     document.addEventListener('mouseup', stopDrag);
@@ -173,8 +172,6 @@ function createDraggableDiv(windID, id) {
         allChartComponents[name] = chartComponents
     }
 
-
-    // Return the created div
     return [div, allChartComponents];
 }
 
@@ -198,10 +195,10 @@ function closeIndivWindow(windID) {
 
 
 function createBarChart(id) {
-  // Initialize an empty dataset
+  
   let dataset = [];
 
-    // Create the initial empty bar graph
+    
     const svg = d3.create("svg")
         .attr("class", "individual-chart-container");
 
@@ -210,17 +207,17 @@ function createBarChart(id) {
         .attr("class", "bar-chart individual-chart")
         .attr("transform", "translate(50, 50)");
 
-  // Set up the scales
+  
   const xScale = d3.scaleBand()
     .domain(d3.range(10))
     .range([0, 400])
     .padding(0.1);
 
   const yScale = d3.scaleLinear()
-    .domain([-1, 1]) // Set the y-axis domain to be between 0 and 1
+    .domain([-1, 1]) 
     .range([200, 0]);
 
-  // Create the axis
+  
   const xAxis = d3.axisBottom(xScale);
   const yAxis = d3.axisLeft(yScale);
 
@@ -231,7 +228,7 @@ function createBarChart(id) {
   chart.append("g")
     .call(yAxis);
 
-  // Add axis labels
+  
   chart.append("text")
     .attr("class", "axis-label")
     .attr("x", 220)
@@ -247,19 +244,19 @@ function createBarChart(id) {
 
   // Function to update the graph with new data
   function updateGraph(color, newData) {
-    // Add the new data to the dataset
+    
     dataset.push(newData);
 
-    // Limit the dataset to 10 bars
+    
     if (dataset.length > 100) {
       dataset.shift(); // Remove the oldest data point
     }
 
-    // Update the scales
+    
     xScale.domain(d3.range(dataset.length));
     yScale.domain([-1, 1]);
 
-    // Update the vertical bar graph
+    
     const bars = chart.selectAll("rect")
       .data(dataset);
 

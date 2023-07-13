@@ -1,12 +1,12 @@
 
 
 
-// Define width and height of chart
+
 const margin = { top: 20, right: 20, bottom: 50, left: 40 };
 const width = 500 - margin.left - margin.right;
 const height = 200 - margin.top - margin.bottom;
 
-// Create scale functions for x and y axes
+
 const xScale_all = [];
 const yScale_all = [];
 const svg_all = [];
@@ -20,19 +20,19 @@ const chart_ids = [
 ]
 
 for (let i = 0; i < chart_ids.length; i++) {
-  // Create x scale
+
   const xScale = d3.scaleBand()
     .range([0, width])
     .paddingInner(0.1);
   xScale_all.push(xScale);
 
-  // Create y scale
+
   const yScale = d3.scaleLinear()
     .domain([-1, 1])
     .range([height, 0]);
   yScale_all.push(yScale);
 
-  // Create SVG element and append to chart container
+
   const svg = d3.select(chart_ids[i])
     .append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -41,7 +41,7 @@ for (let i = 0; i < chart_ids.length; i++) {
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
   svg_all.push(svg);
 
-  // Create x axis and append to chart
+
   const xAxis = d3.axisBottom()
     .scale(xScale);
   xAxis_all.push(xAxis);
@@ -50,7 +50,7 @@ for (let i = 0; i < chart_ids.length; i++) {
     .attr("transform", "translate(0," + height + ")")
     .call(xAxis);
 
-  // Create y axis and append to chart
+
   const yAxis = d3.axisLeft()
     .scale(yScale);
   yAxis_all.push(yAxis);
@@ -75,7 +75,7 @@ function updateChart(data, chart_id) {
   // Update x scale domain with new labels
   xScale_all[chart_id].domain(Object.keys(data));
 
-  // Update bars with new data
+  
   const bars = svg_all[chart_id].selectAll("rect")
     .data(Object.entries(data), d => d[0]);
 
@@ -91,7 +91,7 @@ function updateChart(data, chart_id) {
   bars.exit()
     .remove();
 
-  // Numeric labels for each sample below their respective bar in the horizontal axis
+  
   svg_all[chart_id].selectAll(".label")
     .data(Object.entries(data), d => d[0])
     .enter()
@@ -104,14 +104,12 @@ function updateChart(data, chart_id) {
     .text(d => d[0]) // Use the key as the label
     .style("fill", "white");
 
-// d3.selectAll(".bar-label")
-
   svg_all[chart_id].selectAll(".label")
     .data(Object.entries(data), d => d[0])
     .exit()
     .remove();
 
-  // Update y axis domain with a maximum value of 1.0
+  // Update y axis domain with a maximum value of 1.0 and minimum of -1.0
   yScale_all[chart_id].domain([-1, 1.0]);
 
   svg_all[chart_id].select(".y.axis")
@@ -123,8 +121,6 @@ function updateChart(data, chart_id) {
 
 async function getNewStats(chart_id) {
     
-    // let data = await eel.get_global_reproduction_stats()();
-
     var data;
 
     switch (chart_id) {
