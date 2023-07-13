@@ -1,30 +1,4 @@
-from datetime import datetime
-import time
-import timeit
-from functools import partial
-# import subprocess
-# import sys
-# import cv2
-
-# import cupy
-
-import jax
-import jax.numpy as jnp
-import jax.scipy as jsp
-# import jax.scipy as jsp
-import numba as nb
-from numba import jit, njit
-from numba import int32, float64
-from numba.typed import List
-from numba.experimental import jitclass
-
-# import pygame as pg
 import numpy as np
-import scipy as sp
-# import matplotlib.pyplot as plt
-import typing as t
-
-# import os
 
 
 class Kernel():
@@ -41,18 +15,15 @@ class Kernel():
     def generate_random_parameters(self,
                                  connection_matrix=None,
                                  new_kernel_parameters=None,
-                                 seed=101
+                                 seed=101,
+                                 num_channels = 3
                                  ) -> None:
 
         rand_gen = np.random.RandomState(seed)
 
         if connection_matrix is None:
 
-            connection_matrix = np.array([
-                [1, 1, 1],
-                [1, 1, 1],
-                [1, 1, 1]
-            ])
+            connection_matrix = np.ones((num_channels, num_channels), dtype = np.int64)
 
         self.n_kernels = int(connection_matrix.sum())
 

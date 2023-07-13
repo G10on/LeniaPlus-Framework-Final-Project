@@ -19,6 +19,9 @@ async function updateIndividualsButtons() {
 
         button.addEventListener('click', function() {
             updateActiveIndividualStatsList(key);
+            if (!activeStats.includes(updateAllIndividuals)) {
+              activeStats.push(updateAllIndividuals);
+            }
         });
         
         container.appendChild(button);

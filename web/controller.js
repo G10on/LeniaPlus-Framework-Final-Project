@@ -35,7 +35,7 @@ mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
 
 
 var rmsh = ['C', 'r', 'm', 's', 'h'],
-Baw = ['B', 'a', 'w', 'T'],
+BawT = ['B', 'a', 'w', 'T'],
 is_playing = false,
 frame_recorded = true,
 expanded = false,
@@ -50,23 +50,25 @@ canvas.width = new_width;
 canvas.height = new_height;
 stepNTxt.textContent = 0;
 
+activeStats = [];
+
 
 function addKernel() {
     var row_preview = tablePreview.insertRow();
     var row_kernel = tableKernel.insertRow();
     
-    var rmshParamsCell = row_kernel.insertCell(0);
-    var BParamsCell = row_kernel.insertCell(1);
-    var aParamsCell = row_kernel.insertCell(2);
-    var wParamsCell = row_kernel.insertCell(3);
-    var TParamsCell = row_kernel.insertCell(4);
+    row_kernel.insertCell(0);
+    row_kernel.insertCell(1);
+    row_kernel.insertCell(2);
+    row_kernel.insertCell(3);
+    row_kernel.insertCell(4);
 
     var deleteRowCell = row_preview.insertCell(0);
     var previewCell = row_preview.insertCell(1);
 
 
     let kernelTitles = [rmsh.slice(1).join('')];
-    kernelTitles = kernelTitles.concat(Baw);
+    kernelTitles = kernelTitles.concat(BawT);
     
     for (var i = 0; i < row_kernel.cells.length; i++) {
 
@@ -90,14 +92,14 @@ function addKernel() {
         addInputToKernel(row_kernel, 0, rmsh[i], 0.2, false, innerDiv = true);
     }
 
-    for (let k = 0; k < Baw.length; k++) {
+    for (let k = 0; k < BawT.length; k++) {
 
         let addInputButton = document.createElement("button");
         addInputButton.className = "add-parameter-btn";
         addInputButton.type = "button";
-        addInputButton.textContent = "Add " + Baw[k];
+        addInputButton.textContent = "Add " + BawT[k];
         addInputButton.onclick = function() { 
-            addInput(this, k + 1, Baw[k], 0, true);
+            addInput(this, k + 1, BawT[k], 0, true);
         }
         
         row_kernel.cells[k + 1].appendChild(addInputButton);
@@ -225,13 +227,17 @@ async function updateWorldDisplay() {
 
 
 async function getAnalysisFromPython() {
-    
+    for (let func in activeStats) {
+        func();
+    }
+}
+
+async function generalAnalysis() {
+
     let centers = await eel.get_coordinates_from_python()();
     drawCenterMass(centers);
     drawDots(centers);
     updateStats();
-    updateIndividualsButtons();
-    updateAllIndividuals();
 }
 
 async function drawDots(coordinates) {
@@ -331,10 +337,10 @@ async function getParamsFromPython() {
         let input_C = row_preview.cells[0].querySelector("input[name='C']");
         input_C.value = data['C'][i];
 
-        for (var k = 0; k < Baw.length - 1; k++) {
+        for (var k = 0; k < BawT.length - 1; k++) {
 
-            for (var j = 0; j < data[Baw[k]][i].length; j++) {
-                let input = addInputToKernel(row_kernel, k + 1, '', data[Baw[k]][i][j], true, innerDiv = true);
+            for (var j = 0; j < data[BawT[k]][i].length; j++) {
+                let input = addInputToKernel(row_kernel, k + 1, '', data[BawT[k]][i][j], true, innerDiv = true);
                 
             }
         }
@@ -346,9 +352,13 @@ async function getParamsFromPython() {
 
     for (var c = 0; c < data['numChannels']; c++) {
 
+        if (c >= data['T'].length) {
+            data['T'].push([]);
+        }
+
         for (var j = 0; j < data['T'][c].length; j++) {
 
-            input = addInputToKernel(rows[data['T'][c][j]], Baw.length, '', c, true, innerDiv = true);
+            input = addInputToKernel(rows[data['T'][c][j]], BawT.length, '', c, true, innerDiv = true);
         }
     }
 
@@ -381,12 +391,20 @@ async function setParamsInPython(sampleName = null) {
     data["dt"] = parseFloat(document.querySelector(".dt").value);
     data["sigma"] = parseFloat(document.querySelector(".sigma").value);
 
+    if (data["version"] === "LeniaModel") {
+        document.querySelectorAll('.flow-lenia-param').forEach(a => a.style.display = "none");
+    } else {
+        document.querySelectorAll('.flow-lenia-param').forEach(a => a.style.display = "flex");
+    }
+
+    updateParameterPanel(data["version"]);
+
     for (var k = 0; k < rmsh.length; k++) {
         data[rmsh[k]] = [];
     }
     
-    for (var k = 0; k < Baw.length; k++) {
-        data[Baw[k]] = [];
+    for (var k = 0; k < BawT.length; k++) {
+        data[BawT[k]] = [];
     }
 
     for (var c = 0; c < data["numChannels"]; c++) {
@@ -412,7 +430,7 @@ async function setParamsInPython(sampleName = null) {
         let source_channel = Math.min(parseInt(input_C.value), data["numChannels"] - 1);
         data['C'].push(parseInt(source_channel));
 
-        for (var k = 0; k < Baw.length - 1; k++) {
+        for (var k = 0; k < BawT.length - 1; k++) {
 
             var inputs = row_kernel.cells[k + 1].getElementsByClassName("input-list")[0].getElementsByTagName("input");
 
@@ -423,17 +441,18 @@ async function setParamsInPython(sampleName = null) {
                 B.push(parseFloat(inputs[j].value));
                 
             }
-            data[Baw[k]].push(B);
+            data[BawT[k]].push(B);
 
         }
         
-        var inputs = row_kernel.cells[Baw.length].getElementsByClassName("input-list")[0].getElementsByTagName("input");
+        var inputs = row_kernel.cells[BawT.length].getElementsByClassName("input-list")[0].getElementsByTagName("input");
 
 
         for (var j = 0; j < inputs.length; j++) {
             let target_channel = Math.min(inputs[j].value, data["numChannels"] - 1);
             data['T'][target_channel].push(parseInt(i));
         }
+
     }
 
     
@@ -448,7 +467,6 @@ async function setParamsInPython(sampleName = null) {
     versionLoadingTxt.innerText = "";
 }
 
-// TODO: REDUCE DUPLICATE CODE FROM SETPARAMSINPYTHON FUNCTION
 async function generateKernelParamsInPython() {
 
     is_playing = false;
@@ -465,14 +483,14 @@ async function generateKernelParamsInPython() {
     data["dt"] = parseFloat(document.querySelector(".dt").value);
     data["sigma"] = parseFloat(document.querySelector(".sigma").value);
 
-    // let kernelParmas = submitForm();
+    updateParameterPanel(data["version"]);
 
     for (var k = 0; k < rmsh.length; k++) {
         data[rmsh[k]] = [];
     }
     
-    for (var k = 0; k < Baw.length; k++) {
-        data[Baw[k]] = [];
+    for (var k = 0; k < BawT.length; k++) {
+        data[BawT[k]] = [];
     }
 
     var rows_kernel = tableKernel.rows;
@@ -490,7 +508,7 @@ async function generateKernelParamsInPython() {
             data[k].push(parseFloat(input.value));
         })
 
-        for (var k = 0; k < Baw.length; k++) {
+        for (var k = 0; k < BawT.length; k++) {
 
             inputs = row_kernel.cells[k + 1].getElementsByTagName("input");
 
@@ -501,7 +519,7 @@ async function generateKernelParamsInPython() {
                 B.push(parseFloat(inputs[j].value));
                 
             }
-            data[Baw[k]].push(B);
+            data[BawT[k]].push(B);
 
         }
     }
@@ -510,6 +528,15 @@ async function generateKernelParamsInPython() {
     
     await getParamsFromPython();
     versionLoadingTxt.innerText = "";
+}
+
+function updateParameterPanel(version) {
+    
+    if (version === "LeniaModel") {
+        document.querySelectorAll('.flow-lenia-param').forEach(a => a.style.display = "none");
+    } else {
+        document.querySelectorAll('.flow-lenia-param').forEach(a => a.style.display = "flex");
+    }
 }
 
 
@@ -526,6 +553,13 @@ function panelChanger(event) {
     if (event.target.id === "samples") {
         loadSamples();
     }
+
+    if (event.target.id === "analysis" && !activeStats.includes(generalAnalysis)) {
+        activeStats.push(generalAnalysis);
+    } else {
+        activeStats = [];
+    }
+
 }
 
 

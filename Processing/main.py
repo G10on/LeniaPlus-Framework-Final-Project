@@ -62,7 +62,7 @@ class System():
     
     def generate_random_kernel_parameters(self):
 
-        self.kernel_parameters.generate_random_parameters(seed = self.world.seed)
+        self.kernel_parameters.generate_random_parameters(seed = self.world.seed, num_channels = self.world.numChannels)
 
     
     def step(self):
