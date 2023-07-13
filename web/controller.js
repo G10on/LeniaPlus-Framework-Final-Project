@@ -779,12 +779,12 @@ saveSampleNameBtn.addEventListener("click", () => {
 })
 
 exportBtn.addEventListener("click", () => {
-    eel.save_parameter_state()();
+    eel.export_parameter()();
 })
 
 importBtn.addEventListener("click", async () => {
     
-    await eel.load_parameter_state()();
+    await eel.import_parameter()();
     getParamsFromPython();
     await updateWorldDisplay();
 })

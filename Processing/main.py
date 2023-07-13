@@ -456,6 +456,31 @@ def load_parameter_state(filename = "screenshot"):
     system.set_initial_world(data["world"])
     set_parameters_in_python(data)
 
+
+
+@eel.expose
+def export_parameters():
+
+    data = get_parameters_from_python()
+    data["world"] = system.getCurrentWorld()
+
+    with open('LeniaParameters.pkl', 'wb') as f:
+        pickle.dump(data, f)
+
+    print(os.path.abspath('LeniaParameters.pkl'))
+
+@eel.expose
+def import_parameter():
+
+    # load the dictionary from the file
+    with open('LeniaParameters.pkl', 'rb') as f:
+        data = pickle.load(f)
+        system.set_initial_world(data["world"])
+        set_parameters_in_python(data)
+
+
+
+
 @eel.expose
 def delete_sample(filename = "screenshot"):
 

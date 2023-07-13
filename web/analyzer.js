@@ -63,7 +63,7 @@ for (let i = 0; i < chart_ids.length; i++) {
 // Define a color function that maps keys to colors
 function getColorByKey(id) {
     id = parseInt(id);
-    let inputNum = Math.floor((id + 50) * 104);
+    let inputNum = Math.floor((id + 50) * 105);
     let r = (inputNum * 937) % 128 + 64;
     let g = (inputNum * 961) % 128 + 96;
     let b = (inputNum * 989) % 128 + 100;
