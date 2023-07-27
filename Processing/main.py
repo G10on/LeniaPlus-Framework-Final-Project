@@ -12,9 +12,6 @@ import scipy as sp
 
 from scipy import ndimage
 
-from skimage.feature import hog
-from skimage import exposure
-from skimage.measure import moments, moments_central, moments_normalized, moments_hu
 
 
 import eel

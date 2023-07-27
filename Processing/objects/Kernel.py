@@ -204,7 +204,7 @@ class LeniaKernel(Kernel):
               self.kernel_parameters['R'] * len(self.kernel_parameters['B'][k]) / self.kernel_parameters['r'][k] for k in range(self.n_kernels)]
 
         kernels = [(D < len(self.kernel_parameters['B'][k])) * np.asarray(self.kernel_parameters['B'][k])[np.minimum(D.astype(int),
-            len(self.kernel_parameters['B'][k])-1)] * self.kernel_function(D % 1, 0.5, 0.15) for D, k in zip(distances, range(self.n_kernels))]
+                                                                                                                     len(self.kernel_parameters['B'][k])-1)] * self.kernel_function(D % 1, self.kernel_parameters['a'][k][0], self.kernel_parameters['w'][k][0]) for D, k in zip(distances, range(self.n_kernels))]
 
         normalized_kernels = [K / np.sum(K) for K in kernels]
         fourier_kernels = [np.fft.fft2(np.fft.fftshift(K)) for K in normalized_kernels]
