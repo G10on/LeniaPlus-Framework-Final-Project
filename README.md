@@ -55,16 +55,5 @@ Desde en esta misma ventana, se puede abrir otras dos ventanas emergentes que mu
 
 
 
-## Instalación
-
-Se ha incluido un enlace al ejecutable de este proyecto, debido a que su tamaño excedía el límite de GitHub. Se ejecuta solo en sistemas operativos Linux, y se accede a través de un navegador Chrome. A continuación se indica cómo generar este ejecutable a partir del repositorio.
-
-[Enlace para descargar el ejecutable](https://drive.google.com/file/d/1tdEt-k23cPFAlCe2pf1k9v7mPcyiWYzJ/view?usp=sharing)
-
-Primero, se descarga o clona el repositorio en local. El entorno virtual de Python debe incluir las siguientes librerías: Numpy, Scipy, Jax, Eel, Pickle y PyInstaller.
-
-Desde el directorio del repositorio, se abre una terminal, y se introduce el siguiente comando.
-
-`python -m eel Processing/main.py web --onefile --noconsole`
 
 Este comando generará una carpeta llamada 'dist', que contendrá el ejecutable 'main'. Se llama ejecuta este fichero (desde la terminal o con doble click). Por último, se accede desde el navegador Chrome a `localhost:8000`, que es el puerto por el que escucha el servidor de Eel. Para finalizar el servidor, se pulsa en el botón rojo en la parte superior derecha, y se cierra la ventana.
